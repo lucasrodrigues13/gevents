@@ -1,0 +1,14 @@
+@page "{id:guid}"
+@model Project.Web.Pages.Eventos.ImagemModel
+@{
+    ViewData["Title"] = "Imagem";
+}
+
+@if (Model.EventoDaConta)
+{
+    <p>A imagem não está disponível.</p>
+}
+else
+{
+    <p>O evento não está disponível.</p>
+}

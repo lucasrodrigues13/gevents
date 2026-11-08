@@ -1,0 +1,57 @@
+@page "{link:guid}"
+@using Project.Domain.Convites
+@using Project.Web.Convites
+@model Project.Web.Pages.Convite.IndexModel
+@{
+    Layout = "_LayoutPublico";
+    ViewData["Title"] = "Presença";
+}
+
+@if (Model.Convite is null)
+{
+    <p>O convite não está disponível.</p>
+}
+else
+{
+    <h1>@Model.Convite.Nome</h1>
+    @Html.AntiForgeryToken()
+    @if (Model.Aviso is not null)
+    {
+        <adminlte-alert theme="info">@Model.Aviso</adminlte-alert>
+    }
+    @if (Model.Convite.Convidados.Count == 0)
+    {
+        <p>Não há quem responder.</p>
+    }
+    else if (Model.Convite.Respondido)
+    {
+        <ul>
+            @foreach (var convidado in Model.Convite.Convidados)
+            {
+                <li>@convidado.Nome — @ConviteTexto.Situacao(convidado.Situacao)</li>
+            }
+        </ul>
+    }
+    else
+    {
+        <form method="post">
+            @for (var indice = 0; indice < Model.Convite.Convidados.Count; indice++)
+            {
+                var convidado = Model.Convite.Convidados[indice];
+                <fieldset class="mb-3">
+                    <legend>@convidado.Nome</legend>
+                    <input type="hidden" name="respostas[@indice].ConvidadoId" value="@convidado.Id" />
+                    <label class="me-3">
+                        <input type="radio" name="respostas[@indice].Situacao" value="@SituacaoConvidado.Confirmado" />
+                        Confirmado
+                    </label>
+                    <label>
+                        <input type="radio" name="respostas[@indice].Situacao" value="@SituacaoConvidado.NaoComparecera" />
+                        Não comparecerá
+                    </label>
+                </fieldset>
+            }
+            <button type="submit" class="btn btn-primary">Enviar</button>
+        </form>
+    }
+}

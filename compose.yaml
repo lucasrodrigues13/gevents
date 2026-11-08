@@ -1,0 +1,79 @@
+# Uso local. A senha do banco vale só nesta rede interna: a porta do PostgreSQL não é publicada.
+# Produção continua em HTTPS, com segredo fora deste arquivo. A aplicação não aplica migration ao subir.
+
+name: gevents
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: gevents
+      POSTGRES_PASSWORD: gevents
+      POSTGRES_DB: gevents
+    volumes:
+      - dados:/var/lib/postgresql/data
+    networks:
+      - interna
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gevents -d gevents"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  migrate:
+    build:
+      context: .
+      target: migrate
+    environment:
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=gevents;Username=gevents;Password=gevents
+    networks:
+      - interna
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  app:
+    build:
+      context: .
+      target: runtime
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_HTTP_PORTS: "8080"
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=gevents;Username=gevents;Password=gevents
+      Storage__Root: /storage
+      DataProtection__KeysPath: /keys
+      ForwardedHeaders__KnownProxies__0: 172.28.7.10
+    volumes:
+      - arquivos:/storage
+      - chaves:/keys
+    networks:
+      - interna
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    expose:
+      - "8080"
+
+  caddy:
+    image: caddy:2
+    ports:
+      - "80:80"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    networks:
+      interna:
+        ipv4_address: 172.28.7.10
+    depends_on:
+      - app
+
+networks:
+  interna:
+    ipam:
+      config:
+        - subnet: 172.28.7.0/24
+
+volumes:
+  dados:
+  arquivos:
+  chaves:

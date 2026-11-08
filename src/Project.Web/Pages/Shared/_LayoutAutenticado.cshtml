@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - gevents</title>
+    <partial name="_Estilos" />
+</head>
+<body class="layout-fixed sidebar-expand-lg bg-body-tertiary">
+    <div class="app-wrapper">
+        <nav class="app-header navbar navbar-expand bg-body" aria-label="Conta">
+            <div class="container-fluid">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <button type="button" class="nav-link" data-lte-toggle="sidebar" aria-label="Abrir ou fechar o menu">
+                            <i class="bi bi-list"></i>
+                        </button>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item d-flex align-items-center">
+                        <span class="nav-link">@User.Identity?.Name</span>
+                    </li>
+                    <li class="nav-item d-flex align-items-center ms-2">
+                        <form method="post" asp-page="/Account/Logout">
+                            <button type="submit" class="btn btn-outline-secondary btn-sm">Sair</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+        <adminlte-sidebar />
+        <div class="sidebar-overlay"></div>
+        <main class="app-main">
+            <div class="app-content-header">
+                <div class="container-fluid">
+                    <h1 class="mb-0 h3">@ViewData["Title"]</h1>
+                </div>
+            </div>
+            <div class="app-content">
+                <div class="container-fluid">
+                    @RenderBody()
+                </div>
+            </div>
+        </main>
+        <footer class="app-footer">
+            <span>gevents</span>
+        </footer>
+    </div>
+    <partial name="_Scripts" />
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

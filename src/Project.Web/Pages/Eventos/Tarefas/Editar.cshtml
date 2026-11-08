@@ -1,0 +1,49 @@
+@page "{id:guid}"
+@using Project.Domain.Tarefas
+@using Project.Web.Tarefas
+@model Project.Web.Pages.Eventos.Tarefas.EditarModel
+@{
+    ViewData["Title"] = "Tarefa";
+}
+
+@if (!Model.Disponivel)
+{
+    <p>A tarefa não está disponível.</p>
+}
+else
+{
+    <h1>@Model.EventoNome</h1>
+    <p>Responsável: @Model.Email</p>
+    @if (!Model.Aberto)
+    {
+        <p>O evento não está em andamento.</p>
+    }
+    <form method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="mb-3">
+            <label asp-for="Input.Titulo" class="form-label">Título</label>
+            <input asp-for="Input.Titulo" class="form-control" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Input.Descricao" class="form-label">Descrição</label>
+            <textarea asp-for="Input.Descricao" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Input.Prazo" class="form-label">Prazo</label>
+            <input asp-for="Input.Prazo" class="form-control" type="date" />
+        </div>
+        <div class="mb-3">
+            <label asp-for="Input.Situacao" class="form-label">Situação</label>
+            <select asp-for="Input.Situacao" class="form-select">
+                @foreach (var situacao in TarefaTexto.Colunas)
+                {
+                    <option value="@situacao">@TarefaTexto.Situacao(situacao)</option>
+                }
+            </select>
+        </div>
+        @if (Model.Aberto)
+        {
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        }
+    </form>
+}

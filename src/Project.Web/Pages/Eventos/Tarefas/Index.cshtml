@@ -1,0 +1,76 @@
+@page "{id:guid}"
+@using Project.Domain.Eventos
+@using Project.Web.Tarefas
+@model Project.Web.Pages.Eventos.Tarefas.IndexModel
+@{
+    ViewData["Title"] = "Tarefas";
+}
+
+@if (Model.Evento is null)
+{
+    <p>O evento não está disponível.</p>
+}
+else
+{
+    <h1>Tarefas de @Model.Evento.Nome</h1>
+    <p><a asp-page="/Tarefas/Index">Todas as tarefas</a></p>
+    <p>Responsável: @Model.Email</p>
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @if (Model.Tarefas.Count == 0)
+    {
+        <p>Não há tarefa para mostrar.</p>
+    }
+    <h2>Lista</h2>
+    <ul>
+        @foreach (var tarefa in Model.Tarefas)
+        {
+            <li>
+                <a asp-page="/Eventos/Tarefas/Editar" asp-route-id="@tarefa.Id">@tarefa.Titulo</a>
+                — @TarefaTexto.Situacao(tarefa.Situacao)
+                @if (tarefa.Prazo is DateOnly prazo)
+                {
+                    <span>@prazo.ToString("dd/MM/yyyy")</span>
+                }
+                @if (tarefa.Descricao is not null)
+                {
+                    <span>@tarefa.Descricao</span>
+                }
+            </li>
+        }
+    </ul>
+    <h2>Quadro</h2>
+    <div class="row">
+        @foreach (var coluna in TarefaTexto.Colunas)
+        {
+            <section class="col-md-3" id="coluna-@coluna">
+                <h3>@TarefaTexto.Situacao(coluna)</h3>
+                <ul>
+                    @foreach (var tarefa in Model.Tarefas.Where(item => item.Situacao == coluna))
+                    {
+                        <li>@tarefa.Titulo</li>
+                    }
+                </ul>
+            </section>
+        }
+    </div>
+    @if (Model.Evento.Situacao == SituacaoEvento.EmAndamento)
+    {
+        <h2>Nova tarefa</h2>
+        <form method="post">
+            <div class="mb-3">
+                <label asp-for="Input.Titulo" class="form-label">Título</label>
+                <input asp-for="Input.Titulo" class="form-control" />
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.Descricao" class="form-label">Descrição</label>
+                <textarea asp-for="Input.Descricao" class="form-control"></textarea>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Input.Prazo" class="form-label">Prazo</label>
+                <input asp-for="Input.Prazo" class="form-control" type="date" />
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </form>
+    }
+}

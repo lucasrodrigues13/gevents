@@ -1,0 +1,15 @@
+---
+description: Forma das specifications em docs/specs
+globs: "docs/specs/**/*.md"
+alwaysApply: false
+---
+
+# Specifications
+
+- Um fluxo por arquivo: `docs/specs/NNN-nome.md`. Status no topo: rascunho ou aprovada.
+- Descreva comportamento verificável. Sem projeto, classe, migration nem biblioteca.
+- Cubra, quando couber: identificador, objetivo, RFs, atores, pré-condições, fluxo principal, alternativas, regras, validações, estados, dados, interface, erros, aceite, testes, dependências e pendências.
+- Cada regra aponta para um RF. Se não houver RF, registre como não definido em vez de decidir.
+- Critério de aceite é observável. Cenário de teste diz a condição e o resultado.
+- Não gere a próxima spec antes de a atual ser revisada, salvo pedido explícito.
+- Spec aprovada é pré-requisito de plano técnico e de código.

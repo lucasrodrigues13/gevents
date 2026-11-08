@@ -1,0 +1,24 @@
+.validation-summary-errors {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+  color: var(--bs-danger-text-emphasis);
+  background-color: var(--bs-danger-bg-subtle);
+  border: var(--bs-border-width) solid var(--bs-danger-border-subtle);
+  border-radius: var(--bs-border-radius);
+}
+
+.validation-summary-errors ul {
+  margin-bottom: 0;
+  padding-left: 1.1rem;
+}
+
+.validation-summary-valid {
+  display: none;
+}
+
+.field-validation-error {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--bs-danger);
+  font-size: 0.875rem;
+}

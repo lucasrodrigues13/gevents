@@ -1,0 +1,15 @@
+@page
+@model Project.Web.Pages.User.IndexModel
+@{
+    ViewData["Title"] = "Área autenticada";
+    Layout = "_LayoutAutenticado";
+}
+<p>Você entrou com uma conta de usuário.</p>
+<p><a asp-page="/Perfil/Index">Perfil</a></p>
+<p><a asp-page="/Eventos/Index">Eventos</a></p>
+<p><a asp-page="/Tarefas/Index">Tarefas</a></p>
+<p><a asp-page="/Grupos/Index">Grupos</a></p>
+<p><a asp-page="/Clientes/Index">Clientes</a></p>
+<form method="post" asp-page="/Account/Logout">
+    <button type="submit" class="btn btn-outline-secondary">Sair</button>
+</form>

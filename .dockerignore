@@ -1,0 +1,10 @@
+**/.git
+**/.vs
+**/.cursor
+**/bin
+**/obj
+**/tests
+docs
+agent-transcripts
+data-protection-keys
+storage

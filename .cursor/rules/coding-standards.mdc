@@ -1,0 +1,17 @@
+---
+description: Convenções de C# e .NET para o gevents
+globs: "**/*.cs"
+alwaysApply: false
+---
+
+# Código
+
+- PascalCase para tipos, métodos e propriedades públicas. camelCase para parâmetros e locais. Interface com prefixo `I`. Async com sufixo `Async`.
+- Namespace segue o projeto e a pasta. Um tipo principal por arquivo.
+- Dependência entra por construtor. Não instancie SMTP, `DbContext` nem relógio dentro de regra de negócio.
+- I/O público é assíncrono e recebe `CancellationToken`. Não use `.Result` nem `.Wait()`.
+- Exceção de domínio não vira página de stack trace. Logue o erro com contexto. Nunca logue senha, token, connection string, senha SMTP nem chave do Data Protection.
+- Validação na borda da aplicação. Não confie só em atributo da página para regra que também vale fora da UI.
+- EF Core: consulta filtrada no servidor, sem carregar tabela inteira. Migration é explícita e revisada. Sem `EnsureCreated` e sem migrate na inicialização.
+- Cookie, CSRF e HTTPS seguem os RF de conta. Autorização por role nas páginas. Download privado só depois da checagem de permissão.
+- Teste unitário não abre banco nem rede. Integração usa `WebApplicationFactory` e Testcontainers. E-mail de teste é falso.

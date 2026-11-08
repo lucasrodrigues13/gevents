@@ -1,0 +1,196 @@
+@page "{id:guid}"
+@using Project.Domain.Convites
+@using Project.Web.Convites
+@model Project.Web.Pages.Eventos.Convites.IndexModel
+@{
+    ViewData["Title"] = "Convites";
+}
+
+@if (Model.Painel is null)
+{
+    <p>O evento não está disponível.</p>
+}
+else
+{
+    <h1>Convites de @Model.Painel.EventoNome</h1>
+    <p><a asp-page="/Grupos/Index">Grupos</a></p>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <p>Pendentes: @Model.Painel.Todos.Count(item => item.Situacao == SituacaoConvidado.Pendente)</p>
+    <p>Confirmados: @Model.Painel.Todos.Count(item => item.Situacao == SituacaoConvidado.Confirmado)</p>
+    <p>Não comparecerá: @Model.Painel.Todos.Count(item => item.Situacao == SituacaoConvidado.NaoComparecera)</p>
+    @foreach (var faixa in Enum.GetValues<FaixaConvidado>())
+    {
+        <p>@ConviteTexto.Faixa(faixa): @Model.Painel.Todos.Count(item => item.Faixa == faixa)</p>
+    }
+    @foreach (var custo in Enum.GetValues<CustoConvidado>())
+    {
+        <p>@ConviteTexto.Custo(custo): @Model.Painel.Todos.Count(item => item.Custo == custo)</p>
+    }
+    <p>
+        <a asp-page="/Eventos/Convites/Index" asp-route-id="@RouteData.Values["id"]" asp-route-visao="convites">Por convite</a>
+        <a asp-page="/Eventos/Convites/Index" asp-route-id="@RouteData.Values["id"]" asp-route-visao="convidados">Por convidado</a>
+    </p>
+    <form method="get">
+        <input type="hidden" name="visao" value="@Model.Visao" />
+        <input class="form-control mb-2" name="nome" value="@Model.Nome" placeholder="Nome" />
+        <select class="form-select mb-2" name="situacao">
+            <option value="">Situação</option>
+            @foreach (var situacao in Enum.GetValues<SituacaoConvidado>())
+            {
+                <option value="@situacao">@ConviteTexto.Situacao(situacao)</option>
+            }
+        </select>
+        <input class="form-control mb-2" name="celular" value="@Model.Celular" placeholder="Celular" />
+        <select class="form-select mb-2" name="transfer">
+            <option value="">Transfer</option>
+            <option value="sim">Com transfer</option>
+            <option value="nao">Sem transfer</option>
+        </select>
+        <select class="form-select mb-2" name="grupo">
+            <option value="">Grupo</option>
+            @foreach (var grupo in Model.Painel.Grupos)
+            {
+                <option value="@grupo.Id">@grupo.Nome</option>
+            }
+        </select>
+        <input class="form-control mb-2" name="observacao" value="@Model.Observacao" placeholder="Observação" />
+        <button type="submit" class="btn btn-outline-primary">Filtrar</button>
+    </form>
+    @if (Model.Visao == "convidados")
+    {
+        <h2>Convidados</h2>
+        @if (Model.Painel.Filtrados.Count == 0)
+        {
+            <p>Não há convidado para mostrar.</p>
+        }
+        <ul>
+            @foreach (var convidado in Model.Painel.Filtrados)
+            {
+                <li>
+                    @convidado.Nome — @convidado.ConviteNome — @ConviteTexto.Situacao(convidado.Situacao)
+                    @if (convidado.GrupoNome is not null)
+                    {
+                        <span>@convidado.GrupoNome</span>
+                    }
+                    @if (convidado.Transfer)
+                    {
+                        <span>@convidado.Origem</span>
+                    }
+                </li>
+            }
+        </ul>
+    }
+    else
+    {
+        <h2>Convites</h2>
+        @if (Model.Painel.Convites.Count == 0)
+        {
+            <p>Não há convite para mostrar.</p>
+        }
+        @foreach (var convite in Model.Painel.Convites)
+        {
+            <article class="mb-3">
+                <h3>@convite.Nome</h3>
+                <input class="form-control" readonly value="/Convite/@convite.Link" />
+                @if (convite.AcessadaEm is not null)
+                {
+                    <p>Acessada</p>
+                }
+                @if (convite.RespondidaEm is not null)
+                {
+                    <p>Respondida</p>
+                }
+                <ul>
+                    @foreach (var convidado in Model.Painel.Filtrados.Where(item => item.ConviteId == convite.Id))
+                    {
+                        <li>@convidado.Nome — @ConviteTexto.Situacao(convidado.Situacao)</li>
+                    }
+                </ul>
+            </article>
+        }
+    }
+    @if (Model.Painel.Aberto)
+    {
+        <h2>Novo convite</h2>
+        <form method="post" asp-page-handler="Convite">
+            <div class="mb-3">
+                <label class="form-label">Nome</label>
+                <input class="form-control" name="nomeConvite" />
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </form>
+        <h2>Novo convidado</h2>
+        <form method="post" asp-page-handler="Convidado">
+            <div class="mb-3">
+                <label class="form-label">Convite</label>
+                <select class="form-select" name="input.ConviteId">
+                    @foreach (var convite in Model.Painel.Convites)
+                    {
+                        <option value="@convite.Id">@convite.Nome</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Nome</label>
+                <input class="form-control" name="input.Nome" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Faixa</label>
+                <select class="form-select" name="input.Faixa">
+                    <option value=""></option>
+                    @foreach (var faixa in Enum.GetValues<FaixaConvidado>())
+                    {
+                        <option value="@faixa">@ConviteTexto.Faixa(faixa)</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Custo</label>
+                <select class="form-select" name="input.Custo">
+                    <option value=""></option>
+                    @foreach (var custo in Enum.GetValues<CustoConvidado>())
+                    {
+                        <option value="@custo">@ConviteTexto.Custo(custo)</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Gênero</label>
+                <select class="form-select" name="input.Genero">
+                    <option value=""></option>
+                    @foreach (var genero in Enum.GetValues<GeneroConvidado>())
+                    {
+                        <option value="@genero">@ConviteTexto.Genero(genero)</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Celular</label>
+                <input class="form-control" name="input.Celular" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Observação</label>
+                <input class="form-control" name="input.Observacao" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Grupo</label>
+                <select class="form-select" name="input.GrupoId">
+                    <option value=""></option>
+                    @foreach (var grupo in Model.Painel.Grupos)
+                    {
+                        <option value="@grupo.Id">@grupo.Nome</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3 form-check">
+                <input class="form-check-input" type="checkbox" name="input.Transfer" value="true" />
+                <label class="form-check-label">Transfer</label>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Origem do transfer</label>
+                <input class="form-control" name="input.Origem" />
+            </div>
+            <button type="submit" class="btn btn-primary">Salvar</button>
+        </form>
+    }
+}

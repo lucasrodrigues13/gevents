@@ -1,0 +1,25 @@
+@page
+@using Project.Web.Tarefas
+@model Project.Web.Pages.Tarefas.IndexModel
+@{
+    ViewData["Title"] = "Tarefas";
+}
+
+@if (Model.Tarefas.Count == 0)
+{
+    <p>Não há tarefa para mostrar.</p>
+}
+<ul>
+    @foreach (var tarefa in Model.Tarefas)
+    {
+        <li>
+            <a asp-page="/Eventos/Tarefas/Editar" asp-route-id="@tarefa.Id">@tarefa.Titulo</a>
+            — @tarefa.EventoNome
+            — @TarefaTexto.Situacao(tarefa.Situacao)
+            @if (tarefa.Prazo is DateOnly prazo)
+            {
+                <span>@prazo.ToString("dd/MM/yyyy")</span>
+            }
+        </li>
+    }
+</ul>

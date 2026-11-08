@@ -1,0 +1,14 @@
+---
+description: Como alterar requisitos sem perder o que já foi decidido
+globs: "docs/**/*.md"
+alwaysApply: false
+---
+
+# Requisitos
+
+- Preserve RF, RNF e DA. Não renumere. O próximo RF livre é o maior ID existente mais um.
+- **Definido** nos requisitos de conta significa confirmado. **Observado** veio da referência e não está aprovado. **Proposto** é sugestão. **Pendente** não tem dado para especificar.
+- Não copie comportamento de `docs/brief.md` para Confirmado. Não invente regra para fechar buraco. Escreva a lacuna.
+- Não mude decisão aprovada sem o usuário pedir. Se um texto novo contradiz um RF, pare e aponte o conflito.
+- Atualize o documento só no trecho necessário. `docs/requirements.md` é a fonte. Trello não a substitui.
+- Melhoria pedida pelo cliente entra como requisito novo, sem reestruturar os IDs antigos.

@@ -1,0 +1,27 @@
+@page
+@model Project.Web.Pages.Clientes.IndexModel
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<p><a class="btn btn-primary" asp-page="/Clientes/Criar">Novo cliente</a></p>
+<form method="get" class="mb-3">
+    <input class="form-control" name="nome" value="@Model.Nome" placeholder="Nome" />
+    <button type="submit" class="btn btn-outline-primary">Buscar</button>
+</form>
+@if (Model.Clientes.Count == 0)
+{
+    <p>Não há cliente para mostrar.</p>
+}
+<ul>
+    @foreach (var cliente in Model.Clientes)
+    {
+        <li>
+            <a asp-page="/Clientes/Editar" asp-route-id="@cliente.Id">@cliente.Nome</a>
+            @foreach (var evento in cliente.Eventos)
+            {
+                <span>@evento.Nome</span>
+            }
+        </li>
+    }
+</ul>

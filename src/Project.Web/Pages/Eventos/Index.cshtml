@@ -1,0 +1,57 @@
+@page
+@using Project.Web.Eventos
+@model Project.Web.Pages.Eventos.IndexModel
+@{
+    ViewData["Title"] = "Eventos";
+}
+
+<p><a class="btn btn-primary" asp-page="/Eventos/Criar">Novo evento</a></p>
+<ul class="nav nav-tabs mb-3">
+    <li class="nav-item"><a class="nav-link@(Model.Aba == "emandamento" ? " active" : "")" asp-page="/Eventos/Index" asp-route-aba="emandamento" asp-route-nome="@Model.Nome" asp-route-tipo="@Model.Tipo" asp-route-de="@Model.De?.ToString("yyyy-MM-dd")" asp-route-ate="@Model.Ate?.ToString("yyyy-MM-dd")" asp-route-tag="@Model.Tag">Em andamento</a></li>
+    <li class="nav-item"><a class="nav-link@(Model.Aba == "concluido" ? " active" : "")" asp-page="/Eventos/Index" asp-route-aba="concluido" asp-route-nome="@Model.Nome" asp-route-tipo="@Model.Tipo" asp-route-de="@Model.De?.ToString("yyyy-MM-dd")" asp-route-ate="@Model.Ate?.ToString("yyyy-MM-dd")" asp-route-tag="@Model.Tag">Concluídos</a></li>
+    <li class="nav-item"><a class="nav-link@(Model.Aba == "cancelado" ? " active" : "")" asp-page="/Eventos/Index" asp-route-aba="cancelado" asp-route-nome="@Model.Nome" asp-route-tipo="@Model.Tipo" asp-route-de="@Model.De?.ToString("yyyy-MM-dd")" asp-route-ate="@Model.Ate?.ToString("yyyy-MM-dd")" asp-route-tag="@Model.Tag">Cancelados</a></li>
+</ul>
+<form method="get" class="row g-2 mb-3">
+    <input type="hidden" name="aba" value="@Model.Aba" />
+    <div class="col-md-3"><input class="form-control" name="nome" value="@Model.Nome" placeholder="Nome" /></div>
+    <div class="col-md-2">
+        <select class="form-select" name="tipo">
+            <option value="">Tipo</option>
+            <option value="Casamento">Casamento</option>
+            <option value="QuinzeAnos">15 anos</option>
+            <option value="Aniversario">Aniversário</option>
+            <option value="Corporativo">Corporativo</option>
+            <option value="Formatura">Formatura</option>
+        </select>
+    </div>
+    <div class="col-md-2"><input class="form-control" type="date" name="de" value="@Model.De?.ToString("yyyy-MM-dd")" /></div>
+    <div class="col-md-2"><input class="form-control" type="date" name="ate" value="@Model.Ate?.ToString("yyyy-MM-dd")" /></div>
+    <div class="col-md-2"><input class="form-control" name="tag" value="@Model.Tag" placeholder="Tag" /></div>
+    <div class="col-md-1"><button type="submit" class="btn btn-outline-primary">Filtrar</button></div>
+</form>
+@if (Model.Erro is not null)
+{
+    <adminlte-alert theme="danger">@Model.Erro</adminlte-alert>
+}
+@if (Model.Eventos.Count == 0)
+{
+    <p>Não há evento para mostrar.</p>
+}
+@foreach (var evento in Model.Eventos)
+{
+    <article class="card mb-3">
+        <div class="card-body">
+            <h2 class="h5"><a asp-page="/Eventos/Home" asp-route-id="@evento.Id">@evento.Nome</a></h2>
+            <p>@EventoTexto.Situacao(evento.Situacao)</p>
+            @if (evento.Data is DateOnly data)
+            {
+                <p>@data.ToString("dd/MM/yyyy")</p>
+                <p>@EventoTexto.Contagem(data, Model.Hoje)</p>
+            }
+            @foreach (var tag in evento.Tags)
+            {
+                <span class="badge text-bg-secondary">@tag</span>
+            }
+        </div>
+    </article>
+}

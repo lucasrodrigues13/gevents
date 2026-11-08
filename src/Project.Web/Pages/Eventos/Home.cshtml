@@ -1,0 +1,112 @@
+@page "{id:guid}"
+@using Project.Domain.Eventos
+@using Project.Web.Eventos
+@model Project.Web.Pages.Eventos.HomeModel
+@{
+    ViewData["Title"] = "Evento";
+}
+
+@if (Model.Detalhe is null)
+{
+    <p>O evento não está disponível.</p>
+}
+else
+{
+    @if (Model.Aviso is not null)
+    {
+        <adminlte-alert theme="info">@Model.Aviso</adminlte-alert>
+    }
+    <h1>@Model.Detalhe.Nome</h1>
+    <p>@EventoTexto.Situacao(Model.Detalhe.Situacao)</p>
+    @if (Model.Detalhe.Data is DateOnly data)
+    {
+        <p>@data.ToString("dd/MM/yyyy")</p>
+        <p>@EventoTexto.Contagem(data, Model.Hoje)</p>
+    }
+    @if (Model.Detalhe.Hora is TimeOnly hora)
+    {
+        <p>@hora.ToString("HH:mm")</p>
+    }
+    @if (EventoTexto.Tipo(Model.Detalhe.Tipo) is string tipo)
+    {
+        <p>@tipo</p>
+    }
+    @foreach (var tag in Model.Detalhe.Tags)
+    {
+        <span class="badge text-bg-secondary">@tag</span>
+    }
+    <p>Casal: @Model.Detalhe.CasalNome</p>
+    <p>@Model.Detalhe.CasalPapel</p>
+    <p>@Model.Detalhe.CasalEmail</p>
+    <p>@Model.Detalhe.CasalCelular</p>
+    <p>Orçamento estimado: @Model.Detalhe.OrcamentoEstimado</p>
+    <p>Convidados estimados: @Model.Detalhe.ConvidadosEstimados</p>
+    <p>@Model.Detalhe.LocalCerimonia</p>
+    <p>@Model.Detalhe.LocalRecepcao</p>
+    @if (Model.Detalhe.ArquivoId is not null)
+    {
+        <p><a asp-page="/Eventos/Imagem" asp-route-id="@Model.Detalhe.Id">Imagem</a></p>
+    }
+    <p>Tarefas concluídas: @Model.Detalhe.Indicadores.TarefasConcluidas</p>
+    <p>Convidados pendentes: @Model.Detalhe.Indicadores.ConvidadosPendentes</p>
+    <p>Convidados confirmados: @Model.Detalhe.Indicadores.ConvidadosConfirmados</p>
+    <p>Não comparecerá: @Model.Detalhe.Indicadores.ConvidadosNaoComparecera</p>
+    <p><a asp-page="/Eventos/Tarefas" asp-route-id="@Model.Detalhe.Id">Tarefas do evento</a></p>
+    <p><a asp-page="/Eventos/Convites" asp-route-id="@Model.Detalhe.Id">Convites</a></p>
+    <p><a asp-page="/Clientes/Index">Clientes</a></p>
+    <h2>Clientes do evento</h2>
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    @if (Model.ClientesDoEvento.Count == 0)
+    {
+        <p>Nenhum cliente vinculado.</p>
+    }
+    <ul>
+        @foreach (var cliente in Model.ClientesDoEvento)
+        {
+            <li>
+                @cliente.Nome
+                <form method="post" asp-page-handler="Desvincular" asp-route-id="@Model.Detalhe.Id" class="d-inline">
+                    <input type="hidden" name="clienteId" value="@cliente.Id" />
+                    <button type="submit" class="btn btn-link">Desvincular</button>
+                </form>
+            </li>
+        }
+    </ul>
+    <form method="post" asp-page-handler="Vincular" asp-route-id="@Model.Detalhe.Id" class="mb-3">
+        <select class="form-select" name="clienteId">
+            <option value="">Cliente</option>
+            @foreach (var cliente in Model.ClientesDaConta)
+            {
+                <option value="@cliente.Id">@cliente.Nome</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-outline-primary">Vincular</button>
+    </form>
+    @if (Model.Detalhe.Situacao == SituacaoEvento.EmAndamento)
+    {
+        <p><a asp-page="/Eventos/Editar" asp-route-id="@Model.Detalhe.Id">Editar</a></p>
+        @if (Model.Confirmar == "concluir")
+        {
+            <p>Concluir este evento?</p>
+            <form method="post" asp-page-handler="Concluir" asp-route-id="@Model.Detalhe.Id">
+                <input type="hidden" name="confirmado" value="sim" />
+                <button type="submit" class="btn btn-primary">Confirmar</button>
+                <a asp-page="/Eventos/Home" asp-route-id="@Model.Detalhe.Id">Desistir</a>
+            </form>
+        }
+        else if (Model.Confirmar == "cancelar")
+        {
+            <p>Cancelar este evento?</p>
+            <form method="post" asp-page-handler="Cancelar" asp-route-id="@Model.Detalhe.Id">
+                <input type="hidden" name="confirmado" value="sim" />
+                <button type="submit" class="btn btn-primary">Confirmar</button>
+                <a asp-page="/Eventos/Home" asp-route-id="@Model.Detalhe.Id">Desistir</a>
+            </form>
+        }
+        else
+        {
+            <p><a asp-page="/Eventos/Home" asp-route-id="@Model.Detalhe.Id" asp-route-confirmar="concluir">Concluir</a></p>
+            <p><a asp-page="/Eventos/Home" asp-route-id="@Model.Detalhe.Id" asp-route-confirmar="cancelar">Cancelar</a></p>
+        }
+    }
+}

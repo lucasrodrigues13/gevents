@@ -1,0 +1,17 @@
+---
+description: Stack e limites de arquitetura já aprovados para o gevents
+alwaysApply: true
+---
+
+# Arquitetura
+
+A fonte é `docs/requirements.md`. Não invente stack nem camada.
+
+- .NET 10 LTS, Razor Pages, sem API separada. PostgreSQL, EF Core, Npgsql, migrations explícitas. Identity com cookie. Roles só `Admin` e `User`.
+- Projetos: `Project.Domain`, `Project.Application`, `Project.Infrastructure`, `Project.Web`. Testes: `Project.Tests` e `Project.IntegrationTests`.
+- Domain não referencia nada. Application referencia só Domain. Infrastructure referencia Application e Domain. Web referencia Application e Infrastructure para compor.
+- PageModel de negócio não usa `DbContext`. Página de conta pode usar `UserManager`, `SignInManager` e `RoleManager`.
+- Interface de recurso externo fica em Application e a implementação em Infrastructure. `ApplicationUser` só em Infrastructure, se houver campo extra. Entidade de domínio não herda `IdentityUser`.
+- Sem Generic Repository, Unit of Work extra, repositório de usuário, CQRS, MediatR, AutoMapper, fila, Redis, JWT, OAuth próprio e microserviço.
+- Um VPS: Compose com app, Postgres e Caddy. Arquivo local no volume. E-mail MailKit no pedido, sem fila. Sem `Database.Migrate()` na subida.
+- `User` não é papel de negócio. `SameSite=Lax` ainda é proposta (DA-019). Não trate requisito Observado como aprovado.

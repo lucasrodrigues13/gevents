@@ -1,0 +1,10 @@
+@page
+@model Project.Web.Pages.Admin.IndexModel
+@{
+    ViewData["Title"] = "Área administrativa";
+    Layout = "_LayoutAutenticado";
+}
+
+<form method="post" asp-page="/Account/Logout">
+    <button type="submit" class="btn btn-outline-secondary">Sair</button>
+</form>
