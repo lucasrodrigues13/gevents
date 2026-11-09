@@ -9,7 +9,7 @@
 
 @if (Model.Convite is null)
 {
-    <p>O convite não está disponível.</p>
+    <adminlte-alert theme="warning">O convite não está disponível.</adminlte-alert>
 }
 else
 {
@@ -21,7 +21,7 @@ else
     }
     @if (Model.Convite.Convidados.Count == 0)
     {
-        <p>Não há quem responder.</p>
+        <p class="ge-vazio">Não há quem responder.</p>
     }
     else if (Model.Convite.Respondido)
     {
@@ -41,14 +41,14 @@ else
                 <fieldset class="mb-3">
                     <legend>@convidado.Nome</legend>
                     <input type="hidden" name="respostas[@indice].ConvidadoId" value="@convidado.Id" />
-                    <label class="me-3">
-                        <input type="radio" name="respostas[@indice].Situacao" value="@SituacaoConvidado.Confirmado" />
-                        Confirmado
-                    </label>
-                    <label>
-                        <input type="radio" name="respostas[@indice].Situacao" value="@SituacaoConvidado.NaoComparecera" />
-                        Não comparecerá
-                    </label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="resposta-sim-@indice" name="respostas[@indice].Situacao" value="@SituacaoConvidado.Confirmado" />
+                        <label class="form-check-label" for="resposta-sim-@indice">Confirmado</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" id="resposta-nao-@indice" name="respostas[@indice].Situacao" value="@SituacaoConvidado.NaoComparecera" />
+                        <label class="form-check-label" for="resposta-nao-@indice">Não comparecerá</label>
+                    </div>
                 </fieldset>
             }
             <button type="submit" class="btn btn-primary">Enviar</button>

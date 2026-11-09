@@ -1,7 +1,10 @@
+using System.IO.Compression;
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
 using Microsoft.Extensions.DependencyInjection;
 using Project.Domain.Convites;
+using Project.Infrastructure.Convites;
 
 namespace Project.IntegrationTests;
 
@@ -37,20 +40,37 @@ public sealed class ConviteFluxoTests : IAsyncLifetime
         var evento = Nome("Casamento");
         var eventoId = await CriarEventoAsync(dono, evento);
         var convite = Nome("Mesa da familia");
-        await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Convite", new Dictionary<string, string>
+        var semConvidado = await HtmlAsync(await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Convite", new Dictionary<string, string>
         {
             ["nomeConvite"] = convite
+        }));
+        Assert.Contains("Informe o nome do convidado.", semConvidado);
+        Assert.DoesNotContain(convite, semConvidado);
+        var grupoId = Regex.Match(semConvidado, $"value=\"([0-9a-fA-F-]{{36}})\">{Regex.Escape(grupo)}").Groups[1].Value;
+
+        var ana = Nome("Ana");
+        var bruno = Nome("Bruno");
+        await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Convite", new Dictionary<string, string>
+        {
+            ["nomeConvite"] = convite,
+            ["convidado.Nome"] = ana,
+            ["convidado.Faixa"] = nameof(FaixaConvidado.Adulto),
+            ["convidado.Custo"] = nameof(CustoConvidado.Inteira),
+            ["convidado.Celular"] = "119111",
+            ["convidado.GrupoId"] = grupoId,
+            ["convidado.Observacao"] = "mesa alta",
+            ["convidado.Transfer"] = "true",
+            ["convidado.Origem"] = "Hotel"
         });
 
         var painel = await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}"));
         var link = Regex.Match(painel, "/Convite/([0-9a-fA-F-]{36})").Groups[1].Value;
         var conviteId = Regex.Match(painel, $"value=\"([0-9a-fA-F-]{{36}})\">{Regex.Escape(convite)}").Groups[1].Value;
-        var grupoId = Regex.Match(painel, $"value=\"([0-9a-fA-F-]{{36}})\">{Regex.Escape(grupo)}").Groups[1].Value;
         Assert.True(Guid.TryParse(link, out _));
 
         var anonimo = _factory.CreateClient();
-        var vazio = await HtmlAsync(await anonimo.GetAsync($"/Convite/{link}"));
-        Assert.Contains("Não há quem responder.", vazio);
+        var primeira = await HtmlAsync(await anonimo.GetAsync($"/Convite/{link}"));
+        Assert.Contains(ana, primeira);
         Assert.Contains("Acessada", await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}")));
 
         var recusado = Nome("Sem origem");
@@ -63,20 +83,6 @@ public sealed class ConviteFluxoTests : IAsyncLifetime
         Assert.Contains("Informe o local de origem do transfer.", await HtmlAsync(semOrigem));
         Assert.DoesNotContain(recusado, await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}")));
 
-        var ana = Nome("Ana");
-        var bruno = Nome("Bruno");
-        await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Convidado", new Dictionary<string, string>
-        {
-            ["input.ConviteId"] = conviteId,
-            ["input.Nome"] = ana,
-            ["input.Faixa"] = nameof(FaixaConvidado.Adulto),
-            ["input.Custo"] = nameof(CustoConvidado.Inteira),
-            ["input.Celular"] = "119111",
-            ["input.GrupoId"] = grupoId,
-            ["input.Observacao"] = "mesa alta",
-            ["input.Transfer"] = "true",
-            ["input.Origem"] = "Hotel"
-        });
         await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Convidado", new Dictionary<string, string>
         {
             ["input.ConviteId"] = conviteId,
@@ -147,6 +153,193 @@ public sealed class ConviteFluxoTests : IAsyncLifetime
         Assert.DoesNotContain(convite, await HtmlAsync(await outro.GetAsync("/Grupos")));
     }
 
+    [Fact]
+    public async Task Principal_transfer_planilha_e_qr_ficam_na_conta()
+    {
+        var dono = await ConfirmedClientAsync(NewEmail());
+        var eventoId = await CriarEventoAsync(dono, Nome("Festa"));
+        var antes = await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}"));
+        Assert.DoesNotContain("Origem do transfer", antes);
+
+        await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Transfer", new Dictionary<string, string> { ["ativo"] = "true" });
+        var local = Nome("Rodoviaria");
+        await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Local", new Dictionary<string, string> { ["nomeLocal"] = local });
+
+        var ana = Nome("Ana");
+        var bruno = Nome("Bruno");
+        var convite = Nome("Familia");
+        await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Convite", new Dictionary<string, string>
+        {
+            ["nomeConvite"] = convite,
+            ["convidado.Nome"] = ana,
+            ["convidado.Ddi"] = "+55",
+            ["convidado.Celular"] = "119000111"
+        });
+        var painel = await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}"));
+        Assert.Contains("Origem do transfer", painel);
+        Assert.DoesNotContain("Telefone do convite:", painel);
+        var conviteId = Regex.Match(painel, $"value=\"([0-9a-fA-F-]{{36}})\">{Regex.Escape(convite)}").Groups[1].Value;
+        await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Convidado", new Dictionary<string, string>
+        {
+            ["input.ConviteId"] = conviteId,
+            ["input.Nome"] = bruno,
+            ["input.Ddi"] = "+55",
+            ["input.Celular"] = "119000222"
+        });
+
+        painel = await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}"));
+        var anaId = Regex.Match(painel, "value=\"([0-9a-fA-F-]{36})\"[^>]*>119000111").Groups[1].Value;
+        var brunoId = Regex.Match(painel, "value=\"([0-9a-fA-F-]{36})\"[^>]*>119000222").Groups[1].Value;
+        await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Principal", new Dictionary<string, string>
+        {
+            ["conviteId"] = conviteId,
+            ["convidadoId"] = anaId
+        });
+        var escolhido = await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}"));
+        Assert.Contains("Telefone do convite: +55 119000111", escolhido);
+        Assert.Contains($"{ana} — Principal", escolhido);
+
+        await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Principal", new Dictionary<string, string>
+        {
+            ["conviteId"] = conviteId,
+            ["convidadoId"] = brunoId
+        });
+        var trocado = await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}"));
+        Assert.Contains("Telefone do convite: +55 119000222", trocado);
+        Assert.DoesNotContain("Telefone do convite: +55 119000111", trocado);
+        Assert.Contains($"{bruno} — Principal", trocado);
+        Assert.DoesNotContain($"{ana} — Principal", trocado);
+
+        var edicao = await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/Editar/{eventoId}/{conviteId}"));
+        Assert.Contains("Histórico de mensagens", edicao);
+        Assert.Contains("QR Code", edicao);
+        Assert.Contains("Baixar", edicao);
+        var telefone = Regex.Matches(edicao, "name=\"convidadoId\" value=\"([^\"]+)\"[\\s\\S]*?name=\"celular\" value=\"([^\"]*)\"")
+            .First(item => item.Groups[2].Value == "119000222");
+        await PostAsync(dono, $"/Eventos/Convites/Editar/{eventoId}/{conviteId}?handler=Telefone", new Dictionary<string, string>
+        {
+            ["convidadoId"] = telefone.Groups[1].Value,
+            ["ddi"] = "+55",
+            ["celular"] = "119000333"
+        });
+        Assert.Contains(
+            "Telefone do convite: +55 119000333",
+            await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}")));
+
+        var semLocal = await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Origem", new Dictionary<string, string>
+        {
+            ["conviteId"] = conviteId,
+            ["usa"] = "sim"
+        });
+        Assert.Contains("Informe o local de origem do transfer.", await HtmlAsync(semLocal));
+        var localId = Regex.Match(await HtmlAsync(semLocal), $"value=\"([0-9a-fA-F-]{{36}})\">{Regex.Escape(local)}").Groups[1].Value;
+        await PostAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Origem", new Dictionary<string, string>
+        {
+            ["conviteId"] = conviteId,
+            ["usa"] = "sim",
+            ["localId"] = localId
+        });
+        Assert.Contains($"Origem: {local}", await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}")));
+
+        var modelo = await dono.GetAsync($"/Eventos/Convites/{eventoId}?handler=Planilha");
+        var bytes = await modelo.Content.ReadAsByteArrayAsync();
+        using (var zip = new ZipArchive(new MemoryStream(bytes)))
+        {
+            using var leitura = new StreamReader(zip.GetEntry("xl/worksheets/sheet1.xml")!.Open());
+            var xml = await leitura.ReadToEndAsync();
+            foreach (var coluna in ImportacaoConvites.Cabecalho)
+            {
+                Assert.Contains(coluna, xml);
+            }
+
+            Assert.Single(Regex.Matches(xml, "<row "));
+        }
+
+        var rejeitado = Nome("Rejeitado");
+        var invalido = await PostArquivoAsync(
+            dono,
+            $"/Eventos/Convites/{eventoId}?handler=Importar",
+            "nao e planilha"u8.ToArray(),
+            "pessoas.txt");
+        var invalidoHtml = await HtmlAsync(invalido);
+        Assert.Contains("A planilha não é aceita.", invalidoHtml);
+        Assert.DoesNotContain(rejeitado, invalidoHtml);
+
+        var ilegivel = Nome("Ilegivel");
+        var ruim = new LeitorPlanilhaConvite().Criar(
+        [
+            ImportacaoConvites.Cabecalho,
+            [convite, "+55", "119777", "", "", ilegivel, "Z", "Adulto", "Inteira", "Pendente", "1"]
+        ]);
+        var genero = await PostArquivoAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Importar", ruim, "convidados.xlsx");
+        Assert.Contains("O valor informado não é aceito.", await HtmlAsync(genero));
+        Assert.DoesNotContain(ilegivel, await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}")));
+
+        var importado = Nome("Importado");
+        var carla = Nome("Carla");
+        var diego = Nome("Diego");
+        var grupo = Nome("Amigos");
+        var mesa = Nome("Mesa");
+        var planilha = new LeitorPlanilhaConvite().Criar(
+        [
+            ImportacaoConvites.Cabecalho,
+            [importado, "+55", "119888", grupo, "janela", carla, "F", "Adulto", "Free", "Confirmado", mesa],
+            ["", "", "", "", "", diego, "M", "Criança", "Inteira", "Pendente", mesa]
+        ]);
+        await PostArquivoAsync(dono, $"/Eventos/Convites/{eventoId}?handler=Importar", planilha, "convidados.xlsx");
+        var lista = await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}?visao=convidados"));
+        Assert.Contains(carla, lista);
+        Assert.Contains(diego, lista);
+        Assert.Contains("Feminino", lista);
+        Assert.Contains("Masculino", lista);
+        Assert.Contains("Gratuita", lista);
+        Assert.Contains(mesa, lista);
+        Assert.Contains(grupo, lista);
+        var convites = await HtmlAsync(await dono.GetAsync($"/Eventos/Convites/{eventoId}"));
+        Assert.Contains("Telefone do convite: +55 119888", convites);
+        Assert.Contains($"{carla} — Principal", convites);
+
+        var linkImportado = Regex.Match(convites[convites.IndexOf(importado, StringComparison.Ordinal)..], "/Convite/([0-9a-fA-F-]{36})").Groups[1].Value;
+        var anonimo = _factory.CreateClient();
+        var publica = await HtmlAsync(await anonimo.GetAsync($"/Convite/{linkImportado}"));
+        Assert.Contains(carla, publica);
+        Assert.Contains(diego, publica);
+        Assert.DoesNotContain(mesa, publica);
+        Assert.DoesNotContain("Gratuita", publica);
+        Assert.DoesNotContain("119888", publica);
+
+        var qr = await dono.GetAsync($"/Eventos/Convites/Editar/{eventoId}/{conviteId}?handler=Qr&baixar=true");
+        var png = await qr.Content.ReadAsByteArrayAsync();
+        Assert.Equal(new byte[] { 0x89, 0x50, 0x4E, 0x47 }, png.Take(4));
+        var whats = await PostAsync(dono, $"/Eventos/Convites/Editar/{eventoId}/{conviteId}?handler=WhatsApp", new Dictionary<string, string>
+        {
+            ["ddi"] = "+55",
+            ["celular"] = "119000333",
+            ["mensagem"] = "Seu convite"
+        });
+        Assert.Contains("https://wa.me/55119000333?text=Seu%20convite", await HtmlAsync(whats));
+
+        var outro = await ConfirmedClientAsync(NewEmail());
+        var negado = await outro.GetAsync($"/Eventos/Convites/{eventoId}");
+        Assert.Equal(HttpStatusCode.NotFound, negado.StatusCode);
+        Assert.DoesNotContain(carla, await HtmlAsync(negado));
+        Assert.DoesNotContain(convite, await HtmlAsync(negado));
+        var edicaoNegada = await outro.GetAsync($"/Eventos/Convites/Editar/{eventoId}/{conviteId}");
+        Assert.Equal(HttpStatusCode.NotFound, edicaoNegada.StatusCode);
+        Assert.DoesNotContain(ana, await HtmlAsync(edicaoNegada));
+    }
+
+    private static async Task<HttpResponseMessage> PostArquivoAsync(HttpClient client, string path, byte[] bytes, string nome)
+    {
+        var html = await HtmlAsync(await client.GetAsync(path.Split('?')[0]));
+        var content = new MultipartFormDataContent();
+        content.Add(new StringContent(Token(html)), "__RequestVerificationToken");
+        var arquivo = new ByteArrayContent(bytes);
+        arquivo.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        content.Add(arquivo, "arquivo", nome);
+        return await client.PostAsync(path, content);
+    }
+
     private static async Task<HttpResponseMessage> PostPublicoAsync(
         HttpClient client,
         string link,
@@ -174,7 +367,17 @@ public sealed class ConviteFluxoTests : IAsyncLifetime
 
     private static async Task<Guid> CriarEventoAsync(HttpClient client, string nome)
     {
-        var resposta = await PostAsync(client, "/Eventos/Criar", new Dictionary<string, string> { ["Input.Nome"] = nome });
+        var modelo = await PostAsync(client, "/Modelos/Criar", new Dictionary<string, string>
+        {
+            ["Nome"] = "Modelo " + Guid.NewGuid().ToString("N"),
+            ["Tipo"] = "Aniversario"
+        });
+        var resposta = await PostAsync(client, "/Eventos/Criar", new Dictionary<string, string>
+        {
+            ["Input.Nome"] = nome,
+            ["Input.PrimeiroNome"] = nome,
+            ["Input.ModeloId"] = modelo.RequestMessage!.RequestUri!.Segments.Last().Trim('/')
+        });
         return Guid.Parse(resposta.RequestMessage!.RequestUri!.Segments.Last().Trim('/'));
     }
 

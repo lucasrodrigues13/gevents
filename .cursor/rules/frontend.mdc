@@ -1,0 +1,15 @@
+---
+description: Padrão visual AdminLTE 4 das páginas Razor do gevents
+globs: src/Project.Web/**/*.{cshtml,css,js}
+alwaysApply: false
+---
+
+# Frontend
+
+Nenhuma nova Razor Page ou componente visual do GEVENTS pode ser implementado sem consultar os padrões de frontend documentados e reutilizar os componentes existentes quando aplicável.
+
+- Leia `docs/frontend/README.md` antes de criar ou alterar `.cshtml`, CSS ou JS de interface.
+- Siga `docs/frontend/design-system.md`, `docs/frontend/component-catalog.md` e `docs/frontend/page-patterns.md`.
+- Referência visual: AdminLTE 4 pelo pacote `ColorlibHQ.AdminLTE.AspNetCore`. Sem classe inventada e sem exemplo do AdminLTE 3.
+- Razor Pages e Tag Helpers nativos. Validação de tela reflete o `ModelState` e não substitui o servidor.
+- Atualize `docs/frontend/rastreabilidade.md` quando a tela ou o componente mudar de situação.

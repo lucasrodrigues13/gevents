@@ -63,7 +63,17 @@ public sealed class ConviteRepositorio : IConviteConsulta, IConviteRepositorio
         return await _db.Convites.AsNoTracking()
             .Where(convite => convite.AccountId == accountId && convite.EventoId == eventoId)
             .OrderBy(convite => convite.Nome)
-            .Select(convite => new ConviteItem(convite.Id, convite.Nome, convite.Link, convite.AcessadaEm, convite.RespondidaEm))
+            .Select(convite => new ConviteItem(
+                convite.Id,
+                convite.Nome,
+                convite.Link,
+                convite.AcessadaEm,
+                convite.RespondidaEm,
+                convite.GrupoId,
+                convite.Observacao,
+                convite.ConvidadoPrincipalId,
+                convite.UsaTransfer,
+                convite.LocalTransferId))
             .ToListAsync(cancellationToken);
     }
 
@@ -90,7 +100,11 @@ public sealed class ConviteRepositorio : IConviteConsulta, IConviteRepositorio
                 convidado.GrupoId,
                 grupo != null ? grupo.Nome : null,
                 convidado.Transfer,
-                convidado.Origem);
+                convidado.Origem,
+                convidado.Ddi,
+                convidado.Mesa,
+                convidado.Rg,
+                convidado.Cpf);
         return await consulta.ToListAsync(cancellationToken);
     }
 
@@ -112,6 +126,44 @@ public sealed class ConviteRepositorio : IConviteConsulta, IConviteRepositorio
     {
         _db.Convidados.Add(convidado);
         return Task.CompletedTask;
+    }
+
+    public Task AdicionarAsync(LocalTransfer local, CancellationToken cancellationToken)
+    {
+        _db.LocaisTransfer.Add(local);
+        return Task.CompletedTask;
+    }
+
+    public async Task<IReadOnlyList<Convite>> ListarDoEventoAsync(string accountId, Guid eventoId, CancellationToken cancellationToken)
+    {
+        return await _db.Convites
+            .Where(convite => convite.AccountId == accountId && convite.EventoId == eventoId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task<Convidado?> ObterConvidadoAsync(string accountId, Guid convidadoId, CancellationToken cancellationToken)
+    {
+        return await (
+            from convidado in _db.Convidados
+            join convite in _db.Convites on convidado.ConviteId equals convite.Id
+            where convidado.Id == convidadoId && convite.AccountId == accountId
+            select convidado).FirstOrDefaultAsync(cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<LocalTransferItem>> ListarLocaisAsync(string accountId, Guid eventoId, CancellationToken cancellationToken)
+    {
+        return await _db.LocaisTransfer.AsNoTracking()
+            .Where(local => local.AccountId == accountId && local.EventoId == eventoId)
+            .OrderBy(local => local.Nome)
+            .Select(local => new LocalTransferItem(local.Id, local.Nome))
+            .ToListAsync(cancellationToken);
+    }
+
+    public Task<bool> LocalPertenceAsync(string accountId, Guid eventoId, Guid localId, CancellationToken cancellationToken)
+    {
+        return _db.LocaisTransfer.AnyAsync(
+            local => local.Id == localId && local.AccountId == accountId && local.EventoId == eventoId,
+            cancellationToken);
     }
 
     public Task SalvarAsync(CancellationToken cancellationToken)

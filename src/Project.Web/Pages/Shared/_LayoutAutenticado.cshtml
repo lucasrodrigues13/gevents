@@ -18,13 +18,18 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item d-flex align-items-center">
-                        <span class="nav-link">@User.Identity?.Name</span>
-                    </li>
-                    <li class="nav-item d-flex align-items-center ms-2">
-                        <form method="post" asp-page="/Account/Logout">
-                            <button type="submit" class="btn btn-outline-secondary btn-sm">Sair</button>
-                        </form>
+                    <li class="nav-item dropdown">
+                        <button type="button" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                            @User.Identity?.Name
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" asp-page="/Perfil/Index">Perfil</a></li>
+                            <li>
+                                <form method="post" asp-page="/Account/Logout">
+                                    <button type="submit" class="dropdown-item">Sair</button>
+                                </form>
+                            </li>
+                        </ul>
                     </li>
                 </ul>
             </div>
@@ -34,11 +39,42 @@
         <main class="app-main">
             <div class="app-content-header">
                 <div class="container-fluid">
-                    <h1 class="mb-0 h3">@ViewData["Title"]</h1>
+                    <div class="row align-items-center">
+                        <div class="col-sm-6">
+                            <h1 class="mb-0 h3">@ViewData["Title"]</h1>
+                        </div>
+                        <div class="col-sm-6">
+                            <nav aria-label="Trilha">
+                                <ol class="breadcrumb float-sm-end mb-0">
+                                    <li class="breadcrumb-item"><a asp-page="/Dashboards/Index">Início</a></li>
+                                    @if (ViewData["Secao"] is string secao && !string.IsNullOrWhiteSpace(secao))
+                                    {
+                                        <li class="breadcrumb-item"><a href="@ViewData["SecaoUrl"]">@secao</a></li>
+                                    }
+                                    <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="app-content">
                 <div class="container-fluid">
+                    @if (TempData["Aviso"] is string aviso)
+                    {
+                        <div class="toast-container position-fixed top-0 end-0 p-3">
+                            <div class="toast show text-bg-success" role="status" aria-live="polite">
+                                <div class="toast-body d-flex align-items-center">
+                                    <span class="me-auto">@aviso</span>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Fechar"></button>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                    @if (TempData["Erro"] is string erro)
+                    {
+                        <adminlte-alert theme="danger">@erro</adminlte-alert>
+                    }
                     @RenderBody()
                 </div>
             </div>

@@ -4,12 +4,16 @@
     ViewData["Title"] = "Área autenticada";
     Layout = "_LayoutAutenticado";
 }
-<p>Você entrou com uma conta de usuário.</p>
-<p><a asp-page="/Perfil/Index">Perfil</a></p>
-<p><a asp-page="/Eventos/Index">Eventos</a></p>
-<p><a asp-page="/Tarefas/Index">Tarefas</a></p>
-<p><a asp-page="/Grupos/Index">Grupos</a></p>
-<p><a asp-page="/Clientes/Index">Clientes</a></p>
-<form method="post" asp-page="/Account/Logout">
-    <button type="submit" class="btn btn-outline-secondary">Sair</button>
-</form>
+<div class="card">
+    <div class="card-body">
+        <p>Você entrou com uma conta de usuário.</p>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary" asp-page="/Perfil/Index">Perfil</a>
+            <a class="btn btn-outline-primary" asp-page="/Eventos/Index">Eventos</a>
+            <a class="btn btn-outline-primary" asp-page="/Modelos/Index">Modelos</a>
+            <a class="btn btn-outline-primary" asp-page="/Tarefas/Index">Tarefas</a>
+            <a class="btn btn-outline-primary" asp-page="/Grupos/Index">Grupos</a>
+            <a class="btn btn-outline-primary" asp-page="/Clientes/Index">Clientes</a>
+        </div>
+    </div>
+</div>

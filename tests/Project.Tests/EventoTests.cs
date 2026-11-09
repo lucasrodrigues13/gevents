@@ -47,6 +47,31 @@ public class EventoTests
         Assert.Throws<RegraDeNegocioException>(() => Evento.Criar("conta", Dados("Ana") with { ConvidadosEstimados = -1 }));
     }
 
+    [Fact]
+    public void Sem_modelo_nao_cria()
+    {
+        var erro = Assert.Throws<RegraDeNegocioException>(() => Evento.CriarComModelo("conta", null, "Ana", null, Dados("Ana")));
+
+        Assert.Equal("Escolha um modelo.", erro.Message);
+    }
+
+    [Fact]
+    public void Casamento_sem_um_dos_nomes_nao_cria_e_os_dois_juntam_com_e()
+    {
+        var modelo = Modelo.Criar("conta", "Checklist", TipoEvento.Casamento);
+
+        Assert.Equal("Informe os dois nomes.", Assert.Throws<RegraDeNegocioException>(() => Evento.CriarComModelo("conta", modelo, "Ana", " ", Dados("Ana"))).Message);
+        var evento = Evento.CriarComModelo("conta", modelo, "Ana", "Bia", Dados("Ana"));
+        Assert.Equal("Ana & Bia", evento.Nome);
+    }
+
+    [Fact]
+    public void Valor_nao_positivo_e_quantidade_invalida_nao_geram_parcela()
+    {
+        Assert.Equal("Informe um valor maior que zero.", Assert.Throws<RegraDeNegocioException>(() => ParcelaEvento.Gerar("conta", Guid.NewGuid(), Guid.NewGuid(), 0, 1, new DateOnly(2026, 1, 1), null, null, null)).Message);
+        Assert.Equal("Informe a quantidade de parcelas.", Assert.Throws<RegraDeNegocioException>(() => ParcelaEvento.Gerar("conta", Guid.NewGuid(), Guid.NewGuid(), 10, 0, new DateOnly(2026, 1, 1), null, null, null)).Message);
+    }
+
     private static EventoDados Dados(string nome)
     {
         return new EventoDados(nome, null, null, null, null, null, null, null, null, null, null, null, null);

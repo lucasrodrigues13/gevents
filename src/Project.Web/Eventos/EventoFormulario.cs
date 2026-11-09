@@ -32,6 +32,60 @@ public sealed class EventoInput
 
     public string? LocalRecepcao { get; set; }
 
+    public Guid? ModeloId { get; set; }
+
+    public string? PrimeiroNome { get; set; }
+
+    public string? SegundoNome { get; set; }
+
+    public TimeOnly? TempoDeFesta { get; set; }
+
+    public TimeOnly? InicioCerimonia { get; set; }
+
+    public TimeOnly? InicioRecepcao { get; set; }
+
+    public int? Padrinhos { get; set; }
+
+    public int? DamasEPajens { get; set; }
+
+    public bool NotificarAssessor { get; set; } = true;
+
+    public bool NotificarAssistentes { get; set; } = true;
+
+    public bool NotificarClientes { get; set; } = true;
+
+    public bool SalvarNaAgenda { get; set; }
+
+    public string? SenhaDoSite { get; set; }
+
+    public string? CerimoniaPais { get; set; }
+
+    public string? CerimoniaCep { get; set; }
+
+    public string? CerimoniaLogradouro { get; set; }
+
+    public string? CerimoniaNumero { get; set; }
+
+    public string? CerimoniaEstado { get; set; }
+
+    public string? CerimoniaCidade { get; set; }
+
+    public string? CerimoniaBairro { get; set; }
+
+    public string? RecepcaoPais { get; set; }
+
+    public string? RecepcaoCep { get; set; }
+
+    public string? RecepcaoLogradouro { get; set; }
+
+    public string? RecepcaoNumero { get; set; }
+
+    public string? RecepcaoEstado { get; set; }
+
+    public string? RecepcaoCidade { get; set; }
+
+    public string? RecepcaoBairro { get; set; }
+
     public IFormFile? Imagem { get; set; }
 
     public (Stream? Conteudo, string? Nome) AbrirImagem()
@@ -51,7 +105,7 @@ public static class EventoFormulario
     {
         if (!TiposDeEvento.TentarLer(input.Tipo, out var tipo))
         {
-            dados = new EventoDados(null, null, null, null, null, null, null, null, null, null, null, null, null);
+            dados = new EventoDados(null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, true, true, true, false, null, null, null);
             erro = "O tipo do evento não é aceito.";
             return false;
         }
@@ -73,7 +127,22 @@ public static class EventoFormulario
             input.OrcamentoEstimado,
             input.ConvidadosEstimados,
             input.LocalCerimonia,
-            input.LocalRecepcao);
+            input.LocalRecepcao,
+            input.ModeloId,
+            input.PrimeiroNome,
+            input.SegundoNome,
+            input.TempoDeFesta,
+            input.InicioCerimonia,
+            input.InicioRecepcao,
+            input.Padrinhos,
+            input.DamasEPajens,
+            input.NotificarAssessor,
+            input.NotificarAssistentes,
+            input.NotificarClientes,
+            input.SalvarNaAgenda,
+            input.SenhaDoSite,
+            new EnderecoLocal(input.CerimoniaPais, input.CerimoniaCep, input.CerimoniaLogradouro, input.CerimoniaNumero, input.CerimoniaEstado, input.CerimoniaCidade, input.CerimoniaBairro),
+            new EnderecoLocal(input.RecepcaoPais, input.RecepcaoCep, input.RecepcaoLogradouro, input.RecepcaoNumero, input.RecepcaoEstado, input.RecepcaoCidade, input.RecepcaoBairro));
         erro = null;
         return true;
     }
@@ -94,7 +163,33 @@ public static class EventoFormulario
             OrcamentoEstimado = detalhe.OrcamentoEstimado,
             ConvidadosEstimados = detalhe.ConvidadosEstimados,
             LocalCerimonia = detalhe.LocalCerimonia,
-            LocalRecepcao = detalhe.LocalRecepcao
+            LocalRecepcao = detalhe.LocalRecepcao,
+            PrimeiroNome = detalhe.PrimeiroNome,
+            SegundoNome = detalhe.SegundoNome,
+            TempoDeFesta = detalhe.TempoDeFesta,
+            InicioCerimonia = detalhe.InicioCerimonia,
+            InicioRecepcao = detalhe.InicioRecepcao,
+            Padrinhos = detalhe.Padrinhos,
+            DamasEPajens = detalhe.DamasEPajens,
+            NotificarAssessor = detalhe.NotificarAssessor,
+            NotificarAssistentes = detalhe.NotificarAssistentes,
+            NotificarClientes = detalhe.NotificarClientes,
+            SalvarNaAgenda = detalhe.SalvarNaAgenda,
+            SenhaDoSite = detalhe.SenhaDoSite,
+            CerimoniaPais = detalhe.Cerimonia.Pais,
+            CerimoniaCep = detalhe.Cerimonia.Cep,
+            CerimoniaLogradouro = detalhe.Cerimonia.Logradouro,
+            CerimoniaNumero = detalhe.Cerimonia.Numero,
+            CerimoniaEstado = detalhe.Cerimonia.Estado,
+            CerimoniaCidade = detalhe.Cerimonia.Cidade,
+            CerimoniaBairro = detalhe.Cerimonia.Bairro,
+            RecepcaoPais = detalhe.Recepcao.Pais,
+            RecepcaoCep = detalhe.Recepcao.Cep,
+            RecepcaoLogradouro = detalhe.Recepcao.Logradouro,
+            RecepcaoNumero = detalhe.Recepcao.Numero,
+            RecepcaoEstado = detalhe.Recepcao.Estado,
+            RecepcaoCidade = detalhe.Recepcao.Cidade,
+            RecepcaoBairro = detalhe.Recepcao.Bairro
         };
     }
 

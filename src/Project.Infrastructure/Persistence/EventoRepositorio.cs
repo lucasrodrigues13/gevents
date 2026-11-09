@@ -81,9 +81,66 @@ public sealed class EventoRepositorio : IEventoConsulta, IEventoRepositorio
             porSituacao.GetValueOrDefault(SituacaoConvidado.NaoComparecera));
     }
 
+    public async Task<IReadOnlyList<string>> ListarCopiasAsync(string accountId, Guid eventoId, CancellationToken cancellationToken)
+    {
+        var servicos = await _db.ServicosEvento.AsNoTracking()
+            .Where(servico => servico.AccountId == accountId && servico.EventoId == eventoId)
+            .Select(servico => servico.Nome)
+            .ToListAsync(cancellationToken);
+        var tarefas = await _db.Tarefas.AsNoTracking()
+            .Where(tarefa => tarefa.AccountId == accountId && tarefa.EventoId == eventoId && tarefa.ServicoEventoId != null)
+            .Select(tarefa => tarefa.Titulo)
+            .ToListAsync(cancellationToken);
+        return servicos.Concat(tarefas).ToArray();
+    }
+
+    public Task<Compromisso?> ObterCompromissoAsync(string accountId, Guid eventoId, CancellationToken cancellationToken)
+    {
+        return _db.Compromissos.AsNoTracking()
+            .FirstOrDefaultAsync(compromisso => compromisso.AccountId == accountId && compromisso.EventoId == eventoId, cancellationToken);
+    }
+
     public Task AdicionarAsync(Evento evento, CancellationToken cancellationToken)
     {
         _db.Eventos.Add(evento);
+        return Task.CompletedTask;
+    }
+
+    public Task AdicionarCopiaAsync(
+        IReadOnlyList<ServicoEvento> servicos,
+        IReadOnlyList<Tarefa> tarefas,
+        Compromisso? compromisso,
+        CancellationToken cancellationToken)
+    {
+        if (servicos.Count > 0)
+        {
+            _db.ServicosEvento.AddRange(servicos);
+        }
+
+        if (tarefas.Count > 0)
+        {
+            _db.Tarefas.AddRange(tarefas);
+        }
+
+        if (compromisso is not null)
+        {
+            _db.Compromissos.Add(compromisso);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task<bool> TemAssessoriaAsync(string accountId, Guid eventoId, CancellationToken cancellationToken)
+    {
+        return _db.ServicosEvento.AnyAsync(
+            servico => servico.AccountId == accountId && servico.EventoId == eventoId && servico.Nome == "Assessoria e Organização",
+            cancellationToken);
+    }
+
+    public Task AdicionarAssessoriaAsync(ServicoEvento servico, IReadOnlyList<ParcelaEvento> parcelas, CancellationToken cancellationToken)
+    {
+        _db.ServicosEvento.Add(servico);
+        _db.ParcelasEvento.AddRange(parcelas);
         return Task.CompletedTask;
     }
 

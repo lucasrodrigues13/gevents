@@ -6,35 +6,41 @@
 
 @if (Model.Eventos is null)
 {
-    <p>Não foi possível carregar os dashboards.</p>
+    <adminlte-alert theme="danger">Não foi possível carregar os dashboards.</adminlte-alert>
 }
 else
 {
-    <h2>Eventos</h2>
+    <h2 class="h4">Eventos</h2>
     <div class="row g-3 mb-3">
         <div class="col-md-4">
-            <a class="card h-100 text-decoration-none text-body" asp-page="/Eventos/Index" asp-route-aba="emandamento">
-                <div class="card-body">
-                    <p class="text-secondary mb-1">Em andamento</p>
-                    <p class="fs-3 fw-semibold mb-0">@Model.Eventos.EmAndamento</p>
+            <div class="small-box text-bg-primary">
+                <div class="inner">
+                    <h3>@Model.Eventos.EmAndamento</h3>
+                    <p>Em andamento</p>
                 </div>
-            </a>
+                <i class="small-box-icon bi bi-calendar-event" aria-hidden="true"></i>
+                <a class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover" asp-page="/Eventos/Index" asp-route-aba="emandamento">Abrir</a>
+            </div>
         </div>
         <div class="col-md-4">
-            <a class="card h-100 text-decoration-none text-body" asp-page="/Eventos/Index" asp-route-aba="concluido">
-                <div class="card-body">
-                    <p class="text-secondary mb-1">Concluído</p>
-                    <p class="fs-3 fw-semibold mb-0">@Model.Eventos.Concluidos</p>
+            <div class="small-box text-bg-success">
+                <div class="inner">
+                    <h3>@Model.Eventos.Concluidos</h3>
+                    <p>Concluído</p>
                 </div>
-            </a>
+                <i class="small-box-icon bi bi-check2-circle" aria-hidden="true"></i>
+                <a class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover" asp-page="/Eventos/Index" asp-route-aba="concluido">Abrir</a>
+            </div>
         </div>
         <div class="col-md-4">
-            <a class="card h-100 text-decoration-none text-body" asp-page="/Eventos/Index" asp-route-aba="cancelado">
-                <div class="card-body">
-                    <p class="text-secondary mb-1">Cancelado</p>
-                    <p class="fs-3 fw-semibold mb-0">@Model.Eventos.Cancelados</p>
+            <div class="small-box text-bg-danger">
+                <div class="inner">
+                    <h3>@Model.Eventos.Cancelados</h3>
+                    <p>Cancelado</p>
                 </div>
-            </a>
+                <i class="small-box-icon bi bi-x-circle" aria-hidden="true"></i>
+                <a class="small-box-footer link-light link-underline-opacity-0 link-underline-opacity-50-hover" asp-page="/Eventos/Index" asp-route-aba="cancelado">Abrir</a>
+            </div>
         </div>
     </div>
     @if (Model.Eventos.ListaEmAndamento.Count == 0)
@@ -44,6 +50,7 @@ else
     else
     {
         <div class="card mb-4">
+            <div class="card-header"><h3 class="h5 card-title mb-0">Em andamento</h3></div>
             <ul class="list-group list-group-flush">
                 @foreach (var evento in Model.Eventos.ListaEmAndamento)
                 {
@@ -58,11 +65,11 @@ else
             </ul>
         </div>
     }
-    <h2>Funil</h2>
+    <h2 class="h4">Funil</h2>
     <div class="row g-3">
         @foreach (var cartao in Model.Funil)
         {
-            <div class="col-md-3">
+            <div class="col-sm-6 col-xl-3">
                 <article class="card h-100">
                     <div class="card-body">
                         <p class="text-secondary mb-1">@cartao.Estagio</p>

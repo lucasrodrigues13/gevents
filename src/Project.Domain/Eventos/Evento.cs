@@ -42,6 +42,62 @@ public sealed class Evento
 
     public Guid? ArquivoId { get; private set; }
 
+    public Guid? ModeloId { get; private set; }
+
+    public string? PrimeiroNome { get; private set; }
+
+    public string? SegundoNome { get; private set; }
+
+    public TimeOnly? TempoDeFesta { get; private set; }
+
+    public TimeOnly? InicioCerimonia { get; private set; }
+
+    public TimeOnly? InicioRecepcao { get; private set; }
+
+    public int? Padrinhos { get; private set; }
+
+    public int? DamasEPajens { get; private set; }
+
+    public bool NotificarAssessor { get; private set; } = true;
+
+    public bool NotificarAssistentes { get; private set; } = true;
+
+    public bool NotificarClientes { get; private set; } = true;
+
+    public bool SalvarNaAgenda { get; private set; }
+
+    public bool TransferAtivo { get; private set; }
+
+    public string? SenhaDoSite { get; private set; }
+
+    public string? CerimoniaPais { get; private set; }
+
+    public string? CerimoniaCep { get; private set; }
+
+    public string? CerimoniaLogradouro { get; private set; }
+
+    public string? CerimoniaNumero { get; private set; }
+
+    public string? CerimoniaEstado { get; private set; }
+
+    public string? CerimoniaCidade { get; private set; }
+
+    public string? CerimoniaBairro { get; private set; }
+
+    public string? RecepcaoPais { get; private set; }
+
+    public string? RecepcaoCep { get; private set; }
+
+    public string? RecepcaoLogradouro { get; private set; }
+
+    public string? RecepcaoNumero { get; private set; }
+
+    public string? RecepcaoEstado { get; private set; }
+
+    public string? RecepcaoCidade { get; private set; }
+
+    public string? RecepcaoBairro { get; private set; }
+
     public static Evento Criar(string accountId, EventoDados dados)
     {
         var evento = new Evento
@@ -51,6 +107,46 @@ public sealed class Evento
             Situacao = SituacaoEvento.EmAndamento
         };
         evento.Aplicar(dados);
+        return evento;
+    }
+
+    public static Evento CriarComModelo(
+        string accountId,
+        Modelo? modelo,
+        string? primeiroNome,
+        string? segundoNome,
+        EventoDados dados)
+    {
+        if (modelo is null)
+        {
+            throw new RegraDeNegocioException("Escolha um modelo.");
+        }
+
+        if (modelo.AccountId != accountId)
+        {
+            throw new RegraDeNegocioException("O modelo não está disponível.");
+        }
+
+        string nome;
+        if (modelo.Tipo == TipoEvento.Casamento)
+        {
+            var primeiro = Modelo.ExigirNome(primeiroNome, "Informe os dois nomes.");
+            var segundo = Modelo.ExigirNome(segundoNome, "Informe os dois nomes.");
+            nome = $"{primeiro} & {segundo}";
+        }
+        else
+        {
+            nome = Modelo.ExigirNome(primeiroNome, "Informe o nome do evento.");
+        }
+
+        var evento = Criar(accountId, dados with
+        {
+            Nome = nome,
+            Tipo = modelo.Tipo,
+            ModeloId = modelo.Id,
+            PrimeiroNome = primeiroNome,
+            SegundoNome = segundoNome
+        });
         return evento;
     }
 
@@ -64,6 +160,12 @@ public sealed class Evento
     {
         ExigirAberto();
         ArquivoId = arquivoId;
+    }
+
+    public void DefinirTransfer(bool ativo)
+    {
+        ExigirAberto();
+        TransferAtivo = ativo;
     }
 
     public void Concluir()
@@ -109,11 +211,62 @@ public sealed class Evento
         ConvidadosEstimados = dados.ConvidadosEstimados;
         LocalCerimonia = Vazio(dados.LocalCerimonia);
         LocalRecepcao = Vazio(dados.LocalRecepcao);
+        if (!string.IsNullOrWhiteSpace(dados.PrimeiroNome))
+        {
+            PrimeiroNome = dados.PrimeiroNome.Trim();
+            SegundoNome = Vazio(dados.SegundoNome);
+            if (dados.Tipo == TipoEvento.Casamento && !string.IsNullOrWhiteSpace(dados.SegundoNome))
+            {
+                Nome = $"{PrimeiroNome} & {SegundoNome}";
+            }
+            else if (dados.Tipo != TipoEvento.Casamento)
+            {
+                Nome = PrimeiroNome;
+            }
+        }
+
+        TempoDeFesta = dados.TempoDeFesta;
+        InicioCerimonia = dados.InicioCerimonia;
+        InicioRecepcao = dados.InicioRecepcao;
+        Padrinhos = dados.Padrinhos;
+        DamasEPajens = dados.DamasEPajens;
+        NotificarAssessor = dados.NotificarAssessor;
+        NotificarAssistentes = dados.NotificarAssistentes;
+        NotificarClientes = dados.NotificarClientes;
+        SalvarNaAgenda = dados.SalvarNaAgenda;
+        SenhaDoSite = Vazio(dados.SenhaDoSite);
+        ModeloId = dados.ModeloId ?? ModeloId;
+        AplicarEndereco(dados.Cerimonia, cerimonia: true);
+        AplicarEndereco(dados.Recepcao, cerimonia: false);
         Tags = (dados.Tags ?? [])
             .Select(tag => tag.Trim())
             .Where(tag => tag.Length > 0)
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToList();
+    }
+
+    private void AplicarEndereco(EnderecoLocal? endereco, bool cerimonia)
+    {
+        var normalizado = (endereco ?? EnderecoLocal.Vazio).Normalizar();
+        if (cerimonia)
+        {
+            CerimoniaPais = normalizado.Pais;
+            CerimoniaCep = normalizado.Cep;
+            CerimoniaLogradouro = normalizado.Logradouro;
+            CerimoniaNumero = normalizado.Numero;
+            CerimoniaEstado = normalizado.Estado;
+            CerimoniaCidade = normalizado.Cidade;
+            CerimoniaBairro = normalizado.Bairro;
+            return;
+        }
+
+        RecepcaoPais = normalizado.Pais;
+        RecepcaoCep = normalizado.Cep;
+        RecepcaoLogradouro = normalizado.Logradouro;
+        RecepcaoNumero = normalizado.Numero;
+        RecepcaoEstado = normalizado.Estado;
+        RecepcaoCidade = normalizado.Cidade;
+        RecepcaoBairro = normalizado.Bairro;
     }
 
     private void ExigirAberto()
@@ -159,4 +312,19 @@ public sealed record EventoDados(
     decimal? OrcamentoEstimado,
     int? ConvidadosEstimados,
     string? LocalCerimonia,
-    string? LocalRecepcao);
+    string? LocalRecepcao,
+    Guid? ModeloId = null,
+    string? PrimeiroNome = null,
+    string? SegundoNome = null,
+    TimeOnly? TempoDeFesta = null,
+    TimeOnly? InicioCerimonia = null,
+    TimeOnly? InicioRecepcao = null,
+    int? Padrinhos = null,
+    int? DamasEPajens = null,
+    bool NotificarAssessor = true,
+    bool NotificarAssistentes = true,
+    bool NotificarClientes = true,
+    bool SalvarNaAgenda = false,
+    string? SenhaDoSite = null,
+    EnderecoLocal? Cerimonia = null,
+    EnderecoLocal? Recepcao = null);

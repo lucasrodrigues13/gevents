@@ -55,11 +55,15 @@ public sealed class EventTests : IAsyncLifetime
             ["Input.Nome"] = nome
         });
         var home = await HtmlAsync(criado);
+        var idCriado = IdDaHome(criado);
+        home = await HtmlAsync(await client.GetAsync($"/Eventos/Home/{idCriado}"));
         Assert.Contains(nome, home);
         Assert.Contains("Em andamento", home);
         Assert.Contains("Tarefas concluídas: 0", home);
         Assert.Contains("Convidados confirmados: 0", home);
-        Assert.DoesNotContain("Modelo", await HtmlAsync(await client.GetAsync("/Eventos/Criar")));
+        Assert.Contains($"/Eventos/Tarefas/{idCriado}", home);
+        Assert.Contains($"/Eventos/Convites/{idCriado}", home);
+        Assert.Contains("Modelo", await HtmlAsync(await client.GetAsync("/Eventos/Criar")));
 
         var local = NomeUnico("local");
         var recusado = await PostEventoAsync(client, "/Eventos/Criar", new Dictionary<string, string>
@@ -110,7 +114,7 @@ public sealed class EventTests : IAsyncLifetime
             ["Input.Nome"] = nome
         }, (Png(), "foto.png"));
         var id = IdDaHome(criado);
-        Assert.Contains("Imagem", await HtmlAsync(criado));
+        Assert.Contains("Imagem", await HtmlAsync(await dono.GetAsync($"/Eventos/Home/{id}")));
 
         var imagem = await dono.GetAsync($"/Eventos/Imagem/{id}");
         Assert.Equal(HttpStatusCode.OK, imagem.StatusCode);
@@ -276,6 +280,79 @@ public sealed class EventTests : IAsyncLifetime
         Assert.DoesNotContain(root, resposta.Content.Headers.ContentDisposition?.ToString());
     }
 
+    [Fact]
+    public async Task Modelo_copia_parcelas_e_cep_no_evento()
+    {
+        var client = await ConfirmedClientAsync(NewEmail());
+        var modelo = await PostFormAsync(client, "/Modelos/Criar", new Dictionary<string, string>
+        {
+            ["Nome"] = "Checklist casamento",
+            ["Tipo"] = "Casamento"
+        });
+        var modeloId = modelo.RequestMessage!.RequestUri!.Segments.Last().Trim('/');
+        var editorHtml = await HtmlAsync(await client.GetAsync($"/Modelos/Editar/{modeloId}"));
+        await client.PostAsync($"/Modelos/Editar/{modeloId}?handler=Servico", new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = Token(editorHtml),
+            ["NomeServico"] = "Banda"
+        }));
+        var editor = await HtmlAsync(await client.GetAsync($"/Modelos/Editar/{modeloId}"));
+        var servicoId = Regex.Match(editor, "value=\"([0-9a-fA-F-]{36})\">Banda").Groups[1].Value;
+        await client.PostAsync($"/Modelos/Editar/{modeloId}?handler=Tarefa", new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = Token(editor),
+            ["ServicoId"] = servicoId,
+            ["TituloTarefa"] = "Contratar banda"
+        }));
+
+        var criado = await PostEventoAsync(client, "/Eventos/Criar", new Dictionary<string, string>
+        {
+            ["Input.ModeloId"] = modeloId,
+            ["Input.PrimeiroNome"] = "Ana",
+            ["Input.SegundoNome"] = "Bia",
+            ["Input.Data"] = "2027-06-20",
+            ["Input.Hora"] = "16:00",
+            ["Input.SalvarNaAgenda"] = "true",
+            ["Input.CerimoniaCep"] = "00000-000"
+        });
+        var id = IdDaHome(criado);
+        var home = await HtmlAsync(await client.GetAsync($"/Eventos/Home/{id}"));
+        Assert.Contains("Ana & Bia", home);
+        Assert.Contains("Banda", home);
+        Assert.Contains("Contratar banda", home);
+        Assert.Contains("Compromisso:", home);
+
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            Assert.Equal(0, await db.ServicosEvento.CountAsync(item => item.EventoId == id && item.Nome == "Assessoria e Organização"));
+        }
+
+        await PostFormAsync(client, $"/Eventos/Valor/{id}", new Dictionary<string, string>
+        {
+            ["ValorTotal"] = "15000",
+            ["Quantidade"] = "4",
+            ["Primeira"] = "2026-12-10"
+        });
+        using (var scope = _factory.Services.CreateScope())
+        {
+            var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+            Assert.Equal(4, await db.ParcelasEvento.CountAsync(item => item.EventoId == id));
+            Assert.True(await db.ServicosEvento.AnyAsync(item => item.EventoId == id && item.Contratado && item.Nome == "Assessoria e Organização"));
+        }
+
+        var editado = await PostEventoAsync(client, $"/Eventos/Editar/{id}", new Dictionary<string, string>
+        {
+            ["Input.Nome"] = "Ana & Bia",
+            ["Input.CerimoniaCep"] = "30130-000"
+        });
+        Assert.Contains("Avenida Afonso Pena", await HtmlAsync(await client.GetAsync($"/Eventos/Editar/{id}")));
+        Assert.Contains("Ana & Bia", await HtmlAsync(editado));
+
+        var outro = await ConfirmedClientAsync(NewEmail());
+        Assert.DoesNotContain("Ana", await HtmlAsync(await outro.GetAsync($"/Eventos/Home/{id}")));
+    }
+
     private async Task<HttpClient> ConfirmedClientAsync(string email)
     {
         var client = _factory.CreateClient();
@@ -330,6 +407,11 @@ public sealed class EventTests : IAsyncLifetime
         Dictionary<string, string> fields,
         (byte[] Bytes, string FileName)? arquivo = null)
     {
+        if (path.Contains("/Eventos/Criar", StringComparison.Ordinal))
+        {
+            await CompletarModeloAsync(client, fields);
+        }
+
         var html = await HtmlAsync(await client.GetAsync(path));
         var content = new MultipartFormDataContent();
         content.Add(new StringContent(Token(html)), "__RequestVerificationToken");
@@ -346,6 +428,33 @@ public sealed class EventTests : IAsyncLifetime
         }
 
         return await client.PostAsync(path, content);
+    }
+
+    private static async Task CompletarModeloAsync(HttpClient client, Dictionary<string, string> fields)
+    {
+        if (fields.ContainsKey("Input.ModeloId"))
+        {
+            return;
+        }
+
+        var tipo = fields.TryGetValue("Input.Tipo", out var informado) && informado.Length > 0 ? informado : "Aniversario";
+        var html = await HtmlAsync(await client.GetAsync("/Modelos/Criar"));
+        var criado = await client.PostAsync("/Modelos/Criar", new FormUrlEncodedContent(new Dictionary<string, string>
+        {
+            ["__RequestVerificationToken"] = Token(html),
+            ["Nome"] = "Modelo " + Guid.NewGuid().ToString("N"),
+            ["Tipo"] = tipo
+        }));
+        fields["Input.ModeloId"] = criado.RequestMessage!.RequestUri!.Segments.Last().Trim('/');
+        if (!fields.ContainsKey("Input.PrimeiroNome"))
+        {
+            fields["Input.PrimeiroNome"] = fields.TryGetValue("Input.Nome", out var nome) ? nome : "Evento";
+        }
+
+        if (tipo == "Casamento" && !fields.ContainsKey("Input.SegundoNome"))
+        {
+            fields["Input.SegundoNome"] = "Par";
+        }
     }
 
     private static async Task<HttpResponseMessage> PostFormAsync(HttpClient client, string path, Dictionary<string, string> fields)

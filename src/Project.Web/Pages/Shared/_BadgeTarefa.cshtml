@@ -1,0 +1,14 @@
+@using Project.Domain.Tarefas
+@using Project.Web.Tarefas
+@model SituacaoTarefa
+@{
+    var tema = Model switch
+    {
+        SituacaoTarefa.Pendente => "secondary",
+        SituacaoTarefa.EmAndamento => "primary",
+        SituacaoTarefa.Concluida => "success",
+        SituacaoTarefa.Atrasada => "warning",
+        _ => "secondary"
+    };
+}
+<span class="badge text-bg-@tema">@TarefaTexto.Situacao(Model)</span>

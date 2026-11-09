@@ -14,6 +14,21 @@ public sealed class ClienteConfiguration : IEntityTypeConfiguration<Cliente>
         builder.Property(cliente => cliente.AccountId).HasMaxLength(450).IsRequired();
         builder.Property(cliente => cliente.Nome).IsRequired();
         builder.HasIndex(cliente => cliente.AccountId);
+        builder.HasOne<Project.Infrastructure.Arquivos.ArquivoMetadado>()
+            .WithMany()
+            .HasForeignKey(cliente => cliente.ArquivoId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public sealed class LinkCadastroClienteConfiguration : IEntityTypeConfiguration<LinkCadastroCliente>
+{
+    public void Configure(EntityTypeBuilder<LinkCadastroCliente> builder)
+    {
+        builder.ToTable("links_cadastro_cliente");
+        builder.HasKey(link => link.Id);
+        builder.Property(link => link.AccountId).HasMaxLength(450).IsRequired();
+        builder.HasIndex(link => new { link.AccountId, link.EventoId }).IsUnique();
     }
 }
 

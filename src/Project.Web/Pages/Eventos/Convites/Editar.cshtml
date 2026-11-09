@@ -1,0 +1,78 @@
+@page "{eventoId:guid}/{conviteId:guid}"
+@using Project.Domain.Convites
+@model Project.Web.Pages.Eventos.Convites.EditarModel
+@{
+    ViewData["Title"] = "Editar convite";
+    ViewData["Secao"] = "Eventos";
+    ViewData["SecaoUrl"] = "/Eventos";
+}
+
+@if (Model.Painel is null || Model.Convite is null)
+{
+    <adminlte-alert theme="warning">O convite não está disponível.</adminlte-alert>
+}
+else
+{
+    <p>@Model.Convite.Nome</p>
+    <div asp-validation-summary="ModelOnly" role="alert"></div>
+    <ul class="nav nav-tabs mb-3">
+        <li class="nav-item"><a class="nav-link" href="#dados">Dados</a></li>
+        <li class="nav-item"><a class="nav-link" href="#historico">Histórico de mensagens</a></li>
+        <li class="nav-item"><a class="nav-link" href="#qr">QR Code</a></li>
+    </ul>
+    <section id="dados">
+        <h2>Dados</h2>
+        @if (Model.Convite.Telefone is not null)
+        {
+            <p>Telefone do convite: @Model.Convite.Telefone</p>
+        }
+        <input class="form-control" readonly value="/Convite/@Model.Convite.Link" />
+        <ul>
+            @foreach (var convidado in Model.Painel.Todos.Where(item => item.ConviteId == Model.Convite.Id))
+            {
+                <li>
+                    @convidado.Nome
+                    @if (convidado.Id == Model.Convite.ConvidadoPrincipalId)
+                    {
+                        <span>Principal</span>
+                    }
+                    <form method="post" asp-page-handler="Telefone">
+                        <input type="hidden" name="convidadoId" value="@convidado.Id" />
+                        <label class="form-label">DDI</label>
+                        <input class="form-control" name="ddi" value="@(convidado.Ddi ?? "+55")" />
+                        <label class="form-label">Celular</label>
+                        <input class="form-control" name="celular" value="@convidado.Celular" />
+                        <button type="submit" class="btn btn-outline-primary">Salvar telefone</button>
+                    </form>
+                </li>
+            }
+        </ul>
+    </section>
+    <section id="historico">
+        <h2>Histórico de mensagens</h2>
+    </section>
+    <section id="qr">
+        <h2>QR Code</h2>
+        <img alt="QR Code" src="?handler=Qr" />
+        <p><a href="?handler=Qr&amp;baixar=true">Baixar</a></p>
+        <form method="post" asp-page-handler="WhatsApp">
+            <div class="mb-3">
+                <label class="form-label">DDI</label>
+                <input class="form-control" name="ddi" value="+55" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Celular</label>
+                <input class="form-control" name="celular" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Mensagem</label>
+                <input class="form-control" name="mensagem" />
+            </div>
+            <button type="submit" class="btn btn-primary">Enviar por WhatsApp</button>
+        </form>
+        @if (Model.LinkWhatsApp is not null)
+        {
+            <p><a href="@Model.LinkWhatsApp">@Model.LinkWhatsApp</a></p>
+        }
+    </section>
+}

@@ -20,6 +20,16 @@ public sealed class Convite
 
     public DateTime? RespondidaEm { get; private set; }
 
+    public Guid? GrupoId { get; private set; }
+
+    public string? Observacao { get; private set; }
+
+    public Guid? ConvidadoPrincipalId { get; private set; }
+
+    public bool UsaTransfer { get; private set; }
+
+    public Guid? LocalTransferId { get; private set; }
+
     public static Convite Criar(string accountId, Guid eventoId, string? nome)
     {
         if (string.IsNullOrWhiteSpace(accountId) || eventoId == Guid.Empty)
@@ -35,6 +45,65 @@ public sealed class Convite
             Nome = Grupo.ExigirNome(nome, "Informe o nome do convite."),
             Link = Guid.NewGuid()
         };
+    }
+
+    public static (Convite Convite, Convidado Convidado) CriarComConvidado(
+        string accountId,
+        Guid eventoId,
+        string? nome,
+        ConvidadoDados dados)
+    {
+        var convite = Criar(accountId, eventoId, nome);
+        var convidado = Convidado.Criar(convite.Id, dados);
+        return (convite, convidado);
+    }
+
+    public void DefinirGrupo(Guid? grupoId)
+    {
+        GrupoId = grupoId;
+    }
+
+    public void DefinirObservacao(string? texto)
+    {
+        Observacao = string.IsNullOrWhiteSpace(texto) ? null : texto.Trim();
+    }
+
+    public void DefinirPrincipal(Convidado convidado)
+    {
+        if (convidado.ConviteId != Id)
+        {
+            throw new RegraDeNegocioException("O principal precisa ser deste convite.");
+        }
+
+        if (string.IsNullOrWhiteSpace(convidado.Celular))
+        {
+            throw new RegraDeNegocioException("O principal precisa ter telefone.");
+        }
+
+        ConvidadoPrincipalId = convidado.Id;
+    }
+
+    public void LimparPrincipal()
+    {
+        ConvidadoPrincipalId = null;
+    }
+
+    public void DefinirTransfer(bool eventoLigado, bool usa, Guid? localId)
+    {
+        if (!eventoLigado || !usa)
+        {
+            UsaTransfer = false;
+            LocalTransferId = null;
+            return;
+        }
+
+        if (localId is null || localId == Guid.Empty)
+        {
+            throw new RegraDeNegocioException("Informe o local de origem do transfer.");
+        }
+
+        UsaTransfer = true;
+        LocalTransferId = localId;
     }
 
     public void RegistrarAcesso(DateTime momentoUtc)
@@ -67,4 +136,9 @@ public sealed record ConvidadoDados(
     string? Observacao,
     Guid? GrupoId,
     bool Transfer,
-    string? Origem);
+    string? Origem,
+    string? Ddi = null,
+    string? Mesa = null,
+    string? Rg = null,
+    string? Cpf = null,
+    SituacaoConvidado? Situacao = null);

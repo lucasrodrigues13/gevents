@@ -90,3 +90,6 @@ As specs estão aprovadas. Os planos técnicos estão em [plans/README.md](plans
 | [005-perfil-da-assessoria.md](specs/005-perfil-da-assessoria.md) | Aprovada |
 | [006-clientes.md](specs/006-clientes.md) | Aprovada |
 | [007-dashboards.md](specs/007-dashboards.md) | Aprovada |
+| [008-cadastro-completo-de-evento.md](specs/008-cadastro-completo-de-evento.md) | Aprovada. Incremento sobre a SPEC-002. |
+| [009-cadastro-completo-de-cliente.md](specs/009-cadastro-completo-de-cliente.md) | Aprovada. Incremento sobre a SPEC-006. |
+| [010-convites-convidados-completo.md](specs/010-convites-convidados-completo.md) | Aprovada. Incremento sobre a SPEC-004. |

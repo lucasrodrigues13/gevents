@@ -1,0 +1,13 @@
+@using Project.Domain.Eventos
+@using Project.Web.Eventos
+@model SituacaoEvento
+@{
+    var tema = Model switch
+    {
+        SituacaoEvento.EmAndamento => "primary",
+        SituacaoEvento.Concluido => "success",
+        SituacaoEvento.Cancelado => "danger",
+        _ => "secondary"
+    };
+}
+<span class="badge text-bg-@tema">@EventoTexto.Situacao(Model)</span>

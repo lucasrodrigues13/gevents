@@ -20,6 +20,13 @@ public sealed class Tarefa
 
     public SituacaoTarefa Situacao { get; private set; }
 
+    public Guid? ServicoEventoId { get; private set; }
+
+    public void VincularServico(Guid servicoId)
+    {
+        ServicoEventoId = servicoId;
+    }
+
     public static Tarefa Criar(string accountId, Guid eventoId, string? titulo, string? descricao, DateOnly? prazo)
     {
         if (string.IsNullOrWhiteSpace(accountId) || eventoId == Guid.Empty)

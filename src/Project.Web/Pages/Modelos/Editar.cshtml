@@ -1,0 +1,73 @@
+@page "{id:guid}"
+@model Project.Web.Pages.Modelos.EditarModel
+@{
+    ViewData["Title"] = Model.Detalhe?.Nome ?? "Modelo";
+    ViewData["Secao"] = "Modelos";
+    ViewData["SecaoUrl"] = "/Modelos";
+}
+
+@if (Model.Detalhe is null)
+{
+    <adminlte-alert theme="warning">O modelo não está disponível.</adminlte-alert>
+}
+else
+{
+    <div asp-validation-summary="ModelOnly" role="alert"></div>
+    <div class="card mb-3">
+        <div class="card-header"><h2 class="h5 card-title mb-0">Serviços</h2></div>
+        @if (Model.Detalhe.Servicos.Count == 0)
+        {
+            <div class="card-body"><p class="ge-vazio">Nenhum serviço.</p></div>
+        }
+        else
+        {
+            <ul class="list-group list-group-flush">
+                @foreach (var servico in Model.Detalhe.Servicos)
+                {
+                    <li class="list-group-item">
+                        @servico.Nome
+                        @if (servico.Tarefas.Count == 0)
+                        {
+                            <p class="ge-vazio mb-0">Nenhuma tarefa.</p>
+                        }
+                        <ul>
+                            @foreach (var tarefa in servico.Tarefas)
+                            {
+                                <li>@tarefa.Titulo</li>
+                            }
+                        </ul>
+                    </li>
+                }
+            </ul>
+        }
+    </div>
+    <div class="row g-3">
+        <div class="col-lg-6">
+            <form method="post" asp-page-handler="Servico" class="card">
+                <div class="card-header"><h2 class="h5 card-title mb-0">Serviço</h2></div>
+                <div class="card-body">
+                    <label class="form-label" for="nome-servico">Serviço</label>
+                    <input asp-for="NomeServico" id="nome-servico" class="form-control mb-3" />
+                    <button type="submit" class="btn btn-primary">Adicionar serviço</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-lg-6">
+            <form method="post" asp-page-handler="Tarefa" class="card">
+                <div class="card-header"><h2 class="h5 card-title mb-0">Tarefa</h2></div>
+                <div class="card-body">
+                    <label class="form-label" for="servico-tarefa">Serviço</label>
+                    <select asp-for="ServicoId" id="servico-tarefa" class="form-select mb-3">
+                        @foreach (var servico in Model.Detalhe.Servicos)
+                        {
+                            <option value="@servico.Id">@servico.Nome</option>
+                        }
+                    </select>
+                    <label class="form-label" for="titulo-tarefa">Tarefa</label>
+                    <input asp-for="TituloTarefa" id="titulo-tarefa" class="form-control mb-3" />
+                    <button type="submit" class="btn btn-primary">Adicionar tarefa</button>
+                </div>
+            </form>
+        </div>
+    </div>
+}

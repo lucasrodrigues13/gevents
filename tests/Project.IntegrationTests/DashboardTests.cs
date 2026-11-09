@@ -96,7 +96,17 @@ public sealed class DashboardTests : IAsyncLifetime
 
     private static async Task<Guid> CriarEventoAsync(HttpClient client, string nome, string? data)
     {
-        var campos = new Dictionary<string, string> { ["Input.Nome"] = nome };
+        var modelo = await PostAsync(client, "/Modelos/Criar", new Dictionary<string, string>
+        {
+            ["Nome"] = "Modelo " + Guid.NewGuid().ToString("N"),
+            ["Tipo"] = "Aniversario"
+        });
+        var campos = new Dictionary<string, string>
+        {
+            ["Input.Nome"] = nome,
+            ["Input.PrimeiroNome"] = nome,
+            ["Input.ModeloId"] = modelo.RequestMessage!.RequestUri!.Segments.Last().Trim('/')
+        };
         if (data is not null)
         {
             campos["Input.Data"] = data;

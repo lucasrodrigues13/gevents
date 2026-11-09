@@ -31,6 +31,30 @@ public sealed class ConviteConfiguration : IEntityTypeConfiguration<Convite>
             .WithMany()
             .HasForeignKey(convite => convite.EventoId)
             .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<Grupo>()
+            .WithMany()
+            .HasForeignKey(convite => convite.GrupoId)
+            .OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<LocalTransfer>()
+            .WithMany()
+            .HasForeignKey(convite => convite.LocalTransferId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+}
+
+public sealed class LocalTransferConfiguration : IEntityTypeConfiguration<LocalTransfer>
+{
+    public void Configure(EntityTypeBuilder<LocalTransfer> builder)
+    {
+        builder.ToTable("locais_transfer");
+        builder.HasKey(local => local.Id);
+        builder.Property(local => local.AccountId).HasMaxLength(450).IsRequired();
+        builder.Property(local => local.Nome).IsRequired();
+        builder.HasIndex(local => local.EventoId);
+        builder.HasOne<Evento>()
+            .WithMany()
+            .HasForeignKey(local => local.EventoId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }
 

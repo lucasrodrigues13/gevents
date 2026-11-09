@@ -230,11 +230,77 @@ namespace Project.Infrastructure.Persistence.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("character varying(450)");
 
+                    b.Property<Guid?>("ArquivoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Bairro")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Celular")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Cep")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Cidade")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Cnpj")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Complemento")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Cpf")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Ddi")
+                        .HasColumnType("text");
+
                     b.Property<string>("Email")
                         .HasColumnType("text");
 
+                    b.Property<string>("Estado")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Facebook")
+                        .HasColumnType("text");
+
+                    b.Property<string>("InscricaoMunicipal")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Instagram")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Logradouro")
+                        .HasColumnType("text");
+
+                    b.Property<DateOnly?>("Nascimento")
+                        .HasColumnType("date");
+
                     b.Property<string>("Nome")
                         .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Numero")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Observacao")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Pais")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Papel")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Profissao")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Religiao")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Rg")
                         .HasColumnType("text");
 
                     b.Property<string>("Telefone")
@@ -244,7 +310,31 @@ namespace Project.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("AccountId");
 
+                    b.HasIndex("ArquivoId");
+
                     b.ToTable("clientes", (string)null);
+                });
+
+            modelBuilder.Entity("Project.Domain.Clientes.LinkCadastroCliente", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<Guid>("EventoId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "EventoId")
+                        .IsUnique();
+
+                    b.ToTable("links_cadastro_cliente", (string)null);
                 });
 
             modelBuilder.Entity("Project.Domain.Clientes.VinculoCliente", b =>
@@ -288,8 +378,14 @@ namespace Project.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("ConviteId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Cpf")
+                        .HasColumnType("text");
+
                     b.Property<int?>("Custo")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Ddi")
+                        .HasColumnType("text");
 
                     b.Property<int?>("Faixa")
                         .HasColumnType("integer");
@@ -300,6 +396,9 @@ namespace Project.Infrastructure.Persistence.Migrations
                     b.Property<Guid?>("GrupoId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("Mesa")
+                        .HasColumnType("text");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text");
@@ -308,6 +407,9 @@ namespace Project.Infrastructure.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("Origem")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Rg")
                         .HasColumnType("text");
 
                     b.Property<int>("Situacao")
@@ -339,18 +441,33 @@ namespace Project.Infrastructure.Persistence.Migrations
                     b.Property<DateTime?>("AcessadaEm")
                         .HasColumnType("timestamp with time zone");
 
+                    b.Property<Guid?>("ConvidadoPrincipalId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("EventoId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("GrupoId")
+                        .HasColumnType("uuid");
+
                     b.Property<Guid>("Link")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("LocalTransferId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Observacao")
+                        .HasColumnType("text");
+
                     b.Property<DateTime?>("RespondidaEm")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<bool>("UsaTransfer")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -358,8 +475,12 @@ namespace Project.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("EventoId");
 
+                    b.HasIndex("GrupoId");
+
                     b.HasIndex("Link")
                         .IsUnique();
+
+                    b.HasIndex("LocalTransferId");
 
                     b.ToTable("convites", (string)null);
                 });
@@ -384,6 +505,62 @@ namespace Project.Infrastructure.Persistence.Migrations
                     b.HasIndex("AccountId");
 
                     b.ToTable("grupos", (string)null);
+                });
+
+            modelBuilder.Entity("Project.Domain.Convites.LocalTransfer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<Guid>("EventoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventoId");
+
+                    b.ToTable("locais_transfer", (string)null);
+                });
+
+            modelBuilder.Entity("Project.Domain.Eventos.Compromisso", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<DateOnly>("Data")
+                        .HasColumnType("date");
+
+                    b.Property<Guid>("EventoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<TimeOnly?>("Hora")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "EventoId");
+
+                    b.ToTable("compromissos", (string)null);
                 });
 
             modelBuilder.Entity("Project.Domain.Eventos.Evento", b =>
@@ -412,7 +589,31 @@ namespace Project.Infrastructure.Persistence.Migrations
                     b.Property<string>("CasalPapel")
                         .HasColumnType("text");
 
+                    b.Property<string>("CerimoniaBairro")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CerimoniaCep")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CerimoniaCidade")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CerimoniaEstado")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CerimoniaLogradouro")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CerimoniaNumero")
+                        .HasColumnType("text");
+
+                    b.Property<string>("CerimoniaPais")
+                        .HasColumnType("text");
+
                     b.Property<int?>("ConvidadosEstimados")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("DamasEPajens")
                         .HasColumnType("integer");
 
                     b.Property<DateOnly?>("Data")
@@ -421,19 +622,73 @@ namespace Project.Infrastructure.Persistence.Migrations
                     b.Property<TimeOnly?>("Hora")
                         .HasColumnType("time without time zone");
 
+                    b.Property<TimeOnly?>("InicioCerimonia")
+                        .HasColumnType("time without time zone");
+
+                    b.Property<TimeOnly?>("InicioRecepcao")
+                        .HasColumnType("time without time zone");
+
                     b.Property<string>("LocalCerimonia")
                         .HasColumnType("text");
 
                     b.Property<string>("LocalRecepcao")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("ModeloId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<bool>("NotificarAssessor")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NotificarAssistentes")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("NotificarClientes")
+                        .HasColumnType("boolean");
+
                     b.Property<decimal?>("OrcamentoEstimado")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)");
+
+                    b.Property<int?>("Padrinhos")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PrimeiroNome")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecepcaoBairro")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecepcaoCep")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecepcaoCidade")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecepcaoEstado")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecepcaoLogradouro")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecepcaoNumero")
+                        .HasColumnType("text");
+
+                    b.Property<string>("RecepcaoPais")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("SalvarNaAgenda")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("SegundoNome")
+                        .HasColumnType("text");
+
+                    b.Property<string>("SenhaDoSite")
+                        .HasColumnType("text");
 
                     b.Property<int>("Situacao")
                         .HasColumnType("integer");
@@ -442,8 +697,14 @@ namespace Project.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
+                    b.Property<TimeOnly?>("TempoDeFesta")
+                        .HasColumnType("time without time zone");
+
                     b.Property<int?>("Tipo")
                         .HasColumnType("integer");
+
+                    b.Property<bool>("TransferAtivo")
+                        .HasColumnType("boolean");
 
                     b.HasKey("Id");
 
@@ -452,6 +713,143 @@ namespace Project.Infrastructure.Persistence.Migrations
                     b.HasIndex("AccountId", "Situacao");
 
                     b.ToTable("eventos", (string)null);
+                });
+
+            modelBuilder.Entity("Project.Domain.Eventos.Modelo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("modelos", (string)null);
+                });
+
+            modelBuilder.Entity("Project.Domain.Eventos.ParcelaEvento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<bool>("Entrada")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("EventoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Numero")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("ServicoEventoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("Valor")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.Property<DateOnly>("Vencimento")
+                        .HasColumnType("date");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "EventoId");
+
+                    b.ToTable("parcelas_evento", (string)null);
+                });
+
+            modelBuilder.Entity("Project.Domain.Eventos.ServicoEvento", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountId")
+                        .IsRequired()
+                        .HasMaxLength(450)
+                        .HasColumnType("character varying(450)");
+
+                    b.Property<bool>("Contratado")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("EventoId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Fornecedor")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<decimal?>("Valor")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId", "EventoId");
+
+                    b.ToTable("servicos_evento", (string)null);
+                });
+
+            modelBuilder.Entity("Project.Domain.Eventos.ServicoModelo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ModeloId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ModeloId");
+
+                    b.ToTable("servicos_modelo", (string)null);
+                });
+
+            modelBuilder.Entity("Project.Domain.Eventos.TarefaModelo", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("ServicoModeloId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ServicoModeloId");
+
+                    b.ToTable("tarefas_modelo", (string)null);
                 });
 
             modelBuilder.Entity("Project.Domain.Perfis.Perfil", b =>
@@ -510,6 +908,9 @@ namespace Project.Infrastructure.Persistence.Migrations
 
                     b.Property<DateOnly?>("Prazo")
                         .HasColumnType("date");
+
+                    b.Property<Guid?>("ServicoEventoId")
+                        .HasColumnType("uuid");
 
                     b.Property<int>("Situacao")
                         .HasColumnType("integer");
@@ -611,6 +1012,14 @@ namespace Project.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Project.Domain.Clientes.Cliente", b =>
+                {
+                    b.HasOne("Project.Infrastructure.Arquivos.ArquivoMetadado", null)
+                        .WithMany()
+                        .HasForeignKey("ArquivoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("Project.Domain.Clientes.VinculoCliente", b =>
                 {
                     b.HasOne("Project.Domain.Clientes.Cliente", null)
@@ -647,6 +1056,25 @@ namespace Project.Infrastructure.Persistence.Migrations
                         .HasForeignKey("EventoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.HasOne("Project.Domain.Convites.Grupo", null)
+                        .WithMany()
+                        .HasForeignKey("GrupoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Project.Domain.Convites.LocalTransfer", null)
+                        .WithMany()
+                        .HasForeignKey("LocalTransferId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Project.Domain.Convites.LocalTransfer", b =>
+                {
+                    b.HasOne("Project.Domain.Eventos.Evento", null)
+                        .WithMany()
+                        .HasForeignKey("EventoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Project.Domain.Eventos.Evento", b =>
@@ -657,6 +1085,24 @@ namespace Project.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("Project.Domain.Eventos.ServicoModelo", b =>
+                {
+                    b.HasOne("Project.Domain.Eventos.Modelo", null)
+                        .WithMany("Servicos")
+                        .HasForeignKey("ModeloId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Project.Domain.Eventos.TarefaModelo", b =>
+                {
+                    b.HasOne("Project.Domain.Eventos.ServicoModelo", null)
+                        .WithMany("Tarefas")
+                        .HasForeignKey("ServicoModeloId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Project.Domain.Tarefas.Tarefa", b =>
                 {
                     b.HasOne("Project.Domain.Eventos.Evento", null)
@@ -664,6 +1110,16 @@ namespace Project.Infrastructure.Persistence.Migrations
                         .HasForeignKey("EventoId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Project.Domain.Eventos.Modelo", b =>
+                {
+                    b.Navigation("Servicos");
+                });
+
+            modelBuilder.Entity("Project.Domain.Eventos.ServicoModelo", b =>
+                {
+                    b.Navigation("Tarefas");
                 });
 #pragma warning restore 612, 618
         }

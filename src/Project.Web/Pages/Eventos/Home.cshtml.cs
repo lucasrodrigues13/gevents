@@ -37,6 +37,10 @@ public sealed class HomeModel : PageModel
 
     public IReadOnlyList<ClienteItem> ClientesDaConta { get; private set; } = [];
 
+    public IReadOnlyList<string> Copias { get; private set; } = [];
+
+    public Guid? LinkCadastro { get; private set; }
+
     public async Task<IActionResult> OnGetAsync(Guid id, string? confirmar, string? aviso, CancellationToken cancellationToken)
     {
         Hoje = DateOnly.FromDateTime(DateTime.UtcNow);
@@ -49,6 +53,9 @@ public sealed class HomeModel : PageModel
         }
 
         await CarregarClientesAsync(id, cancellationToken);
+        var conta = await _userManager.GetUserAsync(User);
+        Copias = conta is null ? [] : await _servico.ListarCopiasAsync(conta.Id, id, cancellationToken);
+        LinkCadastro = conta is null ? null : await _clientes.ObterLinkDoEventoAsync(conta.Id, id, cancellationToken);
 
         if (Detalhe.Situacao == SituacaoEvento.EmAndamento && confirmar is "concluir" or "cancelar")
         {
@@ -71,6 +78,26 @@ public sealed class HomeModel : PageModel
     public async Task<IActionResult> OnPostVincularAsync(Guid id, Guid clienteId, CancellationToken cancellationToken)
     {
         return await AlterarVinculoAsync(id, userId => _clientes.VincularAsync(userId, clienteId, id, cancellationToken), cancellationToken);
+    }
+
+    public async Task<IActionResult> OnPostGerarLinkAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var user = await _userManager.GetUserAsync(User);
+        if (user is null)
+        {
+            return Challenge();
+        }
+
+        try
+        {
+            await _clientes.ObterOuCriarLinkAsync(user.Id, id, cancellationToken);
+            return RedirectToPage(new { id });
+        }
+        catch (RegraDeNegocioException)
+        {
+            Response.StatusCode = StatusCodes.Status404NotFound;
+            return Page();
+        }
     }
 
     public async Task<IActionResult> OnPostDesvincularAsync(Guid id, Guid clienteId, CancellationToken cancellationToken)

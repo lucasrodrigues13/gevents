@@ -31,9 +31,25 @@ public sealed class AppDbContext : IdentityDbContext<IdentityUser, IdentityRole,
 
     public DbSet<Convidado> Convidados => Set<Convidado>();
 
+    public DbSet<LocalTransfer> LocaisTransfer => Set<LocalTransfer>();
+
     public DbSet<Cliente> Clientes => Set<Cliente>();
 
     public DbSet<VinculoCliente> Vinculos => Set<VinculoCliente>();
+
+    public DbSet<LinkCadastroCliente> LinksCadastro => Set<LinkCadastroCliente>();
+
+    public DbSet<Modelo> Modelos => Set<Modelo>();
+
+    public DbSet<ServicoModelo> ServicosModelo => Set<ServicoModelo>();
+
+    public DbSet<TarefaModelo> TarefasModelo => Set<TarefaModelo>();
+
+    public DbSet<ServicoEvento> ServicosEvento => Set<ServicoEvento>();
+
+    public DbSet<ParcelaEvento> ParcelasEvento => Set<ParcelaEvento>();
+
+    public DbSet<Compromisso> Compromissos => Set<Compromisso>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

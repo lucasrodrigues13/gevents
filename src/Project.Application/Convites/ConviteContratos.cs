@@ -4,7 +4,20 @@ namespace Project.Application.Convites;
 
 public sealed record GrupoItem(Guid Id, string Nome);
 
-public sealed record ConviteItem(Guid Id, string Nome, Guid Link, DateTime? AcessadaEm, DateTime? RespondidaEm);
+public sealed record ConviteItem(
+    Guid Id,
+    string Nome,
+    Guid Link,
+    DateTime? AcessadaEm,
+    DateTime? RespondidaEm,
+    Guid? GrupoId = null,
+    string? Observacao = null,
+    Guid? ConvidadoPrincipalId = null,
+    bool UsaTransfer = false,
+    Guid? LocalTransferId = null,
+    string? Telefone = null);
+
+public sealed record LocalTransferItem(Guid Id, string Nome);
 
 public sealed record ConvidadoItem(
     Guid Id,
@@ -20,7 +33,15 @@ public sealed record ConvidadoItem(
     Guid? GrupoId,
     string? GrupoNome,
     bool Transfer,
-    string? Origem);
+    string? Origem,
+    string? Ddi = null,
+    string? Mesa = null,
+    string? Rg = null,
+    string? Cpf = null,
+    string? TelefoneConvite = null,
+    Guid? GrupoConviteId = null,
+    string? ObservacaoConvite = null,
+    bool TransferConvite = false);
 
 public sealed record FiltroConvidados(
     string? Nome,
@@ -36,7 +57,9 @@ public sealed record PainelConvites(
     IReadOnlyList<GrupoItem> Grupos,
     IReadOnlyList<ConviteItem> Convites,
     IReadOnlyList<ConvidadoItem> Todos,
-    IReadOnlyList<ConvidadoItem> Filtrados);
+    IReadOnlyList<ConvidadoItem> Filtrados,
+    bool TransferAtivo = false,
+    IReadOnlyList<LocalTransferItem>? Locais = null);
 
 public sealed record PresencaPublica(Guid Id, string Nome, SituacaoConvidado Situacao);
 
@@ -67,6 +90,28 @@ public interface IConviteConsulta
     Task<IReadOnlyList<ConvidadoItem>> ListarConvidadosAsync(string accountId, Guid eventoId, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<Convidado>> ListarConvidadosDoConviteAsync(Guid conviteId, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<Convite>> ListarDoEventoAsync(string accountId, Guid eventoId, CancellationToken cancellationToken);
+
+    Task<Convidado?> ObterConvidadoAsync(string accountId, Guid convidadoId, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<LocalTransferItem>> ListarLocaisAsync(string accountId, Guid eventoId, CancellationToken cancellationToken);
+
+    Task<bool> LocalPertenceAsync(string accountId, Guid eventoId, Guid localId, CancellationToken cancellationToken);
+}
+
+public interface ILeitorPlanilha
+{
+    IReadOnlyList<IReadOnlyList<string>> Ler(Stream conteudo, string? nomeArquivo);
+
+    byte[] Modelo();
+
+    byte[] Criar(IReadOnlyList<IReadOnlyList<string>> linhas);
+}
+
+public interface ICodigoQr
+{
+    byte[] Png(string texto);
 }
 
 public interface IConviteRepositorio
@@ -74,6 +119,8 @@ public interface IConviteRepositorio
     Task AdicionarAsync(Convite convite, CancellationToken cancellationToken);
 
     Task AdicionarAsync(Convidado convidado, CancellationToken cancellationToken);
+
+    Task AdicionarAsync(LocalTransfer local, CancellationToken cancellationToken);
 
     Task SalvarAsync(CancellationToken cancellationToken);
 }

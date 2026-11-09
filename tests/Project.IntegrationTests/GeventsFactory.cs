@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Project.Application.Cep;
 using Project.Infrastructure.Persistence;
 using Project.Web;
 
@@ -46,6 +47,8 @@ public sealed class GeventsFactory : WebApplicationFactory<Program>
         builder.UseSetting("Storage:Root", _storageRoot);
         builder.ConfigureServices(services =>
         {
+            services.RemoveAll<IConsultaCep>();
+            services.AddSingleton<IConsultaCep, ConsultaCepFixa>();
             services.RemoveAll<IEmailSender<IdentityUser>>();
             services.AddSingleton<FakeEmailSender>();
             services.AddSingleton<IEmailSender<IdentityUser>>(provider => provider.GetRequiredService<FakeEmailSender>());
@@ -68,5 +71,19 @@ public sealed class GeventsFactory : WebApplicationFactory<Program>
         {
             Directory.Delete(_storageRoot, true);
         }
+    }
+}
+
+public sealed class ConsultaCepFixa : IConsultaCep
+{
+    public Task<EnderecoCep?> ConsultarAsync(string cep, CancellationToken cancellationToken)
+    {
+        var digitos = new string(cep.Where(char.IsDigit).ToArray());
+        if (digitos == "30130000")
+        {
+            return Task.FromResult<EnderecoCep?>(new EnderecoCep("Avenida Afonso Pena", "MG", "Belo Horizonte", "Centro"));
+        }
+
+        return Task.FromResult<EnderecoCep?>(null);
     }
 }

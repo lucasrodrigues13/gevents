@@ -1,0 +1,25 @@
+@model Project.Web.Ui.ModalConfirmacao
+<div class="modal fade" id="@Model.Id" tabindex="-1" aria-labelledby="@(Model.Id)-titulo" aria-hidden="true" data-ge-abrir="@(Model.Aberto ? "true" : "false")">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="@(Model.Id)-titulo">@Model.Titulo</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <form method="post" asp-page="@Model.Pagina" asp-page-handler="@Model.Handler" asp-route-id="@Model.RegistroId">
+                <div class="modal-body">
+                    <p class="mb-0">@Model.Mensagem</p>
+                    @if (!string.IsNullOrWhiteSpace(Model.Registro))
+                    {
+                        <p class="mt-2 mb-0">@Model.Registro</p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <a class="btn btn-outline-secondary" asp-page="@Model.Pagina" asp-route-id="@Model.RegistroId">Voltar</a>
+                    <input type="hidden" name="confirmado" value="sim" />
+                    <button type="submit" class="btn @(Model.Perigo ? "btn-danger" : "btn-primary")">@Model.Botao</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

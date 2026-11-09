@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Application.Clientes;
 using Project.Domain;
 using Project.Infrastructure.Identity;
+using Project.Web.Clientes;
 
 namespace Project.Web.Pages.Clientes;
 
@@ -21,13 +22,13 @@ public sealed class CriarModel : PageModel
     }
 
     [BindProperty]
-    public InputModel Input { get; set; } = new();
+    public ClienteInput Input { get; set; } = new();
 
     public void OnGet()
     {
     }
 
-    public async Task<IActionResult> OnPostAsync(CancellationToken cancellationToken)
+    public async Task<IActionResult> OnPostAsync(Guid? eventoId, CancellationToken cancellationToken)
     {
         var user = await _userManager.GetUserAsync(User);
         if (user is null)
@@ -35,24 +36,25 @@ public sealed class CriarModel : PageModel
             return Challenge();
         }
 
+        var (conteudo, nome) = Input.AbrirImagem();
         try
         {
-            await _clientes.CriarAsync(user.Id, Input.Nome, Input.Telefone, Input.Email, cancellationToken);
-            return RedirectToPage("/Clientes/Index");
+            await _clientes.CriarAsync(user.Id, Input.ParaDados(), conteudo, nome, eventoId, cancellationToken);
+            return eventoId is null
+                ? RedirectToPage("/Clientes/Index")
+                : RedirectToPage("/Eventos/Home", new { id = eventoId });
         }
         catch (RegraDeNegocioException exception)
         {
             ModelState.AddModelError(string.Empty, exception.Message);
             return Page();
         }
-    }
-
-    public sealed class InputModel
-    {
-        public string? Nome { get; set; }
-
-        public string? Telefone { get; set; }
-
-        public string? Email { get; set; }
+        finally
+        {
+            if (conteudo is not null)
+            {
+                await conteudo.DisposeAsync();
+            }
+        }
     }
 }

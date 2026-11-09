@@ -19,6 +19,10 @@ public interface IClienteConsulta
     Task<IReadOnlyList<ClienteResumo>> ListarDoEventoAsync(string accountId, Guid eventoId, CancellationToken cancellationToken);
 
     Task<VinculoCliente?> ObterVinculoAsync(string accountId, Guid clienteId, Guid eventoId, CancellationToken cancellationToken);
+
+    Task<LinkCadastroCliente?> ObterLinkAsync(string accountId, Guid eventoId, CancellationToken cancellationToken);
+
+    Task<LinkCadastroCliente?> ObterLinkAsync(Guid id, CancellationToken cancellationToken);
 }
 
 public interface IClienteRepositorio
@@ -26,6 +30,8 @@ public interface IClienteRepositorio
     Task AdicionarAsync(Cliente cliente, CancellationToken cancellationToken);
 
     Task AdicionarAsync(VinculoCliente vinculo, CancellationToken cancellationToken);
+
+    Task AdicionarAsync(LinkCadastroCliente link, CancellationToken cancellationToken);
 
     Task RemoverAsync(VinculoCliente vinculo, CancellationToken cancellationToken);
 

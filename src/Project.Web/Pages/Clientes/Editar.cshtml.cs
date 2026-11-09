@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Project.Application.Clientes;
 using Project.Domain;
 using Project.Infrastructure.Identity;
+using Project.Web.Clientes;
 
 namespace Project.Web.Pages.Clientes;
 
@@ -21,7 +22,7 @@ public sealed class EditarModel : PageModel
     }
 
     [BindProperty]
-    public CriarModel.InputModel Input { get; set; } = new();
+    public ClienteInput Input { get; set; } = new();
 
     public bool Disponivel { get; private set; }
 
@@ -45,9 +46,10 @@ public sealed class EditarModel : PageModel
             return Challenge();
         }
 
+        var (conteudo, nome) = Input.AbrirImagem();
         try
         {
-            await _clientes.EditarAsync(user.Id, id, Input.Nome, Input.Telefone, Input.Email, cancellationToken);
+            await _clientes.EditarAsync(user.Id, id, Input.ParaDados(), conteudo, nome, cancellationToken);
             return RedirectToPage("/Clientes/Index");
         }
         catch (RegraDeNegocioException exception)
@@ -59,6 +61,13 @@ public sealed class EditarModel : PageModel
             }
 
             return Page();
+        }
+        finally
+        {
+            if (conteudo is not null)
+            {
+                await conteudo.DisposeAsync();
+            }
         }
     }
 
@@ -76,16 +85,12 @@ public sealed class EditarModel : PageModel
             return false;
         }
 
+        var lista = await _clientes.ListarAsync(user.Id, null, cancellationToken);
         Disponivel = true;
-        Eventos = cliente.Eventos;
+        Eventos = lista.FirstOrDefault(item => item.Id == id)?.Eventos ?? [];
         if (preencher)
         {
-            Input = new CriarModel.InputModel
-            {
-                Nome = cliente.Nome,
-                Telefone = cliente.Telefone,
-                Email = cliente.Email
-            };
+            Input = ClienteInput.De(cliente);
         }
 
         return true;

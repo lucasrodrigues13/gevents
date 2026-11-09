@@ -54,7 +54,7 @@ public sealed class ClienteFluxoTests : IAsyncLifetime
         Assert.DoesNotContain(nome, await HtmlAsync(await dono.GetAsync("/Clientes")));
         Assert.DoesNotContain("type=\"password\"", await HtmlAsync(await dono.GetAsync("/Clientes/Criar")));
 
-        await PostAsync(dono, "/Clientes/Criar", new Dictionary<string, string> { ["Input.Nome"] = nome });
+        await PostAsync(dono, "/Clientes/Criar", ClienteCampos(nome));
         var lista = await HtmlAsync(await dono.GetAsync("/Clientes?nome=" + Uri.EscapeDataString("helena")));
         Assert.Contains(nome, lista);
         var clienteId = Regex.Match(lista, $"Editar/([0-9a-fA-F-]{{36}})\"[^>]*>{Regex.Escape(nome)}").Groups[1].Value;
@@ -90,9 +90,63 @@ public sealed class ClienteFluxoTests : IAsyncLifetime
         Assert.Equal(HttpStatusCode.NotFound, negado.StatusCode);
     }
 
+    [Fact]
+    public async Task Cep_falso_e_link_publico_vinculam_sem_revelar_para_outra_conta()
+    {
+        var dono = await ConfirmedClientAsync(NewEmail());
+        var casal = Nome("Casal Original");
+        var evento = Nome("Evento Link");
+        var eventoId = await CriarEventoAsync(dono, evento, casal);
+        var marina = Nome("Marina");
+        var campos = ClienteCampos(marina);
+        campos["Input.Cep"] = "30130-000";
+        await PostAsync(dono, "/Clientes/Criar", campos);
+        var lista = await HtmlAsync(await dono.GetAsync("/Clientes?nome=" + Uri.EscapeDataString("marina")));
+        Assert.Contains("Nenhum evento vinculado", lista);
+        var clienteId = Regex.Match(lista, $"Editar/([0-9a-fA-F-]{{36}})\"[^>]*>{Regex.Escape(marina)}").Groups[1].Value;
+        Assert.Contains("Avenida Afonso Pena", await HtmlAsync(await dono.GetAsync($"/Clientes/Editar/{clienteId}")));
+
+        await PostAsync(dono, $"/Eventos/Home/{eventoId}?handler=GerarLink", new Dictionary<string, string>());
+        var home = await HtmlAsync(await dono.GetAsync($"/Eventos/Home/{eventoId}"));
+        var link = Regex.Match(home, "/Cadastro/([0-9a-fA-F-]{36})").Groups[1].Value;
+        var publico = Nome("Convidada");
+        var anonimo = _factory.CreateClient();
+        await PostAsync(anonimo, $"/Cadastro/{link}", ClienteCampos(publico));
+
+        var depois = await HtmlAsync(await dono.GetAsync($"/Eventos/Home/{eventoId}"));
+        Assert.Contains(publico, depois);
+        Assert.Contains(casal, depois);
+        var outro = await ConfirmedClientAsync(NewEmail());
+        Assert.DoesNotContain(marina, await HtmlAsync(await outro.GetAsync("/Clientes")));
+        Assert.DoesNotContain(publico, await HtmlAsync(await outro.GetAsync("/Clientes")));
+        Assert.Contains("O link não está disponível.", await HtmlAsync(await anonimo.GetAsync($"/Cadastro/{Guid.NewGuid()}")));
+    }
+
+    private static Dictionary<string, string> ClienteCampos(string nome)
+    {
+        return new Dictionary<string, string>
+        {
+            ["Input.Nome"] = nome,
+            ["Input.Papel"] = "Noiva",
+            ["Input.Email"] = $"{Guid.NewGuid():N}@example.com",
+            ["Input.Ddi"] = "+55",
+            ["Input.Celular"] = "31999990000"
+        };
+    }
+
     private static async Task<Guid> CriarEventoAsync(HttpClient client, string nome, string? casal)
     {
-        var campos = new Dictionary<string, string> { ["Input.Nome"] = nome };
+        var modelo = await PostAsync(client, "/Modelos/Criar", new Dictionary<string, string>
+        {
+            ["Nome"] = "Modelo " + Guid.NewGuid().ToString("N"),
+            ["Tipo"] = "Aniversario"
+        });
+        var campos = new Dictionary<string, string>
+        {
+            ["Input.Nome"] = nome,
+            ["Input.PrimeiroNome"] = nome,
+            ["Input.ModeloId"] = modelo.RequestMessage!.RequestUri!.Segments.Last().Trim('/')
+        };
         if (casal is not null)
         {
             campos["Input.CasalNome"] = casal;

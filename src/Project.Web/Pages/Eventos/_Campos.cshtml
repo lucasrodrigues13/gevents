@@ -1,65 +1,247 @@
 @model Project.Web.Eventos.EventoInput
-
-<div class="mb-3">
-    <label asp-for="Nome" class="form-label">Nome</label>
-    <input asp-for="Nome" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="Data" class="form-label">Data</label>
-    <input asp-for="Data" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="Hora" class="form-label">Hora</label>
-    <input asp-for="Hora" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="Tipo" class="form-label">Tipo</label>
-    <select asp-for="Tipo" class="form-select">
-        <option value="">Sem tipo</option>
-        <option value="Casamento">Casamento</option>
-        <option value="QuinzeAnos">15 anos</option>
-        <option value="Aniversario">Aniversário</option>
-        <option value="Corporativo">Corporativo</option>
-        <option value="Formatura">Formatura</option>
-    </select>
-</div>
-<div class="mb-3">
-    <label asp-for="Tags" class="form-label">Tags</label>
-    <input asp-for="Tags" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="CasalNome" class="form-label">Nome do casal</label>
-    <input asp-for="CasalNome" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="CasalPapel" class="form-label">Papel do casal</label>
-    <input asp-for="CasalPapel" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="CasalEmail" class="form-label">E-mail do casal</label>
-    <input asp-for="CasalEmail" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="CasalCelular" class="form-label">Celular do casal</label>
-    <input asp-for="CasalCelular" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="OrcamentoEstimado" class="form-label">Orçamento estimado</label>
-    <input asp-for="OrcamentoEstimado" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="ConvidadosEstimados" class="form-label">Convidados estimados</label>
-    <input asp-for="ConvidadosEstimados" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="LocalCerimonia" class="form-label">Local da cerimônia</label>
-    <input asp-for="LocalCerimonia" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="LocalRecepcao" class="form-label">Local da recepção</label>
-    <input asp-for="LocalRecepcao" class="form-control" />
-</div>
-<div class="mb-3">
-    <label asp-for="Imagem" class="form-label">Imagem</label>
-    <input asp-for="Imagem" class="form-control" type="file" accept=".jpg,.jpeg,.png,.webp" />
+@using Project.Domain.Eventos
+@using Project.Web.Eventos
+@{
+    var abas = ViewData["AbasEvento"] as bool? == true;
+    var tipoFixo = ViewData["TipoPeloModelo"] as bool? == true;
+    var tipoRotulo = EventoTexto.Tipo(Enum.TryParse<TipoEvento>(Model.Tipo, out var tipo) ? tipo : null);
+}
+@if (abas)
+{
+    <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="aba-gerais" data-bs-toggle="tab" data-bs-target="#gerais" type="button" role="tab" aria-controls="gerais" aria-selected="true">Informações gerais</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="aba-detalhes" data-bs-toggle="tab" data-bs-target="#detalhes" type="button" role="tab" aria-controls="detalhes" aria-selected="false">Detalhes</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="aba-cerimonia" data-bs-toggle="tab" data-bs-target="#cerimonia" type="button" role="tab" aria-controls="cerimonia" aria-selected="false">Cerimônia</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="aba-recepcao" data-bs-toggle="tab" data-bs-target="#recepcao" type="button" role="tab" aria-controls="recepcao" aria-selected="false">Recepção</button>
+        </li>
+    </ul>
+}
+<div class="@(abas ? "tab-content" : null)">
+    <div class="@(abas ? "tab-pane fade show active" : "card mb-3")" id="gerais" role="@(abas ? "tabpanel" : null)" aria-labelledby="@(abas ? "aba-gerais" : null)">
+        @if (!abas)
+        {
+            <div class="card-header"><h2 class="h5 card-title mb-0">Informações gerais</h2></div>
+        }
+        <div class="@(abas ? null : "card-body")">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="PrimeiroNome" class="form-label ge-obrigatorio">Nome</label>
+                    <input asp-for="PrimeiroNome" class="form-control" aria-required="true" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="SegundoNome" class="form-label">Segundo nome</label>
+                    <input asp-for="SegundoNome" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Nome" class="form-label ge-obrigatorio">Nome do evento</label>
+                    <input asp-for="Nome" class="form-control" aria-required="true" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Data" class="form-label">Data</label>
+                    <input asp-for="Data" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Hora" class="form-label">Hora</label>
+                    <input asp-for="Hora" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    @if (tipoFixo)
+                    {
+                        <input type="hidden" asp-for="Tipo" />
+                        <label class="form-label">Tipo</label>
+                        <input class="form-control" value="@tipoRotulo" readonly />
+                    }
+                    else
+                    {
+                        <label asp-for="Tipo" class="form-label">Tipo</label>
+                        <select asp-for="Tipo" class="form-select">
+                            <option value="">Sem tipo</option>
+                            <option value="Casamento">Casamento</option>
+                            <option value="QuinzeAnos">15 anos</option>
+                            <option value="Aniversario">Aniversário</option>
+                            <option value="Corporativo">Corporativo</option>
+                            <option value="Formatura">Formatura</option>
+                        </select>
+                    }
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Tags" class="form-label">Tags</label>
+                    <input asp-for="Tags" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CasalNome" class="form-label">Nome do casal</label>
+                    <input asp-for="CasalNome" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CasalPapel" class="form-label">Papel do casal</label>
+                    <input asp-for="CasalPapel" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CasalEmail" class="form-label">E-mail do casal</label>
+                    <input asp-for="CasalEmail" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CasalCelular" class="form-label">Celular do casal</label>
+                    <input asp-for="CasalCelular" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="OrcamentoEstimado" class="form-label">Orçamento estimado</label>
+                    <input asp-for="OrcamentoEstimado" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">URL do site</label>
+                    <input class="form-control" value="" readonly />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="SenhaDoSite" class="form-label">Senha do site</label>
+                    <input asp-for="SenhaDoSite" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Imagem" class="form-label">Imagem</label>
+                    <input asp-for="Imagem" class="form-control" type="file" accept=".jpg,.jpeg,.png,.webp" />
+                </div>
+            </div>
+            <div class="mb-3 form-check">
+                <input asp-for="NotificarAssessor" class="form-check-input" />
+                <label asp-for="NotificarAssessor" class="form-check-label">Notificar assessor</label>
+            </div>
+            <div class="mb-3 form-check">
+                <input asp-for="NotificarAssistentes" class="form-check-input" />
+                <label asp-for="NotificarAssistentes" class="form-check-label">Notificar assistentes</label>
+            </div>
+            <div class="mb-3 form-check">
+                <input asp-for="NotificarClientes" class="form-check-input" />
+                <label asp-for="NotificarClientes" class="form-check-label">Notificar clientes</label>
+            </div>
+            <div class="mb-3 form-check">
+                <input asp-for="SalvarNaAgenda" class="form-check-input" />
+                <label asp-for="SalvarNaAgenda" class="form-check-label">Salvar na agenda</label>
+            </div>
+        </div>
+    </div>
+    <div class="@(abas ? "tab-pane fade" : "card mb-3")" id="detalhes" role="@(abas ? "tabpanel" : null)" aria-labelledby="@(abas ? "aba-detalhes" : null)">
+        @if (!abas)
+        {
+            <div class="card-header"><h2 class="h5 card-title mb-0">Detalhes</h2></div>
+        }
+        <div class="@(abas ? "pt-3" : "card-body")">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="ConvidadosEstimados" class="form-label">Convidados estimados</label>
+                    <input asp-for="ConvidadosEstimados" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="TempoDeFesta" class="form-label">Tempo de festa</label>
+                    <input asp-for="TempoDeFesta" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="Padrinhos" class="form-label">Padrinhos</label>
+                    <input asp-for="Padrinhos" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="DamasEPajens" class="form-label">Damas e pajens</label>
+                    <input asp-for="DamasEPajens" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="InicioCerimonia" class="form-label">Início da cerimônia</label>
+                    <input asp-for="InicioCerimonia" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="InicioRecepcao" class="form-label">Início da recepção</label>
+                    <input asp-for="InicioRecepcao" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="@(abas ? "tab-pane fade" : "card mb-3")" id="cerimonia" role="@(abas ? "tabpanel" : null)" aria-labelledby="@(abas ? "aba-cerimonia" : null)">
+        @if (!abas)
+        {
+            <div class="card-header"><h2 class="h5 card-title mb-0">Cerimônia</h2></div>
+        }
+        <div class="@(abas ? "pt-3" : "card-body")">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="LocalCerimonia" class="form-label">Local da cerimônia</label>
+                    <input asp-for="LocalCerimonia" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="CerimoniaPais" class="form-label">País</label>
+                    <input asp-for="CerimoniaPais" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="CerimoniaCep" class="form-label">CEP</label>
+                    <input asp-for="CerimoniaCep" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CerimoniaLogradouro" class="form-label">Endereço</label>
+                    <input asp-for="CerimoniaLogradouro" class="form-control" />
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label asp-for="CerimoniaNumero" class="form-label">Número</label>
+                    <input asp-for="CerimoniaNumero" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CerimoniaBairro" class="form-label">Bairro</label>
+                    <input asp-for="CerimoniaBairro" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CerimoniaCidade" class="form-label">Cidade</label>
+                    <input asp-for="CerimoniaCidade" class="form-control" />
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label asp-for="CerimoniaEstado" class="form-label">Estado</label>
+                    <input asp-for="CerimoniaEstado" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="@(abas ? "tab-pane fade" : "card mb-3")" id="recepcao" role="@(abas ? "tabpanel" : null)" aria-labelledby="@(abas ? "aba-recepcao" : null)">
+        @if (!abas)
+        {
+            <div class="card-header"><h2 class="h5 card-title mb-0">Recepção</h2></div>
+        }
+        <div class="@(abas ? "pt-3" : "card-body")">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="LocalRecepcao" class="form-label">Local da recepção</label>
+                    <input asp-for="LocalRecepcao" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="RecepcaoPais" class="form-label">País</label>
+                    <input asp-for="RecepcaoPais" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="RecepcaoCep" class="form-label">CEP</label>
+                    <input asp-for="RecepcaoCep" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="RecepcaoLogradouro" class="form-label">Endereço</label>
+                    <input asp-for="RecepcaoLogradouro" class="form-control" />
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label asp-for="RecepcaoNumero" class="form-label">Número</label>
+                    <input asp-for="RecepcaoNumero" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="RecepcaoBairro" class="form-label">Bairro</label>
+                    <input asp-for="RecepcaoBairro" class="form-control" />
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="RecepcaoCidade" class="form-label">Cidade</label>
+                    <input asp-for="RecepcaoCidade" class="form-control" />
+                </div>
+                <div class="col-md-2 mb-3">
+                    <label asp-for="RecepcaoEstado" class="form-label">Estado</label>
+                    <input asp-for="RecepcaoEstado" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

@@ -30,6 +30,14 @@ public sealed class Convidado
 
     public string? Origem { get; private set; }
 
+    public string? Ddi { get; private set; }
+
+    public string? Mesa { get; private set; }
+
+    public string? Rg { get; private set; }
+
+    public string? Cpf { get; private set; }
+
     public static Convidado Criar(Guid conviteId, ConvidadoDados dados)
     {
         if (conviteId == Guid.Empty)
@@ -44,7 +52,28 @@ public sealed class Convidado
             Situacao = SituacaoConvidado.Pendente
         };
         convidado.Aplicar(dados);
+        if (dados.Situacao is not null)
+        {
+            convidado.DefinirSituacao(dados.Situacao.Value);
+        }
+
         return convidado;
+    }
+
+    public void DefinirSituacao(SituacaoConvidado situacao)
+    {
+        if (!Enum.IsDefined(situacao))
+        {
+            throw new RegraDeNegocioException("A situação não é aceita.");
+        }
+
+        Situacao = situacao;
+    }
+
+    public void DefinirTelefone(string? ddi, string? celular)
+    {
+        Ddi = Vazio(ddi);
+        Celular = Vazio(celular);
     }
 
     public void Responder(SituacaoConvidado situacao)
@@ -73,6 +102,10 @@ public sealed class Convidado
         GrupoId = dados.GrupoId;
         Transfer = dados.Transfer;
         Origem = dados.Transfer ? dados.Origem!.Trim() : null;
+        Ddi = Vazio(dados.Ddi);
+        Mesa = Vazio(dados.Mesa);
+        Rg = Vazio(dados.Rg);
+        Cpf = Vazio(dados.Cpf);
     }
 
     private static string? Vazio(string? valor)

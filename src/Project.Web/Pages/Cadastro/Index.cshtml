@@ -1,0 +1,22 @@
+@page "{id:guid}"
+@model Project.Web.Pages.Cadastro.IndexModel
+@{
+    ViewData["Title"] = "Cadastro de cliente";
+}
+
+@if (!Model.Disponivel)
+{
+    <adminlte-alert theme="warning">O link não está disponível.</adminlte-alert>
+}
+else if (Model.Gravado)
+{
+    <adminlte-alert theme="success">Cadastro gravado.</adminlte-alert>
+}
+else
+{
+    <form method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" role="alert"></div>
+        <partial name="/Pages/Clientes/_Campos.cshtml" for="Input" />
+        <button type="submit" class="btn btn-primary">Salvar</button>
+    </form>
+}

@@ -32,7 +32,7 @@ public sealed class ClienteRepositorio : IClienteConsulta, IClienteRepositorio
         return clientes.Select(cliente => new ClienteItem(
             cliente.Id,
             cliente.Nome,
-            cliente.Telefone,
+            cliente.Celular ?? cliente.Telefone,
             cliente.Email,
             vinculos.Where(item => item.ClienteId == cliente.Id)
                 .Select(item => new EventoVinculado(item.Id, item.Nome))
@@ -75,9 +75,27 @@ public sealed class ClienteRepositorio : IClienteConsulta, IClienteRepositorio
         return Task.CompletedTask;
     }
 
+    public Task<LinkCadastroCliente?> ObterLinkAsync(string accountId, Guid eventoId, CancellationToken cancellationToken)
+    {
+        return _db.LinksCadastro.FirstOrDefaultAsync(
+            link => link.AccountId == accountId && link.EventoId == eventoId,
+            cancellationToken);
+    }
+
+    public Task<LinkCadastroCliente?> ObterLinkAsync(Guid id, CancellationToken cancellationToken)
+    {
+        return _db.LinksCadastro.FirstOrDefaultAsync(link => link.Id == id, cancellationToken);
+    }
+
     public Task AdicionarAsync(VinculoCliente vinculo, CancellationToken cancellationToken)
     {
         _db.Vinculos.Add(vinculo);
+        return Task.CompletedTask;
+    }
+
+    public Task AdicionarAsync(LinkCadastroCliente link, CancellationToken cancellationToken)
+    {
+        _db.LinksCadastro.Add(link);
         return Task.CompletedTask;
     }
 

@@ -35,7 +35,23 @@ public sealed record EventoDetalhe(
     string? LocalCerimonia,
     string? LocalRecepcao,
     Guid? ArquivoId,
-    IndicadoresEvento Indicadores);
+    IndicadoresEvento Indicadores,
+    string? PrimeiroNome,
+    string? SegundoNome,
+    TimeOnly? TempoDeFesta,
+    TimeOnly? InicioCerimonia,
+    TimeOnly? InicioRecepcao,
+    int? Padrinhos,
+    int? DamasEPajens,
+    bool NotificarAssessor,
+    bool NotificarAssistentes,
+    bool NotificarClientes,
+    bool SalvarNaAgenda,
+    string? SenhaDoSite,
+    EnderecoLocal Cerimonia,
+    EnderecoLocal Recepcao,
+    string? Compromisso,
+    string? Mapa);
 
 public sealed record EventoGravado(Guid Id, string? AvisoImagem);
 
@@ -46,11 +62,25 @@ public interface IEventoConsulta
     Task<Evento?> ObterAsync(string accountId, Guid id, CancellationToken cancellationToken);
 
     Task<IndicadoresEvento> ContarIndicadoresAsync(string accountId, Guid eventoId, CancellationToken cancellationToken);
+
+    Task<Compromisso?> ObterCompromissoAsync(string accountId, Guid eventoId, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<string>> ListarCopiasAsync(string accountId, Guid eventoId, CancellationToken cancellationToken);
 }
 
 public interface IEventoRepositorio
 {
     Task AdicionarAsync(Evento evento, CancellationToken cancellationToken);
+
+    Task AdicionarCopiaAsync(
+        IReadOnlyList<ServicoEvento> servicos,
+        IReadOnlyList<Project.Domain.Tarefas.Tarefa> tarefas,
+        Compromisso? compromisso,
+        CancellationToken cancellationToken);
+
+    Task<bool> TemAssessoriaAsync(string accountId, Guid eventoId, CancellationToken cancellationToken);
+
+    Task AdicionarAssessoriaAsync(ServicoEvento servico, IReadOnlyList<ParcelaEvento> parcelas, CancellationToken cancellationToken);
 
     Task SalvarAsync(CancellationToken cancellationToken);
 }

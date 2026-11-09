@@ -4,24 +4,24 @@
     ViewData["Title"] = "Entrar";
 }
 
-<h1>Entrar</h1>
+<h1 class="h4">Entrar</h1>
 @if (Model.Message is not null)
 {
     <adminlte-alert theme="info">@Model.Message</adminlte-alert>
 }
 <form method="post">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div asp-validation-summary="ModelOnly" role="alert"></div>
     <div class="mb-3">
-        <label asp-for="Input.Email" class="form-label">E-mail</label>
-        <input asp-for="Input.Email" class="form-control" autocomplete="username" />
-        <span asp-validation-for="Input.Email" class="text-danger"></span>
+        <label asp-for="Input.Email" class="form-label ge-obrigatorio">E-mail</label>
+        <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" />
+        <span asp-validation-for="Input.Email" class="invalid-feedback"></span>
     </div>
     <div class="mb-3">
-        <label asp-for="Input.Password" class="form-label">Senha</label>
-        <input asp-for="Input.Password" class="form-control" autocomplete="current-password" />
-        <span asp-validation-for="Input.Password" class="text-danger"></span>
+        <label asp-for="Input.Password" class="form-label ge-obrigatorio">Senha</label>
+        <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" />
+        <span asp-validation-for="Input.Password" class="invalid-feedback"></span>
     </div>
     <button type="submit" class="btn btn-primary">Entrar</button>
 </form>
-<p class="mt-3"><a asp-page="/Account/ForgotPassword">Esqueci a senha</a></p>
-<p><a asp-page="/Account/ResendConfirmation">Reenviar confirmação</a></p>
+<p class="mt-3 mb-1"><a asp-page="/Account/ForgotPassword">Esqueci a senha</a></p>
+<p class="mb-0"><a asp-page="/Account/ResendConfirmation">Reenviar confirmação</a></p>

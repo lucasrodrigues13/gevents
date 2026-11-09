@@ -1,12 +1,88 @@
 @page
+@using Project.Domain.Eventos
+@using Project.Web.Eventos
 @model Project.Web.Pages.Eventos.CriarModel
 @{
     ViewData["Title"] = "Novo evento";
+    ViewData["Secao"] = "Eventos";
+    ViewData["SecaoUrl"] = "/Eventos";
+    ViewData["TipoPeloModelo"] = Model.Modelos.Any(item => item.Id == Model.Input.ModeloId);
+    var selecionado = Model.Modelos.FirstOrDefault(item => item.Id == Model.Input.ModeloId);
+    var exibirFormulario = HttpMethods.IsPost(Request.Method) || selecionado is not null;
 }
 
-<form method="post" enctype="multipart/form-data">
-    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-    <partial name="_Campos" for="Input" />
-    <button type="submit" class="btn btn-primary">Salvar</button>
-    <a asp-page="/Eventos/Index">Voltar</a>
-</form>
+@Html.AntiForgeryToken()
+@if (!exibirFormulario)
+{
+    <div class="card">
+        <div class="card-header">
+            <h2 class="h5 card-title mb-0">Modelo</h2>
+        </div>
+        <div class="card-body">
+            @if (Model.Modelos.Count == 0)
+            {
+                <p class="ge-vazio">Nenhum modelo.</p>
+                <a class="btn btn-primary" asp-page="/Modelos/Criar">Novo modelo</a>
+            }
+            else
+            {
+                <div class="row g-3">
+                    @foreach (var modelo in Model.Modelos)
+                    {
+                        <div class="col-sm-6 col-lg-4">
+                            <a class="card ge-modelo-card" asp-page="/Eventos/Criar" asp-route-modelo="@modelo.Id">
+                                <div class="card-body">
+                                    <h3 class="h5 card-title">@modelo.Nome -  </h3>
+                                    <p class="mb-0 text-secondary">@EventoTexto.Tipo(modelo.Tipo)</p>
+                                </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <form method="post" enctype="multipart/form-data">
+        <div asp-validation-summary="ModelOnly" role="alert"></div>
+        @if (selecionado is not null)
+        {
+            <adminlte-callout theme="info" title="Modelo">
+                @selecionado.Nome — @EventoTexto.Tipo(selecionado.Tipo)
+                <a asp-page="/Eventos/Criar">Trocar modelo</a>
+            </adminlte-callout>
+            <input type="hidden" asp-for="Input.ModeloId" />
+        }
+        else
+        {
+            <div class="mb-3">
+                <label asp-for="Input.ModeloId" class="form-label ge-obrigatorio">Modelo</label>
+                <select asp-for="Input.ModeloId" class="form-select" aria-required="true">
+                    <option value="">Escolha um modelo</option>
+                    @foreach (var modelo in Model.Modelos)
+                    {
+                        <option value="@modelo.Id">@modelo.Nome</option>
+                    }
+                </select>
+            </div>
+        }
+        <partial name="_Campos" for="Input" />
+        <div class="card mb-3">
+            <div class="card-body">
+                <div class="mb-3 form-check">
+                    <input asp-for="CadastrarCliente" class="form-check-input" data-ge-toggle="cliente-evento" />
+                    <label asp-for="CadastrarCliente" class="form-check-label">Cadastrar cliente</label>
+                </div>
+                <div id="cliente-evento" class="@(Model.CadastrarCliente ? null : "d-none")">
+                    <partial name="/Pages/Clientes/_Campos.cshtml" for="Cliente" />
+                </div>
+                <div class="d-flex flex-wrap gap-2">
+                    <button type="submit" class="btn btn-primary">Salvar</button>
+                    <a class="btn btn-outline-secondary" asp-page="/Eventos/Index">Voltar</a>
+                </div>
+            </div>
+        </div>
+    </form>
+}
