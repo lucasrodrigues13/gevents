@@ -1,6 +1,6 @@
 # 009. Cadastro completo de cliente
 
-**Status: aprovada.** Plano 009 aprovado. Incremento sobre a SPEC-006. Fonte observada: [inventario-referencia.md](../inventario-referencia.md) §1.7 e §5.
+**Status: aprovada.** O código segue esta spec. Incremento sobre a SPEC-006. Fonte observada: [inventario-referencia.md](../inventario-referencia.md) §1.7 e §5.
 
 ## 1. Identificador e nome
 

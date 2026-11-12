@@ -1,6 +1,6 @@
 # 001. Autenticação e conta
 
-**Status: aprovada.** Plano técnico e código dependem de aprovação própria.
+**Status: aprovada.** O código segue esta spec.
 
 ## 1. Identificador e nome
 
@@ -40,8 +40,8 @@ Não há papel de assessoria, assistente, cliente, fornecedor ou convidado nesta
 3. O sistema envia o link de confirmação, válido por 24 horas.
 4. O visitante abre o link e o e-mail passa a confirmado.
 5. Ele entra com e-mail e senha.
-6. O sistema cria o cookie e leva à área de `User`.
-7. Ele sai e o cookie deixa de autenticar.
+6. O sistema entrega um JWT de acesso e leva à área de `User`.
+7. Ele sai. O cliente deixa de enviar o token. O token já emitido continua válido até expirar.
 
 O administrador inicial segue outro caminho: o bootstrap cria as roles, cria o usuário se o e-mail não existir, confirma o e-mail e atribui `Admin`. Ele entra pela mesma tela de login.
 
@@ -67,12 +67,11 @@ O administrador inicial segue outro caminho: o bootstrap cria as roles, cria o u
 - Sem confirmação não há login.
 - Confirmação vale 24 horas. Redefinição vale 1 hora. São provedores de token separados do Identity. Não há criptografia própria.
 - Bloqueio: 5 falhas, 15 minutos.
-- Cookie: 8 horas, renovação deslizante, HttpOnly, Secure em produção.
-- `SameSite=Lax` ainda é proposta, DA-019, não regra fechada.
+- O JWT de acesso vale 8 horas e não se renova sozinho. Não há refresh nem lista de revogação.
 - Senha: mínimo 8 caracteres. Não se exige dígito, maiúscula nem símbolo. O Identity continua exigindo minúscula porque isso não foi desligado.
 - Limites são por IP, em memória, configuráveis. Só o proxy configurado, o Caddy, define o IP do cliente.
 - Não existe endpoint público de bootstrap.
-- CSRF nas ações que alteram estado, pelo mecanismo nativo.
+- Pedido que altera estado exige o JWT no cabeçalho Authorization. Não há cookie de autenticação.
 
 ## 9. Validações
 
@@ -94,7 +93,7 @@ Não há estado de assinatura, plano ou perfil de empresa nesta spec.
 
 ## 11. Dados necessários
 
-E-mail, senha, confirmação do e-mail, role, contagem e prazo de bloqueio, cookie de autenticação, tokens de confirmação e de redefinição.
+E-mail, senha, confirmação do e-mail, role, contagem e prazo de bloqueio, JWT de acesso, tokens de confirmação e de redefinição.
 
 Não entram CPF, endereço, nome da empresa nem dados de evento.
 
@@ -141,12 +140,11 @@ Teste de integração não envia e-mail real. Teste unitário não usa banco.
 
 ## 16. Dependências
 
-PostgreSQL, Identity, MailKit, cookie, Data Protection em volume persistente e Caddy como proxy confiável. Nenhuma funcionalidade de evento.
+PostgreSQL, Identity, MailKit, JWT de acesso, Data Protection em volume persistente e Caddy como proxy confiável. Nenhuma funcionalidade de evento.
 
 ## 17. Premissas e pontos não definidos
 
 - Segundo campo de confirmação de senha não está num RF. A tela pode pedi-lo. A regra fechada é a senha da DA-028 mais a minúscula ainda exigida.
-- `SameSite` não está decidido.
-- Depois do login, o `User` vai para a tela de dashboards, SPEC-007. A página mínima desta spec continua servindo só para provar a autorização.
+- Depois do login, o `User` vai para a tela de dashboards, SPEC-007. A área mínima desta spec continua servindo só para provar a autorização.
 - E-mail de bootstrap que já foi `Admin` e perdeu a role não tem regra. Resolução manual, como já está em DA-026.
 - Nome de exibição, foto e perfil da empresa são RF-044, observado, fora desta spec.

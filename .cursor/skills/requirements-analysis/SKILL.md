@@ -17,4 +17,4 @@ description: Consolida requisitos do gevents a partir de docs/brief.md e docs/re
 
 - Não invente campo obrigatório, estado ou permissão.
 - Não transforme o recorte do brief em escopo aprovado.
-- Não escreva spec, plano técnico nem código nesta skill.
+- Não escreva spec nem código nesta skill.

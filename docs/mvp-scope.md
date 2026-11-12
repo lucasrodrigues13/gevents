@@ -18,8 +18,8 @@ Cliente com login, assistente e fornecedor ficam de fora. A role `User` continua
 
 | Módulo | Entra neste corte | Ficou de fora porque não fechou |
 |---|---|---|
-| Conta | Cadastro, confirmação, login, bloqueio, senha, logout e bootstrap. SPEC-001 aprovada. | `SameSite` continua proposta. |
-| Dashboards | Primeira tela do `User`. Menu na lateral. Miolo com dashboard de eventos e dashboard do funil. RF-080, RF-081 e RF-082. Referência visual: AdminLTE 4, DA-044. | A grade de menus da referência. Estágios que não foram vistos. Gráfico que exigiria biblioteca nova. |
+| Conta | Cadastro, confirmação, login, bloqueio, senha, logout e bootstrap. SPEC-001 aprovada. | A conta deste corte está fechada na SPEC-001. |
+| Dashboards | Primeira tela do `User`. Menu na lateral. Miolo com dashboard de eventos e dashboard do funil. RF-080, RF-081 e RF-082. Referência visual: Angular Material, DA-044. | A grade de menus da referência. Estágios que não foram vistos. Gráfico que exigiria biblioteca nova. |
 | Perfil | Nome da empresa, responsável, e-mail somente leitura, CPF ou CNPJ, celular, nascimento e endereço. RF-044. | Não foi vista a divisão do endereço em CEP, rua e cidade. |
 | Eventos | Abas em andamento, concluído e cancelado. Busca por nome. Filtros de tipo, período e tags. Card com data, contagem, tags, tarefas e convidados. Criar e editar com os campos do formulário. Concluir e cancelar. Imagem opcional do evento. RF-048 e RF-049. | Aba Estatísticas, agrupar, equipe do dia, impressão, remover e modelo. O miolo do modelo não foi inventariado, então a obrigatoriedade vista na referência não entra. |
 | Home do evento | Contagem regressiva, dados do evento, tarefas concluídas e convidados por situação. | Budget, pagamentos, serviços, pendências do mês e equipe. Dependem de módulos que não fecharam. |
@@ -57,7 +57,7 @@ Motivo comum: a exploração não abriu o fluxo por dentro, ou a regra depende d
 
 ## 7. Riscos e premissas
 
-- O corte e as specs 001 a 007 estão aprovados. O plano técnico de cada uma ainda não.
+- O corte e as specs 001 a 007 estão aprovados. O código segue a spec, sem plano técnico separado.
 - Campos obrigatórios que a exploração não marcou continuam pendentes em cada spec.
 - Modelo obrigatório, assistente, portal do cliente, fornecedor, parcela, agenda e financeiro não entram neste corte.
 - O funil completo também não. O dashboard usa os quatro estágios vistos. Cadastro da oportunidade, descarte com motivo, formulário de lead e checagem de data continuam sem spec.

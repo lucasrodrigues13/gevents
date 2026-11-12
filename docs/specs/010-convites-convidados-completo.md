@@ -1,6 +1,6 @@
 # 010. Convites e convidados completo
 
-**Status: aprovada.** Plano 010 aprovado. Incremento sobre a SPEC-004. Fonte observada: [inventario-referencia.md](../inventario-referencia.md) §2. O telefone do convite é escolha deste produto: aponta para o convidado principal.
+**Status: aprovada.** O código segue esta spec. Incremento sobre a SPEC-004. Fonte observada: [inventario-referencia.md](../inventario-referencia.md) §2. O telefone do convite é escolha deste produto: aponta para o convidado principal.
 
 ## 1. Identificador e nome
 

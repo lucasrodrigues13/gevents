@@ -402,4 +402,5 @@ FodyWeavers.xsd
 
 # Dados locais da aplicação
 data-protection-keys/
+keys/
 storage/

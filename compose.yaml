@@ -1,5 +1,5 @@
 # Uso local. A senha do banco vale só nesta rede interna: a porta do PostgreSQL não é publicada.
-# Produção continua em HTTPS, com segredo fora deste arquivo. A aplicação não aplica migration ao subir.
+# O Caddy publica o build estático e encaminha /api. A API não aplica migration ao subir.
 
 name: gevents
 
@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: gevents
       POSTGRES_DB: gevents
     volumes:
-      - dados:/var/lib/postgresql/data
+      - banco:/var/lib/postgresql/data
     networks:
       - interna
     healthcheck:
@@ -21,59 +21,71 @@ services:
       retries: 12
 
   migrate:
-    build:
-      context: .
-      target: migrate
+    image: postgres:16-alpine
     environment:
-      ConnectionStrings__Default: Host=postgres;Port=5432;Database=gevents;Username=gevents;Password=gevents
-    networks:
-      - interna
+      PGPASSWORD: gevents
+      PGHOST: postgres
+      PGUSER: gevents
+      PGDATABASE: gevents
+    volumes:
+      - ./deploy/schema.sql:/schema.sql:ro
+    command: ["psql", "-v", "ON_ERROR_STOP=1", "-f", "/schema.sql"]
     depends_on:
       postgres:
         condition: service_healthy
-    restart: "no"
-
-  app:
-    build:
-      context: .
-      target: runtime
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_HTTP_PORTS: "8080"
-      ConnectionStrings__Default: Host=postgres;Port=5432;Database=gevents;Username=gevents;Password=gevents
-      Storage__Root: /storage
-      DataProtection__KeysPath: /keys
-      ForwardedHeaders__KnownProxies__0: 172.28.7.10
-    volumes:
-      - arquivos:/storage
-      - chaves:/keys
     networks:
       - interna
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=gevents;Username=gevents;Password=gevents
+      # Segredo só desta stack local. Em produção vem de variável de ambiente e não entra no git.
+      Jwt__Secret: local-apenas-gevents-jwt-segredo-32
+      Jwt__Issuer: gevents
+      Jwt__Audience: gevents
+      Jwt__ExpiryHours: "8"
+      DataProtection__KeysPath: /keys
+      PublicUrl: http://localhost:8080
+      Bootstrap__Enabled: "false"
+      ForwardedHeaders__KnownNetworks__0: 172.16.0.0/12
+      ForwardedHeaders__KnownNetworks__1: 10.0.0.0/8
+      ForwardedHeaders__KnownNetworks__2: 192.168.0.0/16
+    volumes:
+      - storage:/storage
+      - chaves:/keys
     depends_on:
       migrate:
         condition: service_completed_successfully
-    expose:
-      - "8080"
-
-  caddy:
-    image: caddy:2
-    ports:
-      - "80:80"
-    volumes:
-      - ./Caddyfile:/etc/caddy/Caddyfile:ro
     networks:
-      interna:
-        ipv4_address: 172.28.7.10
+      - interna
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8080'"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    ports:
+      - "8080:80"
     depends_on:
-      - app
+      api:
+        condition: service_healthy
+    networks:
+      - interna
+
+volumes:
+  banco:
+  storage:
+  chaves:
 
 networks:
   interna:
-    ipam:
-      config:
-        - subnet: 172.28.7.0/24
-
-volumes:
-  dados:
-  arquivos:
-  chaves:

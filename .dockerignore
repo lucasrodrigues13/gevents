@@ -3,8 +3,5 @@
 **/.cursor
 **/bin
 **/obj
-**/tests
+**/node_modules
 docs
-agent-transcripts
-data-protection-keys
-storage

@@ -10,8 +10,8 @@ alwaysApply: false
 - Namespace segue o projeto e a pasta. Um tipo principal por arquivo.
 - Dependência entra por construtor. Não instancie SMTP, `DbContext` nem relógio dentro de regra de negócio.
 - I/O público é assíncrono e recebe `CancellationToken`. Não use `.Result` nem `.Wait()`.
-- Exceção de domínio não vira página de stack trace. Logue o erro com contexto. Nunca logue senha, token, connection string, senha SMTP nem chave do Data Protection.
-- Validação na borda da aplicação. Não confie só em atributo da página para regra que também vale fora da UI.
+- Exceção de domínio não vira stack trace na resposta. Logue o erro com contexto. Nunca logue senha, token, connection string, senha SMTP nem chave do Data Protection.
+- Validação na borda da aplicação. Não confie só na validação da tela para regra que também vale fora da UI.
 - EF Core: consulta filtrada no servidor, sem carregar tabela inteira. Migration é explícita e revisada. Sem `EnsureCreated` e sem migrate na inicialização.
-- Cookie, CSRF e HTTPS seguem os RF de conta. Autorização por role nas páginas. Download privado só depois da checagem de permissão.
+- JWT, HTTPS e autorização por role seguem os RF de conta. Esconder a ação na tela não autoriza o endpoint. Download privado só depois da checagem de permissão.
 - Teste unitário não abre banco nem rede. Integração usa `WebApplicationFactory` e Testcontainers. E-mail de teste é falso.

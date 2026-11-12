@@ -3,5 +3,13 @@
 		max_size 50MB
 	}
 
-	reverse_proxy app:8080
+	handle /api/* {
+		reverse_proxy api:8080
+	}
+
+	handle {
+		root * /srv/frontend
+		try_files {path} /index.html
+		file_server
+	}
 }

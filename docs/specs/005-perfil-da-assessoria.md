@@ -1,6 +1,6 @@
 # 005. Perfil da assessoria
 
-**Status: aprovada.** Plano técnico e código dependem de aprovação própria.
+**Status: aprovada.** O código segue esta spec.
 
 ## 1. Identificador e nome
 

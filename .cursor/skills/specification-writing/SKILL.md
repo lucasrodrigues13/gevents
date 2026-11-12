@@ -17,4 +17,4 @@ description: Escreve uma specification de comportamento do gevents em docs/specs
 
 - Não aprove a spec no lugar do usuário.
 - Não copie a plataforma de referência além do RF.
-- Não escreva o plano de implementação nem o código.
+- Não escreva código nesta skill.

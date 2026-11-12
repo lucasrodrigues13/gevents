@@ -1,6 +1,6 @@
 # 007. Dashboards
 
-**Status: aprovada.** Plano técnico e código dependem de aprovação própria.
+**Status: aprovada.** O código segue esta spec.
 
 ## 1. Identificador e nome
 
@@ -62,9 +62,9 @@ Eventos da conta, com situação, nome e data. Oportunidades da conta, com está
 
 ## 12. Interface
 
-Referência visual: AdminLTE 4, DA-044. Vale a estrutura: barra lateral, barra superior com a conta e cartões no miolo. Não valem a paleta de comando, o modo escuro, os gráficos nem os widgets de demonstração.
+Referência visual: Angular Material, DA-044. Vale a estrutura: barra lateral, barra superior com a conta e cartões no miolo. Não valem a paleta de comando, o modo escuro, os gráficos nem os widgets de demonstração.
 
-AdminLTE sobre Bootstrap no Razor Pages, DA-044. Sem biblioteca de gráfico neste corte. Quantidade em cartão. Funil em quatro cartões, cada um com quantidade e valor. Lista simples dos eventos em andamento.
+Sem biblioteca de gráfico neste corte. Quantidade em cartão. Funil em quatro cartões, cada um com quantidade e valor. Lista simples dos eventos em andamento.
 
 Textos: Em andamento, Concluído, Cancelado, Contato inicial, Orçamento enviado, Contratado e Descartado.
 

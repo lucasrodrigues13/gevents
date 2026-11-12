@@ -7,11 +7,11 @@ alwaysApply: true
 
 A fonte é `docs/requirements.md`. Não invente stack nem camada.
 
-- .NET 10 LTS, Razor Pages, sem API separada. PostgreSQL, EF Core, Npgsql, migrations explícitas. Identity com cookie. Roles só `Admin` e `User`.
-- Projetos: `Project.Domain`, `Project.Application`, `Project.Infrastructure`, `Project.Web`. Testes: `Project.Tests` e `Project.IntegrationTests`.
-- Domain não referencia nada. Application referencia só Domain. Infrastructure referencia Application e Domain. Web referencia Application e Infrastructure para compor.
-- PageModel de negócio não usa `DbContext`. Página de conta pode usar `UserManager`, `SignInManager` e `RoleManager`.
+- .NET 10 LTS, API em `Project.Api`, rotas `/api/v1`. Frontend Angular 22 estático em `frontend/`, com Angular Material. PostgreSQL, EF Core, Npgsql, migrations explícitas. Identity para senha, e-mail, lockout e roles. Sessão por JWT de acesso, 8 horas, sem refresh e sem lista de revogação. Roles só `Admin` e `User`.
+- Projetos: `Project.Domain`, `Project.Application`, `Project.Infrastructure`, `Project.Api`. Testes: `Project.Tests` e `Project.IntegrationTests`. O Angular não é projeto .NET.
+- Domain não referencia nada. Application referencia só Domain. Infrastructure referencia Application e Domain. Api referencia Application e Infrastructure para compor.
+- Endpoint de negócio não usa `DbContext`. Endpoint de conta pode usar `UserManager`, `SignInManager` e `RoleManager`. A assinatura do JWT fica na Infrastructure, atrás de interface na Application.
 - Interface de recurso externo fica em Application e a implementação em Infrastructure. `ApplicationUser` só em Infrastructure, se houver campo extra. Entidade de domínio não herda `IdentityUser`.
-- Sem Generic Repository, Unit of Work extra, repositório de usuário, CQRS, MediatR, AutoMapper, fila, Redis, JWT, OAuth próprio e microserviço.
-- Um VPS: Compose com app, Postgres e Caddy. Arquivo local no volume. E-mail MailKit no pedido, sem fila. Sem `Database.Migrate()` na subida.
-- `User` não é papel de negócio. `SameSite=Lax` ainda é proposta (DA-019). Não trate requisito Observado como aprovado.
+- Sem Generic Repository, Unit of Work extra, repositório de usuário, CQRS, MediatR, AutoMapper, fila, Redis, refresh token, OAuth próprio, login social, SSR e microsserviço.
+- Um VPS: Compose com API, Postgres e Caddy. O Caddy publica o build estático e encaminha `/api`. Arquivo local no volume. E-mail MailKit no pedido, sem fila. Sem `Database.Migrate()` na subida.
+- `User` não é papel de negócio. Não há cookie de autenticação. Não trate requisito Observado como aprovado.

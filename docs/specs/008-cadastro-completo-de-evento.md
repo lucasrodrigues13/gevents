@@ -1,6 +1,6 @@
 # 008. Cadastro completo de evento
 
-**Status: aprovada.** Plano 008 aprovado. Incremento sobre a SPEC-002. Fonte observada: [inventario-referencia.md](../inventario-referencia.md) §1.3 e §1.5.
+**Status: aprovada.** O código segue esta spec. Incremento sobre a SPEC-002. Fonte observada: [inventario-referencia.md](../inventario-referencia.md) §1.3 e §1.5.
 
 ## 1. Identificador e nome
 

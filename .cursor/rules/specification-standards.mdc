@@ -12,4 +12,4 @@ alwaysApply: false
 - Cada regra aponta para um RF. Se não houver RF, registre como não definido em vez de decidir.
 - Critério de aceite é observável. Cenário de teste diz a condição e o resultado.
 - Não gere a próxima spec antes de a atual ser revisada, salvo pedido explícito.
-- Spec aprovada é pré-requisito de plano técnico e de código.
+- Spec aprovada é pré-requisito de código. Não há plano técnico separado.
