@@ -17,9 +17,21 @@ Use esta skill ao implementar ou alterar a interface.
 
 A interface é uma aplicação Angular em `src/frontend/`, com Angular Material.
 
-Se `src/frontend/` ainda não tiver a aplicação, crie com o Angular CLI e adicione o Angular Material pelo schematic oficial. Use o tema padrão que o schematic oferece. Não copie template pago nem a demo de outro produto.
+Se `src/frontend/` ainda não tiver a aplicação, crie com o Angular CLI e adicione o Angular Material pelo schematic oficial. O visual não é o tema padrão do schematic. A fonte de estilo e de layout é `docs/design-system.md`, extraída da demo pública https://apex-angular.dashboardpack.com. O código desse template não entra no repositório.
 
 O build publicado é estático. O Caddy serve esse build e encaminha `/api`. Sem SSR e sem service worker. A tela chama a API real.
+
+## Visual
+
+Siga `docs/design-system.md` em toda tela nova ou alterada.
+
+- Cores iguais às da demo, com modo claro e modo escuro. A classe `escuro` no `html` liga o escuro. A escolha fica em `localStorage` (`gevents-tema`).
+- Casca: barra lateral escura de 260px e barra superior de 64px. Item ativo em verde.
+- Cabeçalho de lista: título, linha de apoio e botão verde à direita, no padrão de New Order.
+- Tabela dentro de `.gd-painel`, com abas em pílula e busca quando a tela já tem esses filtros. A última coluna é Ações, com Editar e Excluir. Excluir só chama a API quando o fluxo já tem remoção.
+- Novo e Editar de evento, cliente e tarefa são `MatDialog` (`gd-dialog`) sobre a tela aberta. Novo convite abre painel modal sobre a lista. Não navegue para uma página só para esses formulários.
+- Cartões de número do painel usam `.gd-numero`. Sem gráfico enquanto um requisito não pedir a série.
+- Formulário, tabela, diálogo, botão, campo e aviso continuam no Angular Material. O tema do Material aponta para os tokens `--gd-*`.
 
 ## Stack
 

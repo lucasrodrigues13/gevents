@@ -3,22 +3,31 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { mensagemDeErro } from '../../core/mensagem-erro';
-import { Cliente, EventoDetalhe, NegocioClient, PAPEIS, ROTULO_PAPEL } from '../../core/negocio.client';
+import { Cliente, EventoDetalhe, NegocioClient, ROTULO_PAPEL } from '../../core/negocio.client';
 import { ConfirmaDialog } from '../../shared/confirma-dialog';
+import { DIALOG } from '../../shared/dialog';
+import { ClienteFormDialog } from '../clientes/cliente-form.dialog';
+import { EventoFormPage } from './evento-form.page';
 
 @Component({
   selector: 'app-evento-home',
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule],
+  imports: [RouterLink, MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule, MatSelectModule, MatIconModule],
   template: `
     <a mat-button routerLink="/eventos">Eventos</a>
     @if (aviso()) { <p class="aviso" role="alert">{{ aviso() }}</p> }
     @if (evento(); as atual) {
-      <h1>{{ atual.nome }}</h1>
-      @if (atual.data) { <p>{{ atual.data }} @if (atual.hora) { às {{ atual.hora }} }</p> }
+      <header class="gd-cabecalho">
+        <div>
+          <h1>{{ atual.nome }}</h1>
+          <p>{{ atual.data }} @if (atual.hora) { às {{ atual.hora }} }</p>
+        </div>
+        <button mat-flat-button type="button" (click)="editar()"><mat-icon>edit</mat-icon> Editar</button>
+      </header>
       @if (atual.diasRestantes !== null && atual.diasRestantes >= 0) { <p>Faltam {{ atual.diasRestantes }} dias</p> }
       <p>{{ atual.cerimonia.nome }}</p>
       @if (mapa(atual.cerimonia); as link) { <p><a [href]="link" target="_blank" rel="noopener">Mapa da cerimônia</a></p> }
@@ -32,7 +41,6 @@ import { ConfirmaDialog } from '../../shared/confirma-dialog';
       <p>
         <a mat-button [routerLink]="['/eventos', atual.id, 'tarefas']">Tarefas</a>
         <a mat-button [routerLink]="['/eventos', atual.id, 'convidados']">Convidados</a>
-        <a mat-button [routerLink]="['/eventos', atual.id, 'editar']">Editar</a>
       </p>
       @if (atual.situacao === 'EmAndamento') {
         <button mat-stroked-button type="button" (click)="encerrar('concluir')">Concluir</button>
@@ -58,19 +66,7 @@ import { ConfirmaDialog } from '../../shared/confirma-dialog';
             </mat-select>
           </mat-form-field>
           <h2>Cadastrar novo cliente</h2>
-          <form class="formulario" (ngSubmit)="criarCliente()">
-            <mat-form-field appearance="outline"><mat-label>Nome</mat-label><input matInput name="nome" [value]="novoNome()" (input)="novoNome.set(texto($event))" /></mat-form-field>
-            <mat-form-field appearance="outline">
-              <mat-label>Papel</mat-label>
-              <mat-select [value]="novoPapel()" (valueChange)="novoPapel.set($event)">
-                @for (papel of papeis; track papel) { <mat-option [value]="papel">{{ rotulo(papel) }}</mat-option> }
-              </mat-select>
-            </mat-form-field>
-            <mat-form-field appearance="outline"><mat-label>E-mail</mat-label><input matInput type="email" [value]="novoEmail()" (input)="novoEmail.set(texto($event))" /></mat-form-field>
-            <mat-form-field appearance="outline"><mat-label>DDI</mat-label><input matInput [value]="novoDdi()" (input)="novoDdi.set(texto($event))" /></mat-form-field>
-            <mat-form-field appearance="outline"><mat-label>Celular</mat-label><input matInput [value]="novoCelular()" (input)="novoCelular.set(texto($event))" /></mat-form-field>
-            <button mat-flat-button type="submit">Cadastrar e vincular</button>
-          </form>
+          <button mat-flat-button type="button" (click)="criarCliente()"><mat-icon>add</mat-icon> Novo cliente</button>
           <h2>Permissões</h2>
           <p>Nenhum cliente selecionado para permissões.</p>
         </mat-card-content>
@@ -82,16 +78,10 @@ export class EventoHomePage implements OnInit {
   private readonly negocio = inject(NegocioClient);
   private readonly rota = inject(ActivatedRoute);
   private readonly dialog = inject(MatDialog);
-  protected readonly papeis = PAPEIS;
   protected readonly evento = signal<EventoDetalhe | null>(null);
   protected readonly clientes = signal<Cliente[]>([]);
   protected readonly todos = signal<Cliente[]>([]);
   protected readonly aviso = signal('');
-  protected readonly novoNome = signal('');
-  protected readonly novoPapel = signal('Noiva');
-  protected readonly novoEmail = signal('');
-  protected readonly novoDdi = signal('+55');
-  protected readonly novoCelular = signal('');
   private id = '';
 
   ngOnInit(): void {
@@ -108,12 +98,9 @@ export class EventoHomePage implements OnInit {
     return ROTULO_PAPEL[papel] ?? papel;
   }
 
-  protected texto(evento: Event): string {
-    return (evento.target as HTMLInputElement).value;
-  }
-
   protected encerrar(acao: 'concluir' | 'cancelar'): void {
     const ref = this.dialog.open(ConfirmaDialog, {
+      ...DIALOG,
       data: {
         titulo: acao === 'concluir' ? 'Concluir evento' : 'Cancelar evento',
         texto: 'Confirma a mudança de situação?',
@@ -149,16 +136,19 @@ export class EventoHomePage implements OnInit {
     });
   }
 
+  protected editar(): void {
+    this.dialog.open(EventoFormPage, { ...DIALOG, data: { id: this.id } }).afterClosed().subscribe((salvo) => {
+      if (salvo) {
+        this.recarregar();
+      }
+    });
+  }
+
   protected criarCliente(): void {
-    this.negocio.criarCliente({
-      nome: this.novoNome(),
-      papel: this.novoPapel(),
-      email: this.novoEmail(),
-      ddi: this.novoDdi(),
-      celular: this.novoCelular(),
-    }).subscribe({
-      next: (cliente) => this.vincular(cliente.id),
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+    this.dialog.open(ClienteFormDialog, { ...DIALOG, data: null }).afterClosed().subscribe((cliente) => {
+      if (cliente) {
+        this.vincular(cliente.id);
+      }
     });
   }
 

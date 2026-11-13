@@ -6,10 +6,12 @@ alwaysApply: false
 
 # Frontend
 
-A fonte visual é o Angular Material e a DA-044. Uma segunda biblioteca de interface não entra.
+A fonte visual é `docs/design-system.md`, lida da demo pública https://apex-angular.dashboardpack.com e aplicada com Angular Material. O código do template não entra. Uma segunda biblioteca de interface não entra.
 
-- Angular 22, componentes standalone e Angular Material no tema padrão do schematic.
-- Casca autenticada com `mat-sidenav` e `mat-toolbar`. Conteúdo em `mat-card`. Textos da interface em português.
+- Angular 22, componentes standalone e Angular Material. Cores da demo, com modo claro e escuro.
+- Casca autenticada com `mat-sidenav` e `mat-toolbar` no desenho do design system. Textos da interface em português.
+- Lista no padrão de Orders: cabeçalho com ação verde, tabela em `.gd-painel`, Editar e Excluir na última coluna.
+- Novo e Editar abrem `MatDialog` sobre a tela atual.
 - Formulário, tabela, diálogo, botão e aviso usam os componentes do Material. Componente próprio só quando o Material não cobre a tela.
 - Tela nova só existe se uma spec aprovada pedir. O miolo do dashboard continua em cartões e lista, sem gráfico, enquanto um RF não pedir a série.
 - `HttpClient` com a URL da API vinda do ambiente. O token fica em `sessionStorage` e sai em `Authorization: Bearer`. Sem NgRx.

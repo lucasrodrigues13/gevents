@@ -1,64 +1,42 @@
 import { Component, inject } from '@angular/core';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { MatToolbarModule } from '@angular/material/toolbar';
 import { AuthService } from '../core/auth.service';
 import { ContaClient } from '../core/conta.client';
 
 @Component({
   selector: 'app-casca',
-  imports: [RouterOutlet, RouterLink, MatSidenavModule, MatToolbarModule, MatButtonModule],
-  styles: `
-    mat-sidenav-container {
-      height: 100%;
-    }
-
-    mat-sidenav {
-      width: 220px;
-      padding: 12px;
-    }
-
-    mat-toolbar {
-      gap: 12px;
-    }
-
-    .espaco {
-      flex: 1;
-    }
-
-    main {
-      padding: 24px;
-    }
-
-    nav {
-      display: flex;
-      flex-direction: column;
-      align-items: stretch;
-    }
-  `,
+  host: { class: 'gd-casca' },
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, MatSidenavModule, MatButtonModule, MatIconModule],
   template: `
     <mat-sidenav-container>
-      <mat-sidenav mode="side" opened>
+      <mat-sidenav class="gd-sidebar" mode="side" opened>
+        <div class="gd-marca">
+          <span class="gd-marca-selo">G</span>
+          <span>gevents</span>
+        </div>
+        <div class="gd-grupo">Gestão</div>
         <nav>
-          <a mat-button routerLink="/painel">Dashboards</a>
-          <a mat-button routerLink="/perfil">Perfil</a>
-          <a mat-button routerLink="/eventos">Eventos</a>
-          <a mat-button routerLink="/tarefas">Tarefas</a>
-          <a mat-button routerLink="/clientes">Clientes</a>
-          <a mat-button routerLink="/convidados">Convidados</a>
+          <a class="gd-item" routerLink="/painel" routerLinkActive="ativo"><mat-icon>dashboard</mat-icon>Dashboards</a>
+          <a class="gd-item" routerLink="/perfil" routerLinkActive="ativo"><mat-icon>apartment</mat-icon>Perfil</a>
+          <a class="gd-item" routerLink="/eventos" routerLinkActive="ativo"><mat-icon>celebration</mat-icon>Eventos</a>
+          <a class="gd-item" routerLink="/tarefas" routerLinkActive="ativo"><mat-icon>task_alt</mat-icon>Tarefas</a>
+          <a class="gd-item" routerLink="/clientes" routerLinkActive="ativo"><mat-icon>group</mat-icon>Clientes</a>
+          <a class="gd-item" routerLink="/convidados" routerLinkActive="ativo"><mat-icon>mail</mat-icon>Convidados</a>
           @if (auth.ehAdmin()) {
-            <a mat-button routerLink="/admin">Administração</a>
+            <a class="gd-item" routerLink="/admin" routerLinkActive="ativo"><mat-icon>admin_panel_settings</mat-icon>Administração</a>
           }
         </nav>
       </mat-sidenav>
       <mat-sidenav-content>
-        <mat-toolbar>
+        <header class="gd-topo">
           <span>{{ auth.email() }}</span>
           <span class="espaco"></span>
           <button mat-button type="button" (click)="sair()">Sair</button>
-        </mat-toolbar>
-        <main>
+        </header>
+        <main class="gd-conteudo">
           <router-outlet />
         </main>
       </mat-sidenav-content>

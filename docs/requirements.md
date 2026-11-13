@@ -239,7 +239,7 @@ Não há cookie de autenticação. DA-019 registra isso.
 | DA-041 | Esta versão não inclui antivírus. O risco de malware fica registrado e precisa ser reavaliado antes de liberar upload de usuário não confiável. | Definido |
 | DA-042 | Testes com xUnit. Integração HTTP com `WebApplicationFactory`. PostgreSQL real com Testcontainers e Npgsql. O provider InMemory não valida o comportamento do PostgreSQL. E-mail de teste substitui o Gmail. | Definido |
 | DA-043 | Confirmação de e-mail vale 24 horas e recuperação de senha vale 1 hora. Prazos diferentes usam providers de token do próprio Identity, sem criptografia própria. | Definido |
-| DA-044 | A interface usa Angular Material em `src/frontend/`, no tema padrão do schematic, com componentes standalone. A casca autenticada tem barra lateral, barra superior e cartões na área principal. As telas do produto são só as das specs, com textos em português. Formulário, tabela, diálogo e aviso usam o Material. Componente próprio só nasce quando o Material não cobre a tela, e pode se inspirar no visual de outro template sem trazer o código dele. O miolo do dashboard continua em cartões e lista. Gráfico não entra enquanto um RF não pedir a série. | Definido |
+| DA-044 | A interface usa Angular Material em `src/frontend/`, com componentes standalone. O visual segue `docs/design-system.md`, extraído da demo pública https://apex-angular.dashboardpack.com: as cores são as da demo, com modo claro e escuro; a casca, os cartões, as tabelas e os diálogos seguem esse documento. O código do template pago não entra no repositório. A casca autenticada tem barra lateral, barra superior e a área principal. As telas do produto são só as das specs, com textos em português. Formulário, tabela, diálogo e aviso usam o Material. Novo e Editar de cadastro abrem diálogo sobre a tela atual. O miolo do dashboard continua em cartões e lista. Gráfico não entra enquanto um RF não pedir a série. | Definido |
 
 ## 5. Stack tecnológica
 
@@ -699,7 +699,8 @@ Decisões anteriores que este texto altera ou que precisam de cuidado:
 15. **Quem vê qual arquivo.** A entrega técnica está fechada: autenticação, autorização e resposta segura. A regra de qual usuário acessa qual arquivo continua no domínio, DP-016. Sem esse requisito, não há tela de upload de negócio.
 16. **Testcontainers.** A suíte de integração precisa de Docker para subir o PostgreSQL. Isso é intencional: o provider InMemory não reproduz constraint nem migration. A suíte unitária segue sem Docker, para o pull request continuar leve.
 17. **Interface e sessão.** A interface deixou de ser Razor Pages com AdminLTE, DA-003 e DA-044, e passou a ser o build estático do Angular, com a API em `Project.Api`. A sessão deixou de ser cookie, RF-012, DA-006, DA-029, RNF-013 e RNF-016, e passou a ser JWT de acesso de 8 horas, sem renovação, sem refresh e sem lista de revogação. DA-019 deixa de propor `SameSite`. O logout do cliente não invalida um token já emitido.
-18. **Template da interface.** O Apex foi descartado porque é pago. DA-044 passa a ser Angular Material, no tema padrão. Componente próprio entra quando o Material não cobrir a tela. A sessão do item 17 permanece.
+18. **Template da interface.** O Apex foi descartado como dependência porque é pago. DA-044 permanece Angular Material. O item 19 fixa a referência visual.
+19. **Referência visual.** A demo pública do Apex passa a ser a fonte de cor e de layout, em `docs/design-system.md`. O código do template continua de fora. Modo claro e escuro fazem parte dessa decisão. Cadastro e edição abrem diálogo sobre a tela atual. A sessão do item 17 permanece.
 
 ## 15. Pendências já resolvidas
 

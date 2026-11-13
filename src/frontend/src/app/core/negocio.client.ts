@@ -339,6 +339,10 @@ export class NegocioClient {
     return this.http.post<Convite>(`${this.base}/api/v1/eventos/${eventoId}/convites`, pedido);
   }
 
+  removerConvidado(id: string) {
+    return this.http.delete(`${this.base}/api/v1/convidados/${id}`);
+  }
+
   definirPrincipal(conviteId: string, convidadoId: string) {
     return this.http.post<Convite>(`${this.base}/api/v1/convites/${conviteId}/principal`, { convidadoId });
   }

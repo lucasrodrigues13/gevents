@@ -2,6 +2,9 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTableModule } from '@angular/material/table';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCardModule } from '@angular/material/card';
 import { MatCheckboxModule } from '@angular/material/checkbox';
@@ -9,24 +12,43 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { mensagemDeErro } from '../../core/mensagem-erro';
+import { DIALOG } from '../../shared/dialog';
+import { ConfirmaDialog } from '../../shared/confirma-dialog';
 import { EventoResumo, ListaConvites, NegocioClient } from '../../core/negocio.client';
 
 @Component({
   selector: 'app-convidados',
   imports: [
     ReactiveFormsModule, RouterLink, MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatButtonToggleModule, MatCheckboxModule,
+    MatSelectModule, MatButtonToggleModule, MatCheckboxModule, MatIconModule, MatTableModule,
   ],
+  styles: `
+    .gd-modal { position: fixed; z-index: 40; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(640px, calc(100vw - 32px)); max-height: 90vh; overflow: auto; padding: 20px; }
+    .gd-backdrop { position: fixed; inset: 0; z-index: 35; }
+  `,
   template: `
     @if (!eventoId()) {
-      <h1>Convidados</h1>
-      <p>Escolha o evento para ver os convites.</p>
+      <header class="gd-cabecalho">
+        <div>
+          <h1>Convidados</h1>
+          <p>Escolha o evento para ver os convites.</p>
+        </div>
+      </header>
       @for (evento of eventos(); track evento.id) {
         <p><a [routerLink]="['/eventos', evento.id, 'convidados']">{{ evento.nome }}</a></p>
       }
     } @else {
+      <header class="gd-cabecalho">
+        <div>
+          <h1>Convites e convidados</h1>
+          <p>Lista do evento e o RSVP de cada convite.</p>
+        </div>
+        <button mat-flat-button type="button" (click)="formularioConvite.set(true)">
+          <mat-icon>add</mat-icon>
+          Novo convite
+        </button>
+      </header>
       <a mat-button [routerLink]="['/eventos', eventoId()]">Voltar ao evento</a>
-      <h1>Convites e convidados</h1>
       <mat-button-toggle-group [value]="visao()" (change)="visao.set($event.value)">
         <mat-button-toggle value="convite">Por convite</mat-button-toggle>
         <mat-button-toggle value="convidado">Por convidado</mat-button-toggle>
@@ -59,6 +81,9 @@ import { EventoResumo, ListaConvites, NegocioClient } from '../../core/negocio.c
         <button mat-stroked-button type="button" (click)="criarGrupo()">Criar grupo</button>
         <p>{{ grupos().map((grupo) => grupo.nome).join(', ') }}</p>
       </section>
+      @if (formularioConvite()) {
+      <div class="gd-backdrop" (click)="formularioConvite.set(false)"></div>
+      <section class="gd-painel gd-modal" (click)="$event.stopPropagation()">
       <form class="formulario" [formGroup]="convite" (ngSubmit)="criarConvite()">
         <h2>Novo convite</h2>
         <mat-form-field appearance="outline"><mat-label>Nome do convite</mat-label><input matInput formControlName="nome" /></mat-form-field>
@@ -85,7 +110,10 @@ import { EventoResumo, ListaConvites, NegocioClient } from '../../core/negocio.c
           }
         }
         <button mat-flat-button type="submit">Salvar convite</button>
+        <button mat-button type="button" (click)="formularioConvite.set(false)">Cancelar</button>
       </form>
+      </section>
+      }
       <p>
         <button mat-stroked-button type="button" (click)="baixarPlanilha()">Planilha padrão</button>
         <label>Importar
@@ -99,26 +127,52 @@ import { EventoResumo, ListaConvites, NegocioClient } from '../../core/negocio.c
         <p>Faixa: {{ dados.porFaixa.map((item) => item.rotulo + ' ' + item.quantidade).join(', ') }}</p>
         <p>Custo: {{ dados.porCusto.map((item) => item.rotulo + ' ' + item.quantidade).join(', ') }}</p>
         @if (visao() === 'convite') {
-          @for (item of dados.convites; track item.id) {
-            <mat-card>
-              <mat-card-title>{{ item.nome }}</mat-card-title>
-              <mat-card-content>
-                <p>{{ item.grupo }} {{ item.telefone }}</p>
-                <p>Histórico: @if (item.acessada) { acessada } @if (item.respondida) { respondida }</p>
-                <button mat-button type="button" (click)="copiar(item.token)">Copiar link</button>
-                <button mat-button type="button" (click)="baixarQr(item.id)">Baixar QR Code</button>
-                <button mat-button type="button" (click)="whatsapp(item.id)">Enviar por WhatsApp</button>
-                @for (pessoa of item.convidados; track pessoa.id) {
-                  <p>{{ pessoa.nome }} — {{ pessoa.situacaoIcone }}
-                    @if (pessoa.celular) {
-                      <button mat-button type="button" (click)="principal(item.id, pessoa.id)">Usar este telefone</button>
-                    }
-                    @if (pessoa.principal) { <strong>Principal</strong> }
-                  </p>
-                }
-              </mat-card-content>
-            </mat-card>
-          }
+          <section class="gd-painel">
+            @if (dados.convites.length === 0) {
+              <p class="gd-vazio">Não há convite.</p>
+            } @else {
+              <table class="gd-grade">
+                <thead>
+                  <tr>
+                    <th>Convite</th>
+                    <th>Telefone</th>
+                    <th>Convidados</th>
+                    <th class="gd-acoes">Ações</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (item of dados.convites; track item.id) {
+                    <tr>
+                      <td>
+                        {{ item.nome }}
+                        <span class="gd-sub">{{ item.grupo }} @if (item.acessada) { · acessada } @if (item.respondida) { · respondida }</span>
+                      </td>
+                      <td>{{ item.telefone }}</td>
+                      <td>
+                        @for (pessoa of item.convidados; track pessoa.id) {
+                          <span>
+                            {{ pessoa.nome }} — {{ pessoa.situacaoIcone }}
+                            @if (pessoa.principal) { <strong>Principal</strong> }
+                            @if (pessoa.celular) {
+                              <button mat-button type="button" (click)="principal(item.id, pessoa.id)">Usar este telefone</button>
+                            }
+                            <button mat-icon-button type="button" aria-label="Excluir convidado" (click)="excluirConvidado(pessoa.id)"><mat-icon>delete</mat-icon></button>
+                          </span>
+                        }
+                      </td>
+                      <td class="gd-acoes">
+                        <button mat-button type="button" (click)="copiar(item.token)">Link</button>
+                        <button mat-button type="button" (click)="baixarQr(item.id)">QR</button>
+                        <button mat-button type="button" (click)="whatsapp(item.id)">WhatsApp</button>
+                        <button mat-icon-button type="button" aria-label="Editar" (click)="semEdicao()"><mat-icon>edit</mat-icon></button>
+                        <button mat-icon-button type="button" aria-label="Excluir" (click)="semExclusao('convite')"><mat-icon>delete</mat-icon></button>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            }
+          </section>
         } @else {
           @for (item of dados.convites; track item.id) {
             @for (pessoa of item.convidados; track pessoa.id) {
@@ -144,6 +198,8 @@ export class ConvidadosPage implements OnInit {
   protected readonly transferAtivo = signal(false);
   protected readonly locaisTexto = signal('');
   protected readonly grupoNome = signal('');
+  protected readonly formularioConvite = signal(false);
+  private readonly dialog = inject(MatDialog);
   protected readonly filtro = this.fb.nonNullable.group({
     nome: '', situacao: '', telefone: '', observacao: '', somenteConfirmados: false,
   });
@@ -233,6 +289,7 @@ export class ConvidadosPage implements OnInit {
     }).subscribe({
       next: () => {
         this.convite.reset({ ddi: '+55', usaTransfer: false });
+        this.formularioConvite.set(false);
         this.carregar();
       },
       error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
@@ -276,6 +333,36 @@ export class ConvidadosPage implements OnInit {
         window.open(resposta.url, '_blank', 'noopener');
       },
       error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+    });
+  }
+
+  protected excluirConvidado(id: string): void {
+    this.dialog.open(ConfirmaDialog, {
+      ...DIALOG,
+      data: { titulo: 'Excluir convidado', texto: 'Confirma a exclusão deste convidado?', confirmar: 'Excluir' },
+    }).afterClosed().subscribe((confirmou) => {
+      if (!confirmou) {
+        return;
+      }
+      this.negocio.removerConvidado(id).subscribe({
+        next: () => this.carregar(),
+        error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      });
+    });
+  }
+
+  protected semEdicao(): void {
+    this.aviso.set('A edição do convite ainda não está disponível neste fluxo.');
+  }
+
+  protected semExclusao(tipo: string): void {
+    this.dialog.open(ConfirmaDialog, {
+      ...DIALOG,
+      data: { titulo: 'Excluir', texto: `Confirma a exclusão deste ${tipo}?`, confirmar: 'Excluir' },
+    }).afterClosed().subscribe((confirmou) => {
+      if (confirmou) {
+        this.aviso.set('A exclusão ainda não está disponível neste fluxo.');
+      }
     });
   }
 

@@ -1,77 +1,72 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { mensagemDeErro } from '../../core/mensagem-erro';
 import { NegocioClient, Painel } from '../../core/negocio.client';
 
 @Component({
   selector: 'app-painel',
-  imports: [RouterLink, MatCardModule, MatListModule],
+  imports: [RouterLink, MatCardModule, MatIconModule, MatListModule],
   template: `
-    <h1>Dashboards</h1>
+    <header class="gd-cabecalho">
+      <div>
+        <h1>Dashboards</h1>
+        <p>O que está em andamento na assessoria.</p>
+      </div>
+    </header>
     @if (aviso()) {
       <p class="aviso" role="alert">{{ aviso() }}</p>
     }
     @if (painel(); as dados) {
-      <section class="blocos">
-        <mat-card>
-          <mat-card-header><mat-card-title>Eventos</mat-card-title></mat-card-header>
-          <mat-card-content>
-            <div class="numeros">
-              <a routerLink="/eventos" [queryParams]="{ situacao: 'EmAndamento' }">
-                <strong>{{ dados.emAndamento }}</strong>
-                <span>Em andamento</span>
-              </a>
-              <a routerLink="/eventos" [queryParams]="{ situacao: 'Concluido' }">
-                <strong>{{ dados.concluidos }}</strong>
-                <span>Concluído</span>
-              </a>
-              <a routerLink="/eventos" [queryParams]="{ situacao: 'Cancelado' }">
-                <strong>{{ dados.cancelados }}</strong>
-                <span>Cancelado</span>
-              </a>
-            </div>
-            @if (dados.eventosEmAndamento.length === 0) {
-              <p>Não há evento.</p>
-            } @else {
-              <mat-nav-list>
-                @for (evento of dados.eventosEmAndamento; track evento.id) {
-                  <a mat-list-item [routerLink]="['/eventos', evento.id]">
-                    <span matListItemTitle>{{ evento.nome }}</span>
-                    @if (evento.data) {
-                      <span matListItemLine>{{ evento.data }}</span>
-                    }
-                  </a>
-                }
-              </mat-nav-list>
-            }
-          </mat-card-content>
-        </mat-card>
-        <mat-card>
-          <mat-card-header><mat-card-title>Funil</mat-card-title></mat-card-header>
-          <mat-card-content>
-            <div class="numeros">
-              @for (estagio of dados.funil; track estagio.estagio) {
-                <div>
-                  <strong>{{ estagio.quantidade }}</strong>
-                  <span>{{ estagio.estagio }}</span>
-                  <small>{{ estagio.valor }}</small>
-                </div>
-              }
-            </div>
-          </mat-card-content>
-        </mat-card>
+      <section class="gd-numeros">
+        <a class="gd-numero" routerLink="/eventos" [queryParams]="{ situacao: 'EmAndamento' }">
+          <span>Em andamento</span>
+          <span class="gd-icone"><mat-icon>event</mat-icon></span>
+          <strong>{{ dados.emAndamento }}</strong>
+        </a>
+        <a class="gd-numero" routerLink="/eventos" [queryParams]="{ situacao: 'Concluido' }">
+          <span>Concluído</span>
+          <span class="gd-icone"><mat-icon>check_circle</mat-icon></span>
+          <strong>{{ dados.concluidos }}</strong>
+        </a>
+        <a class="gd-numero" routerLink="/eventos" [queryParams]="{ situacao: 'Cancelado' }">
+          <span>Cancelado</span>
+          <span class="gd-icone"><mat-icon>cancel</mat-icon></span>
+          <strong>{{ dados.cancelados }}</strong>
+        </a>
+        @for (estagio of dados.funil; track estagio.estagio) {
+          <div class="gd-numero">
+            <span>{{ estagio.estagio }}</span>
+            <span class="gd-icone"><mat-icon>filter_alt</mat-icon></span>
+            <strong>{{ estagio.quantidade }}</strong>
+            <small>{{ estagio.valor }}</small>
+          </div>
+        }
       </section>
+      <mat-card>
+        <mat-card-header><mat-card-title>Eventos em andamento</mat-card-title></mat-card-header>
+        <mat-card-content>
+          @if (dados.eventosEmAndamento.length === 0) {
+            <p>Não há evento.</p>
+          } @else {
+            <mat-nav-list>
+              @for (evento of dados.eventosEmAndamento; track evento.id) {
+                <a mat-list-item [routerLink]="['/eventos', evento.id]">
+                  <span matListItemTitle>{{ evento.nome }}</span>
+                  @if (evento.data) {
+                    <span matListItemLine>{{ evento.data }}</span>
+                  }
+                </a>
+              }
+            </mat-nav-list>
+          }
+        </mat-card-content>
+      </mat-card>
     }
   `,
-  styles: `
-    .blocos, .numeros { display: grid; gap: 16px; }
-    .blocos { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-    .numeros { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); margin: 16px 0; }
-    .numeros a, .numeros div { display: flex; flex-direction: column; text-decoration: none; color: inherit; }
-    strong { font-size: 2rem; }
-  `,
+  styles: `mat-card { margin-top: 16px; }`,
 })
 export class PainelPage implements OnInit {
   private readonly negocio = inject(NegocioClient);

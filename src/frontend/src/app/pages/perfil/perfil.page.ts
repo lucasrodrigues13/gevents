@@ -11,6 +11,12 @@ import { NegocioClient } from '../../core/negocio.client';
   selector: 'app-perfil',
   imports: [ReactiveFormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule],
   template: `
+    <header class="gd-cabecalho">
+      <div>
+        <h1>Perfil</h1>
+        <p>Dados da assessoria.</p>
+      </div>
+    </header>
     <mat-card>
       <mat-card-header><mat-card-title>Perfil da assessoria</mat-card-title></mat-card-header>
       <mat-card-content>

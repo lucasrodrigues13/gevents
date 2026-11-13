@@ -9,17 +9,23 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatTabsModule } from '@angular/material/tabs';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { mensagemDeErro } from '../../core/mensagem-erro';
 import { Modelo, NegocioClient } from '../../core/negocio.client';
+
+export interface EventoFormDados {
+  id?: string;
+}
 
 @Component({
   selector: 'app-evento-form',
   imports: [
     NgTemplateOutlet, ReactiveFormsModule, RouterLink, MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatCheckboxModule, MatTabsModule,
+    MatSelectModule, MatCheckboxModule, MatTabsModule, MatDialogModule,
   ],
   template: `
-    <a mat-button routerLink="/eventos">Voltar</a>
+    <div class="gd-dialog-miolo">
+    @if (!dialogRef) { <a mat-button routerLink="/eventos">Voltar</a> }
     <h1>{{ editando() ? 'Editar evento' : 'Novo evento' }}</h1>
     @if (!editando()) {
       <mat-card>
@@ -70,6 +76,7 @@ import { Modelo, NegocioClient } from '../../core/negocio.client';
         }
         @if (aviso()) { <p class="aviso" role="alert">{{ aviso() }}</p> }
         <button mat-flat-button type="submit">Salvar</button>
+        @if (dialogRef) { <button mat-button type="button" (click)="dialogRef.close()">Cancelar</button> }
       </form>
     }
     <ng-template #geral>
@@ -133,11 +140,16 @@ import { Modelo, NegocioClient } from '../../core/negocio.client';
               <mat-form-field appearance="outline"><mat-label>Data de entrada</mat-label><input matInput type="date" formControlName="dataEntrada" /></mat-form-field>
             }
             <button mat-flat-button type="submit">Gerar parcelas</button>
-            <a mat-button [routerLink]="['/eventos', id]">Agora não</a>
+            @if (dialogRef) {
+              <button mat-button type="button" (click)="dialogRef.close(id)">Agora não</button>
+            } @else {
+              <a mat-button [routerLink]="['/eventos', id]">Agora não</a>
+            }
           </form>
         </mat-card-content>
       </mat-card>
     }
+    </div>
   `,
 })
 export class EventoFormPage implements OnInit {
@@ -145,6 +157,8 @@ export class EventoFormPage implements OnInit {
   private readonly negocio = inject(NegocioClient);
   private readonly rota = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly dadosDialogo = inject<EventoFormDados | null>(MAT_DIALOG_DATA, { optional: true });
+  protected readonly dialogRef = inject(MatDialogRef<EventoFormPage, string>, { optional: true });
   protected readonly modelos = signal<Modelo[]>([]);
   protected readonly modeloId = signal('');
   protected readonly tipo = signal('');
@@ -195,7 +209,7 @@ export class EventoFormPage implements OnInit {
   });
 
   ngOnInit(): void {
-    this.id = this.rota.snapshot.paramMap.get('id') ?? '';
+    this.id = this.dadosDialogo ? (this.dadosDialogo.id ?? '') : (this.rota.snapshot.paramMap.get('id') ?? '');
     this.editando.set(!!this.id);
     this.negocio.modelos().subscribe({
       next: (modelos) => this.modelos.set(modelos),
@@ -289,7 +303,11 @@ export class EventoFormPage implements OnInit {
       next: (evento) => {
         const seguir = () => {
           if (this.editando()) {
-            void this.router.navigate(['/eventos', evento.id]);
+            if (this.dialogRef) {
+              this.dialogRef.close(evento.id);
+            } else {
+              void this.router.navigate(['/eventos', evento.id]);
+            }
           } else {
             this.eventoCriado.set(evento.id);
           }
@@ -321,7 +339,13 @@ export class EventoFormPage implements OnInit {
       valorEntrada: valor.comEntrada ? this.numero(valor.valorEntrada) : null,
       dataEntrada: valor.comEntrada ? valor.dataEntrada || null : null,
     }).subscribe({
-      next: () => void this.router.navigate(['/eventos', id]),
+      next: () => {
+        if (this.dialogRef) {
+          this.dialogRef.close(id);
+        } else {
+          void this.router.navigate(['/eventos', id]);
+        }
+      },
       error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
     });
   }
