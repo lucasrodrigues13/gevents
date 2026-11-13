@@ -15,9 +15,9 @@ Use esta skill ao implementar ou alterar a interface.
 
 ## Base
 
-A interface é uma aplicação Angular em `frontend/`, com Angular Material.
+A interface é uma aplicação Angular em `src/frontend/`, com Angular Material.
 
-Se `frontend/` ainda não tiver a aplicação, crie com o Angular CLI e adicione o Angular Material pelo schematic oficial. Use o tema padrão que o schematic oferece. Não copie template pago nem a demo de outro produto.
+Se `src/frontend/` ainda não tiver a aplicação, crie com o Angular CLI e adicione o Angular Material pelo schematic oficial. Use o tema padrão que o schematic oferece. Não copie template pago nem a demo de outro produto.
 
 O build publicado é estático. O Caddy serve esse build e encaminha `/api`. Sem SSR e sem service worker. A tela chama a API real.
 
@@ -42,7 +42,7 @@ Evite:
 ## Estrutura esperada
 
 ```text
-frontend/
+src/frontend/
   src/app/
     core/          auth, interceptor, config, clientes HTTP
     layout/        casca com mat-sidenav e mat-toolbar

@@ -7,8 +7,8 @@ alwaysApply: true
 
 A fonte é `docs/requirements.md`. Não invente stack nem camada.
 
-- .NET 10 LTS, API em `Project.Api`, rotas `/api/v1`. Frontend Angular 22 estático em `frontend/`, com Angular Material. PostgreSQL, EF Core, Npgsql, migrations explícitas. Identity para senha, e-mail, lockout e roles. Sessão por JWT de acesso, 8 horas, sem refresh e sem lista de revogação. Roles só `Admin` e `User`.
-- Projetos: `Project.Domain`, `Project.Application`, `Project.Infrastructure`, `Project.Api`. Testes: `Project.Tests` e `Project.IntegrationTests`. O Angular não é projeto .NET.
+- .NET 10 LTS, API em `src/backend/Project.Api`, rotas `/api/v1`. Frontend Angular 22 estático em `src/frontend/`, com Angular Material. PostgreSQL, EF Core, Npgsql, migrations explícitas. Identity para senha, e-mail, lockout e roles. Sessão por JWT de acesso, 8 horas, sem refresh e sem lista de revogação. Roles só `Admin` e `User`.
+- Projetos em `src/backend/`: `Project.Domain`, `Project.Application`, `Project.Infrastructure`, `Project.Api`. A solution é `src/backend/gevents.slnx` e inclui esses projetos e os testes. Testes: `Project.Tests` e `Project.IntegrationTests`, em `tests/`. O Angular não entra na solution.
 - Domain não referencia nada. Application referencia só Domain. Infrastructure referencia Application e Domain. Api referencia Application e Infrastructure para compor.
 - Endpoint de negócio não usa `DbContext`. Endpoint de conta pode usar `UserManager`, `SignInManager` e `RoleManager`. A assinatura do JWT fica na Infrastructure, atrás de interface na Application.
 - Interface de recurso externo fica em Application e a implementação em Infrastructure. `ApplicationUser` só em Infrastructure, se houver campo extra. Entidade de domínio não herda `IdentityUser`.

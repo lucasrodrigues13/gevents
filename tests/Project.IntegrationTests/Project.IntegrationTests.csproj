@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Project.Api\Project.Api.csproj" />
-    <ProjectReference Include="..\..\src\Project.Infrastructure\Project.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\backend\Project.Api\Project.Api.csproj" />
+    <ProjectReference Include="..\..\src\backend\Project.Infrastructure\Project.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

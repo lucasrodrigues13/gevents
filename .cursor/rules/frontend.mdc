@@ -1,6 +1,6 @@
 ---
 description: Padrão visual Angular Material das telas do gevents
-globs: frontend/**/*.{ts,html,css,scss}
+globs: src/frontend/**/*.{ts,html,css,scss}
 alwaysApply: false
 ---
 

@@ -197,8 +197,8 @@ Não há cookie de autenticação. DA-019 registra isso.
 | ID | Decisão | Status |
 |---|---|---|
 | DA-001 | A aplicação é um produto com dois processos: a API e o build estático do Angular. Não é microsserviço. A interface não roda dentro do processo da API. | Definido |
-| DA-002 | A arquitetura é Clean Architecture simplificada, com quatro projetos .NET de produção. O frontend Angular fica em `frontend/` e não entra na solution. Os testes ficam em `tests/`, separados em unitário e integração. | Definido |
-| DA-003 | A interface é Angular em `frontend/`. A API é ASP.NET Core em `Project.Api`, com rotas em `/api/v1`. Erro HTTP vai em JSON, com código e mensagem, sem stack trace em produção. Swagger é configurável e fica ligado em desenvolvimento. CORS só libera a origem local do `ng serve`. Em produção a origem é a do Caddy. Não há Razor Pages. | Definido |
+| DA-002 | A arquitetura é Clean Architecture simplificada, com quatro projetos .NET de produção em `src/backend/`. A solution `src/backend/gevents.slnx` inclui esses projetos e os testes, e não inclui o frontend. O Angular fica em `src/frontend/`. Os testes ficam em `tests/`, separados em unitário e integração. | Definido |
+| DA-003 | A interface é Angular em `src/frontend/`. A API é ASP.NET Core em `src/backend/Project.Api`, com rotas em `/api/v1`. Erro HTTP vai em JSON, com código e mensagem, sem stack trace em produção. Swagger é configurável e fica ligado em desenvolvimento. CORS só libera a origem local do `ng serve`. Em produção a origem é a do Caddy. Não há Razor Pages. | Definido |
 | DA-004 | .NET 10 LTS, C#, ASP.NET Core. | Definido |
 | DA-005 | PostgreSQL, Entity Framework Core, Code First e Migrations. O provider é Npgsql. | Definido |
 | DA-006 | Autenticação com ASP.NET Core Identity para senha, normalização, lockout, roles e tokens de e-mail. A sessão da API é um JWT de acesso. Sem cookie de autenticação, sem refresh token, sem lista de revogação, sem servidor OAuth2 próprio e sem provedor externo de identidade. | Definido |
@@ -239,7 +239,7 @@ Não há cookie de autenticação. DA-019 registra isso.
 | DA-041 | Esta versão não inclui antivírus. O risco de malware fica registrado e precisa ser reavaliado antes de liberar upload de usuário não confiável. | Definido |
 | DA-042 | Testes com xUnit. Integração HTTP com `WebApplicationFactory`. PostgreSQL real com Testcontainers e Npgsql. O provider InMemory não valida o comportamento do PostgreSQL. E-mail de teste substitui o Gmail. | Definido |
 | DA-043 | Confirmação de e-mail vale 24 horas e recuperação de senha vale 1 hora. Prazos diferentes usam providers de token do próprio Identity, sem criptografia própria. | Definido |
-| DA-044 | A interface usa Angular Material em `frontend/`, no tema padrão do schematic, com componentes standalone. A casca autenticada tem barra lateral, barra superior e cartões na área principal. As telas do produto são só as das specs, com textos em português. Formulário, tabela, diálogo e aviso usam o Material. Componente próprio só nasce quando o Material não cobre a tela, e pode se inspirar no visual de outro template sem trazer o código dele. O miolo do dashboard continua em cartões e lista. Gráfico não entra enquanto um RF não pedir a série. | Definido |
+| DA-044 | A interface usa Angular Material em `src/frontend/`, no tema padrão do schematic, com componentes standalone. A casca autenticada tem barra lateral, barra superior e cartões na área principal. As telas do produto são só as das specs, com textos em português. Formulário, tabela, diálogo e aviso usam o Material. Componente próprio só nasce quando o Material não cobre a tela, e pode se inspirar no visual de outro template sem trazer o código dele. O miolo do dashboard continua em cartões e lista. Gráfico não entra enquanto um RF não pedir a série. | Definido |
 
 ## 5. Stack tecnológica
 
@@ -247,7 +247,7 @@ Não há cookie de autenticação. DA-019 registra isso.
 |---|---|---|
 | Linguagem de servidor | C# | Definido |
 | Plataforma | .NET 10 LTS | Definido |
-| API | ASP.NET Core Web API em `Project.Api` | Definido |
+| API | ASP.NET Core Web API em `src/backend/Project.Api` | Definido |
 | Interface | Angular 22 e Angular Material, build estático | Definido |
 | Banco | PostgreSQL | Definido |
 | Acesso a dados | Entity Framework Core + Npgsql | Definido |
@@ -267,13 +267,14 @@ Não há cookie de autenticação. DA-019 registra isso.
 ## 6. Organização dos projetos
 
 ```text
-frontend/
-
 src/
-├── Project.Api/
-├── Project.Application/
-├── Project.Domain/
-└── Project.Infrastructure/
+├── backend/
+│   ├── gevents.slnx
+│   ├── Project.Api/
+│   ├── Project.Application/
+│   ├── Project.Domain/
+│   └── Project.Infrastructure/
+└── frontend/
 
 tests/
 ├── Project.Tests/
@@ -284,7 +285,7 @@ docs/
 └── requirements.md
 ```
 
-A solution tem quatro projetos de produção .NET. `frontend/` é o Angular e não entra na solution. Os testes são dois porque a suíte unitária não sobe banco e a de integração sobe PostgreSQL descartável. Novo projeto de produção só com justificativa registrada neste documento.
+A solution fica em `src/backend/gevents.slnx` e tem quatro projetos de produção .NET mais os dois de teste. `src/frontend/` é o Angular e não entra na solution. Os testes são dois porque a suíte unitária não sobe banco e a de integração sobe PostgreSQL descartável. Novo projeto de produção só com justificativa registrada neste documento.
 
 ### 6.1. Project.Domain
 
@@ -358,7 +359,7 @@ Project.Api
     → Project.Infrastructure
 ```
 
-A seta é referência de compilação. Application não referencia Infrastructure. `frontend/` não referencia os projetos .NET.
+A seta é referência de compilação. Application não referencia Infrastructure. `src/frontend/` não referencia os projetos .NET.
 
 Interfaces de persistência e de serviços externos são declaradas na Application e implementadas na Infrastructure. O registro concreto acontece no `Program.cs` da Api.
 

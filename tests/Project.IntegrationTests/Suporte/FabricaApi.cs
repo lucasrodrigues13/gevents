@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Project.Application.Cep;
 
 namespace Project.IntegrationTests.Suporte;
 
@@ -63,11 +64,15 @@ public sealed class FabricaApi : WebApplicationFactory<Program>
         builder.UseSetting("RateLimit:RecuperacaoPorHora", _recuperacaoPorHora.ToString());
         builder.UseSetting("RateLimit:ReenvioPorHora", _reenvioPorHora.ToString());
         builder.UseSetting("Swagger:Enabled", "false");
+        builder.UseSetting("Storage:Root", Path.Combine(Path.GetTempPath(), "gevents-arquivos-teste", Guid.NewGuid().ToString("N")));
+        builder.UseSetting("Storage:MaxImageBytes", "5242880");
         builder.ConfigureLogging(logging => logging.AddProvider(Logs));
         builder.ConfigureServices(services =>
         {
             services.RemoveAll<IEmailSender<IdentityUser>>();
             services.AddSingleton<IEmailSender<IdentityUser>>(Email);
+            services.RemoveAll<IConsultaCep>();
+            services.AddSingleton<IConsultaCep, CepDeTeste>();
         });
     }
 }

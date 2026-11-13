@@ -170,3 +170,474 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Arquivos" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "NomeOriginal" text NOT NULL,
+        "TipoConteudo" text NOT NULL,
+        "Tamanho" bigint NOT NULL,
+        "CaminhoRelativo" text NOT NULL,
+        CONSTRAINT "PK_Arquivos" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Clientes" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        "Papel" text NOT NULL,
+        "Nascimento" date,
+        "Email" text NOT NULL,
+        "Ddi" text NOT NULL,
+        "Celular" text NOT NULL,
+        "TelefoneFixo" text,
+        "Cpf" text,
+        "Rg" text,
+        "Cnpj" text,
+        "Profissao" text,
+        "InscricaoMunicipal" text,
+        "Religiao" text,
+        "Observacao" text,
+        "Facebook" text,
+        "Instagram" text,
+        "Pais" text,
+        "Cep" text,
+        "Endereco" text,
+        "Numero" text,
+        "Estado" text,
+        "Cidade" text,
+        "Bairro" text,
+        "Complemento" text,
+        "FotoId" uuid,
+        CONSTRAINT "PK_Clientes" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Eventos" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "ModeloId" uuid NOT NULL,
+        "Nome" text NOT NULL,
+        "PrimeiroNome" text,
+        "SegundoNome" text,
+        "Tipo" text NOT NULL,
+        "Situacao" text NOT NULL,
+        "Data" date,
+        "Hora" time without time zone,
+        "OrcamentoEstimado" numeric(12,2),
+        "ConvidadosEstimados" integer,
+        "TempoFesta" time without time zone,
+        "InicioCerimonia" time without time zone,
+        "InicioRecepcao" time without time zone,
+        "QuantidadePadrinhos" integer,
+        "QuantidadeDamas" integer,
+        "SenhaSite" text,
+        "NotificarAssessor" boolean NOT NULL,
+        "NotificarAssistentes" boolean NOT NULL,
+        "NotificarClientes" boolean NOT NULL,
+        "SalvarNaAgenda" boolean NOT NULL,
+        "ImagemId" uuid,
+        "TransferAtivo" boolean NOT NULL,
+        "Cerimonia_Nome" text,
+        "Cerimonia_Pais" text,
+        "Cerimonia_Cep" text,
+        "Cerimonia_Endereco" text,
+        "Cerimonia_Numero" text,
+        "Cerimonia_Estado" text,
+        "Cerimonia_Cidade" text,
+        "Cerimonia_Bairro" text,
+        "Recepcao_Nome" text,
+        "Recepcao_Pais" text,
+        "Recepcao_Cep" text,
+        "Recepcao_Endereco" text,
+        "Recepcao_Numero" text,
+        "Recepcao_Estado" text,
+        "Recepcao_Cidade" text,
+        "Recepcao_Bairro" text,
+        CONSTRAINT "PK_Eventos" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Grupos" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        CONSTRAINT "PK_Grupos" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Modelos" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        "Tipo" text NOT NULL,
+        CONSTRAINT "PK_Modelos" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Perfis" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "NomeEmpresa" text,
+        "Responsavel" text,
+        "Documento" text,
+        "Celular" text,
+        "Nascimento" date,
+        "Endereco" text,
+        CONSTRAINT "PK_Perfis" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Tags" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        CONSTRAINT "PK_Tags" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Compromissos" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "EventoId" uuid NOT NULL,
+        "Data" date,
+        "Hora" time without time zone,
+        CONSTRAINT "PK_Compromissos" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_Compromissos_Eventos_EventoId" FOREIGN KEY ("EventoId") REFERENCES "Eventos" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "LocalTransfer" (
+        "Id" uuid NOT NULL,
+        "EventoId" uuid NOT NULL,
+        "Nome" text NOT NULL,
+        CONSTRAINT "PK_LocalTransfer" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_LocalTransfer_Eventos_EventoId" FOREIGN KEY ("EventoId") REFERENCES "Eventos" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "ServicoEvento" (
+        "Id" uuid NOT NULL,
+        "EventoId" uuid NOT NULL,
+        "Nome" text NOT NULL,
+        "FornecedorContaId" text,
+        "Contratado" boolean NOT NULL,
+        "ValorContratado" numeric(12,2),
+        CONSTRAINT "PK_ServicoEvento" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_ServicoEvento_Eventos_EventoId" FOREIGN KEY ("EventoId") REFERENCES "Eventos" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Tarefas" (
+        "Id" uuid NOT NULL,
+        "EventoId" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Titulo" text NOT NULL,
+        "Descricao" text,
+        "Prazo" date,
+        "Situacao" text NOT NULL,
+        "ResponsavelContaId" text NOT NULL,
+        CONSTRAINT "PK_Tarefas" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_Tarefas_Eventos_EventoId" FOREIGN KEY ("EventoId") REFERENCES "Eventos" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Vinculos" (
+        "ClienteId" uuid NOT NULL,
+        "EventoId" uuid NOT NULL,
+        CONSTRAINT "PK_Vinculos" PRIMARY KEY ("ClienteId", "EventoId"),
+        CONSTRAINT "FK_Vinculos_Clientes_ClienteId" FOREIGN KEY ("ClienteId") REFERENCES "Clientes" ("Id") ON DELETE CASCADE,
+        CONSTRAINT "FK_Vinculos_Eventos_EventoId" FOREIGN KEY ("EventoId") REFERENCES "Eventos" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Convites" (
+        "Id" uuid NOT NULL,
+        "EventoId" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        "GrupoId" uuid,
+        "Observacao" text,
+        "PrincipalId" uuid,
+        "UsaTransfer" boolean NOT NULL,
+        "LocalOrigem" text,
+        "Token" text NOT NULL,
+        "AcessadoEm" timestamp with time zone,
+        "RespondidoEm" timestamp with time zone,
+        CONSTRAINT "PK_Convites" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_Convites_Eventos_EventoId" FOREIGN KEY ("EventoId") REFERENCES "Eventos" ("Id") ON DELETE CASCADE,
+        CONSTRAINT "FK_Convites_Grupos_GrupoId" FOREIGN KEY ("GrupoId") REFERENCES "Grupos" ("Id") ON DELETE SET NULL
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "ServicoModelo" (
+        "Id" uuid NOT NULL,
+        "ModeloId" uuid NOT NULL,
+        "Nome" text NOT NULL,
+        CONSTRAINT "PK_ServicoModelo" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_ServicoModelo_Modelos_ModeloId" FOREIGN KEY ("ModeloId") REFERENCES "Modelos" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "TarefaModelo" (
+        "Id" uuid NOT NULL,
+        "ModeloId" uuid NOT NULL,
+        "Titulo" text NOT NULL,
+        CONSTRAINT "PK_TarefaModelo" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_TarefaModelo_Modelos_ModeloId" FOREIGN KEY ("ModeloId") REFERENCES "Modelos" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "EventoTagConta" (
+        "EventosId" uuid NOT NULL,
+        "TagsId" uuid NOT NULL,
+        CONSTRAINT "PK_EventoTagConta" PRIMARY KEY ("EventosId", "TagsId"),
+        CONSTRAINT "FK_EventoTagConta_Eventos_EventosId" FOREIGN KEY ("EventosId") REFERENCES "Eventos" ("Id") ON DELETE CASCADE,
+        CONSTRAINT "FK_EventoTagConta_Tags_TagsId" FOREIGN KEY ("TagsId") REFERENCES "Tags" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "ParcelaServico" (
+        "Id" uuid NOT NULL,
+        "ServicoId" uuid NOT NULL,
+        "Numero" integer NOT NULL,
+        "Vencimento" date NOT NULL,
+        "Valor" numeric(12,2) NOT NULL,
+        "Entrada" boolean NOT NULL,
+        CONSTRAINT "PK_ParcelaServico" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_ParcelaServico_ServicoEvento_ServicoId" FOREIGN KEY ("ServicoId") REFERENCES "ServicoEvento" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE TABLE "Convidados" (
+        "Id" uuid NOT NULL,
+        "ConviteId" uuid NOT NULL,
+        "Nome" text NOT NULL,
+        "Ddi" text,
+        "Celular" text,
+        "Situacao" text NOT NULL,
+        "Mesa" text,
+        "Genero" text,
+        "Faixa" text,
+        "Custo" text,
+        "Rg" text,
+        "Cpf" text,
+        "Observacao" text,
+        CONSTRAINT "PK_Convidados" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_Convidados_Convites_ConviteId" FOREIGN KEY ("ConviteId") REFERENCES "Convites" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE UNIQUE INDEX "IX_Compromissos_EventoId" ON "Compromissos" ("EventoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_Convidados_ConviteId" ON "Convidados" ("ConviteId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_Convites_EventoId" ON "Convites" ("EventoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_Convites_GrupoId" ON "Convites" ("GrupoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE UNIQUE INDEX "IX_Convites_Token" ON "Convites" ("Token");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_EventoTagConta_TagsId" ON "EventoTagConta" ("TagsId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_LocalTransfer_EventoId" ON "LocalTransfer" ("EventoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_ParcelaServico_ServicoId" ON "ParcelaServico" ("ServicoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE UNIQUE INDEX "IX_Perfis_ContaId" ON "Perfis" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_ServicoEvento_EventoId" ON "ServicoEvento" ("EventoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_ServicoModelo_ModeloId" ON "ServicoModelo" ("ModeloId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE UNIQUE INDEX "IX_Tags_ContaId_Nome" ON "Tags" ("ContaId", "Nome");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_TarefaModelo_ModeloId" ON "TarefaModelo" ("ModeloId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_Tarefas_EventoId" ON "Tarefas" ("EventoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    CREATE INDEX "IX_Vinculos_EventoId" ON "Vinculos" ("EventoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113120632_Negocio') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20261113120632_Negocio', '10.0.4');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113121755_LocaisDoEvento') THEN
+    ALTER TABLE "Eventos" ADD "Cerimonia_Persistido" boolean NOT NULL DEFAULT TRUE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113121755_LocaisDoEvento') THEN
+    ALTER TABLE "Eventos" ADD "Recepcao_Persistido" boolean NOT NULL DEFAULT TRUE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261113121755_LocaisDoEvento') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20261113121755_LocaisDoEvento', '10.0.4');
+    END IF;
+END $EF$;
+COMMIT;
+

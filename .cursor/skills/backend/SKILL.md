@@ -15,6 +15,8 @@ Use esta skill ao implementar ou alterar a API.
 
 ## Onde cada coisa fica
 
+Os quatro projetos e a solution ficam em `src/backend/`. A solution é `src/backend/gevents.slnx` e não inclui o Angular. Os testes ficam em `tests/` e entram nessa solution.
+
 - **Domain.** Entidades, enums e invariantes. Sem EF Core, Identity, ASP.NET Core nem JWT.
 - **Application.** Casos de uso, DTOs e interfaces de recurso externo, inclusive a de assinar o JWT. Sem `DbContext` e sem tipo de HTTP.
 - **Infrastructure.** EF Core, Npgsql, migrations, `IdentityDbContext`, assinatura do JWT, MailKit, arquivo no volume e bootstrap do administrador.

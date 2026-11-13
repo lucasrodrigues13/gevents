@@ -216,6 +216,10 @@ public class ContaFluxoTests
 
             Assert.Equal(HttpStatusCode.Created, resposta.StatusCode);
             Assert.Contains("não foi enviado", corpo, StringComparison.Ordinal);
+            Assert.DoesNotContain("falha simulada", corpo, StringComparison.Ordinal);
+            var logs = string.Join('\n', _banco.Fabrica.Logs.Linhas);
+            Assert.Contains("falha simulada de envio", logs, StringComparison.Ordinal);
+            Assert.DoesNotContain("smtp-segredo-nao-logar", logs, StringComparison.Ordinal);
         }
         finally
         {
