@@ -1,5 +1,5 @@
 # gevents
- 
+
 API .NET e interface Angular do mesmo produto. O Caddy publica o build estático e encaminha `/api`.
 
 ## Onde fica cada coisa
