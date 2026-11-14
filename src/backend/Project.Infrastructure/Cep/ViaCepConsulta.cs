@@ -25,7 +25,7 @@ public sealed class ViaCepConsulta(HttpClient http) : IConsultaCep
             return null;
         }
 
-        return new EnderecoCep(corpo.Logradouro ?? "", corpo.Uf, corpo.Localidade ?? "", corpo.Bairro ?? "");
+        return new EnderecoCep(corpo.Logradouro ?? "", corpo.Uf, corpo.Localidade ?? "", corpo.Bairro ?? "", "Brasil");
     }
 
     private sealed class Corpo

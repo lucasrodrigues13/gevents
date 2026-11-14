@@ -1,4 +1,5 @@
 using Project.Domain.Eventos;
+using Project.Domain.Funil;
 
 namespace Project.Application.Negocio;
 
@@ -25,12 +26,19 @@ public sealed class PainelServico(IDados dados)
     {
         var contagens = await dados.ContarEventosAsync(contaId, ct);
         var andamento = await dados.ListarEmAndamentoAsync(contaId, ct);
+        var funil = await dados.ContarOportunidadesPorEstagioAsync(contaId, ct);
+        var funilLeitura = FunilZerado.Select(baseEstagio =>
+        {
+            var estagio = RotulosEstagio.Todos.First(e => RotulosEstagio.Texto(e) == baseEstagio.Estagio);
+            var item = funil.FirstOrDefault(c => c.Estagio == estagio);
+            return new FunilEstagio(baseEstagio.Estagio, item?.Quantidade ?? 0, item?.Valor ?? 0);
+        }).ToArray();
         return new PainelLeitura(
             Quantidade(contagens, SituacaoEvento.EmAndamento),
             Quantidade(contagens, SituacaoEvento.Concluido),
             Quantidade(contagens, SituacaoEvento.Cancelado),
             andamento,
-            FunilZerado);
+            funilLeitura);
     }
 
     private static int Quantidade(IReadOnlyList<ContagemSituacao> contagens, SituacaoEvento situacao) =>

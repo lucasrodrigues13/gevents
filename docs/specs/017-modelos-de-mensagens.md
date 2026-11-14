@@ -1,6 +1,6 @@
 # 017. Modelos de mensagens
 
-**Status: rascunho.** Fonte observada: a página `https://assessoriavip.com.br/modelos_mensagens`, aberta vazia. RF-054 está Observado e fora do corte aprovado em [mvp-scope.md](../mvp-scope.md), seção 5. O fluxo não está no Must e não foi confirmado na conta.
+**Status: aprovada.** O código segue esta spec. Fonte: [inventario-referencia.md](../inventario-referencia.md) §6 e leitura VIP (`/modelos_mensagens`). Uso em RSVP e envios permanece nos RFs de convite/RSVP.
 
 ## 1. Identificador e nome
 
@@ -8,82 +8,96 @@ SPEC-017. Modelos de mensagens.
 
 ## 2. Objetivo
 
-Descrever a biblioteca de modelos de mensagem no único estado visto: lista vazia, com o texto e a ação que apareceram na página.
+O Organizer mantém a biblioteca de modelos de mensagem: listar, criar com nome e texto (com parâmetros), editar, clonar e excluir.
 
 ## 3. Requisitos relacionados
 
-RF-054, somente a biblioteca de mensagem. O status dele continua Observado.
+RF-054 (biblioteca de mensagem). Consumo em RSVP e envios: RF-065 e fluxos de convite; na aba RSVP e Mensagens do modelo de evento: SPEC-012.
 
-Fora deste arquivo: briefing, roteiro, cronograma e inspiração, que também estão em RF-054; modelo de evento (RF-053); RSVP automático (RF-065); roteiro do evento (RF-069); cronograma (RF-070); briefing do evento (RF-071); inspirações (RF-072).
+Fora: RF-079. Assistente. Fornecedor com login. Mensagens do funil (SPEC de funil, se houver).
 
 ## 4. Atores e permissões
 
-Assessoria, na conta autenticada. A role `User` identifica a conta e não é papel de negócio, RF-040. Cliente, assistente e fornecedor ficam de fora deste fluxo.
+| Ator | Pode |
+|---|---|
+| Organizer | CRUD dos modelos de mensagem da própria conta. |
+| Client | Não edita a biblioteca. |
+| Admin | Acessa modelos de qualquer conta. |
+| Visitante | Não acessa. |
 
 ## 5. Pré-condições
 
-Conta autenticada, SPEC-001. A página vista não pediu evento aberto.
+Conta autenticada, SPEC-001.
 
 ## 6. Fluxo principal
 
-1. A assessoria abre a biblioteca de modelos de mensagens.
-2. Sem modelos cadastrados, a tela mostra o texto "Sem modelos de mensagens cadastrados".
-3. A tela mostra a ação "Novo Modelo".
-
-A ação não foi acionada. O fluxo para nesse ponto.
+1. O Organizer abre Modelos de Mensagens.
+2. Se não houver modelo, vê o estado vazio e a ação "Novo Modelo".
+3. Abre o formulário: Nome do modelo e Texto.
+4. Pode inserir parâmetros (#nome_evento, #data_evento, #convite, etc.) no texto.
+5. Salva. O modelo entra na lista.
+6. Edita ou exclui um modelo existente, com confirmação na exclusão.
+7. Pode clonar um modelo, gerando cópia editável.
 
 ## 7. Fluxos alternativos
 
-Biblioteca com modelo já cadastrado: não visto. Destino de "Novo Modelo": não visto.
+- Sem modelos: texto "Sem modelos de mensagens cadastrados" e ação "Novo Modelo".
+- Nome vazio: não grava.
+- Texto vazio: não grava.
+- Cancelar no formulário: nada é gravado.
+- Modelo de outra conta: Organizer não vê.
 
 ## 8. Regras de negócio
 
-- A assessoria tem uma biblioteca de mensagem. RF-054, Observado.
-- O editor dessa biblioteca não foi aberto. RF-054 registra a biblioteca no menu, sem o editor.
-- O texto "Sem modelos de mensagens cadastrados" e o rótulo "Novo Modelo" foram vistos na página vazia. Não há RF que fixe esse texto ou esse rótulo. Ficam como observação da página, sem virar regra decidida.
+- A biblioteca de mensagem é uma das bibliotecas de RF-054.
+- Criar/editar usa Nome e Texto.
+- Parâmetros no texto são substituídos na hora do envio pelos dados do evento/convite. Parâmetros vistos: `#nome_da_empresa`, `#nome_evento`, `#tipo_evento`, `#data_evento`, `#hora_evento`, `#local_cerimonia`, `#local_recepcao`, `#endereco_cerimonia`, `#endereco_recepcao`, `#convite`, `#link_convite`, `#link_unico`, `#nome_convidados`, `#mesa_dos_convidados`, `#site_url`, `#prazo_rsvp`, `#qr_code`.
+- Clonar gera cópia na conta.
+- Excluir remove da biblioteca; envios já feitos não são alterados.
+- Isolamento por conta do Organizer.
 
 ## 9. Validações
 
-Nenhuma validação foi vista. Campo, obrigatoriedade e formato do modelo: não definido.
+Nome obrigatório, sem só espaços. Texto obrigatório, sem só espaços. Modelo alheio rejeitado sem vazar dado.
 
 ## 10. Estados
 
-Estado visto: biblioteca sem modelos, com o texto e a ação da seção 6. Biblioteca com modelos: não definido. Editor aberto: não definido.
+Biblioteca vazia; biblioteca com modelos. Sem situação adicional.
 
 ## 11. Dados necessários
 
-Não definido. A página vazia não mostrou campo de modelo.
+Lista: nome do modelo.
+
+Criar / editar: nome, texto (com ou sem parâmetros).
+
+Clonar / excluir: identificador.
 
 ## 12. Interface
 
-Biblioteca vazia com o texto "Sem modelos de mensagens cadastrados" e a ação "Novo Modelo". Composição do editor, lista preenchida, busca e demais ações: não definido.
+Lista com "Novo Modelo". Estado vazio com texto de ausência. Modal ou formulário com Nome, Texto, lista de parâmetros, Cancelar e Salvar. Confirmação ao excluir.
 
 ## 13. Erros
 
-Nenhum erro foi visto nesta página. Mensagem de falha ao abrir ou ao criar: não definido.
+Campo inválido permanece no formulário. Falha ao salvar mantém o anterior. Modelo alheio não revela dado.
 
 ## 14. Critérios de aceite
 
-1. Sem modelos cadastrados, a biblioteca mostra "Sem modelos de mensagens cadastrados".
-2. A mesma tela mostra a ação "Novo Modelo".
-3. O que ocorre ao acionar "Novo Modelo" fica fora do aceite enquanto o editor não for visto.
-
-Estes critérios descrevem a página vista. RF-054 segue Observado.
+1. Sem modelos, a tela mostra "Sem modelos de mensagens cadastrados" e "Novo Modelo".
+2. Criar com nome e texto grava; faltando um dos dois, não grava.
+3. Editar atualiza nome e texto.
+4. Clonar gera cópia editável.
+5. Excluir remove da biblioteca.
+6. Outra conta não vê o modelo.
 
 ## 15. Cenários de teste
 
-Abrir a biblioteca sem modelos e conferir o texto e a ação. Não acionar "Novo Modelo". Cenário com modelo existente e cenário do editor ficam sem resultado esperado até haver observação.
+Abrir biblioteca vazia. Criar modelo "RSVP" com texto usando `#nome_evento`. Editar. Clonar. Excluir a cópia. Conta B não vê o modelo da conta A.
 
 ## 16. Dependências
 
-SPEC-001, para a conta autenticada. RF-054 aponta RF-069, RF-070, RF-071, RF-072 e RF-065; essas peças não são pré-requisito do estado vazio visto.
+SPEC-001. RF-054. RF-065 / SPEC de convites para envio. SPEC-012 para vínculo na aba RSVP e Mensagens.
 
 ## 17. Premissas e pontos não definidos
 
-- Editor, campos, gravação, edição, exclusão, clonagem e ordenação.
-- Aparência da lista quando já existe modelo.
-- Dono do dado: conta, evento ou outro vínculo. A página vazia não mostrou essa ligação.
-- Uso do modelo em envio, WhatsApp, fornecedor, parcela, RSVP ou na aba Mensagens do modelo de evento.
-- Permissão de cliente para ver modelo de mensagem.
-- Isolamento entre contas nesta biblioteca. A página vazia não foi comparada com outra conta.
-- Resultado de acionar "Novo Modelo".
+- Subconjunto mínimo de parâmetros obrigatório no produto (a lista vista pode ser reduzida se algum parâmetro depender de módulo fora do corte).
+- Pré-visualização com dados de um evento na biblioteca.

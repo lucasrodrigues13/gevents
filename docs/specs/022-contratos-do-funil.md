@@ -1,8 +1,6 @@
 # 022. Contratos do funil
 
-**Status: rascunho.**
-
-Fonte da visita: a lista em `https://assessoriavip.com.br/funnel/contract`, com as três abas vazias. Criar, assinar, cancelar e enviar não foram acionados. O modelo de contrato fica na SPEC-028. O contrato pedido ao fornecedor no evento fica em RF-059 e RF-060.
+**Status: aprovada.** O código segue esta spec.
 
 ## 1. Identificador e nome
 
@@ -10,103 +8,84 @@ SPEC-022. Contratos do funil.
 
 ## 2. Objetivo
 
-Descrever a lista de contratos do funil no que a visita mostrou. O restante do fluxo permanece em aberto.
+O Organizer gerencia contratos comerciais do funil ligados a oportunidades: cria, edita, envia, assina, cancela e consulta nas abas Em andamento, Assinados e Cancelados.
 
 ## 3. Requisitos relacionados
 
-RF-075 cita contratos entre os itens do funil de vendas. Status Observado. Esse status não aprova regra desta tela.
-
-RF-077 cita catálogos de funil entre relatórios e impressões. Status Observado. A visita não abriu relatório nem impressão.
-
-O dashboard do funil segue RF-082 e a SPEC-007: quantidade e valor em contato inicial, orçamento enviado, contratado e descartado. As abas desta lista são rótulos vistos na tela de contratos. Elas não entram no dashboard.
-
-Este fluxo está fora do corte em [mvp-scope.md](../mvp-scope.md). De RF-075, o corte aprovado usa só o que RF-082 já cobre.
+RF-075, no recorte de contratos do funil. Modelo de contrato é a SPEC-028. Oportunidade é a SPEC-020. Contrato pedido ao fornecedor no evento permanece em RF-059 e RF-060, fora desta tela. RF-079 fica fora.
 
 ## 4. Atores e permissões
 
-A tela foi aberta na conta da assessoria. Quem mais acessa, e se o `User` vê só a própria conta, está Pendente.
+O `Organizer` opera os contratos da própria conta. Outro `Organizer` não vê. `Admin` acessa qualquer conta. `Client` não acessa o funil neste corte. Assistente e fornecedor com login ficam fora.
 
 ## 5. Pré-condições
 
-Conta autenticada, SPEC-001. A visita encontrou as três abas vazias. O que precisa existir para um contrato aparecer na lista está Pendente.
+Conta autenticada, SPEC-001. Para criar, existe oportunidade da mesma conta, SPEC-020. Modelo opcional vem da SPEC-028.
 
 ## 6. Fluxo principal
 
-1. A assessoria abre a lista de contratos do funil.
-2. A tela mostra o filtro "Criado em", a busca por oportunidade e as abas Em andamento, Assinados e Cancelados.
-3. Na visita, as três abas estavam vazias.
-4. Na aba Cancelados, o texto visível foi "Nenhum orçamento encontrado!".
-
-O fluxo visto para nesse ponto.
+1. O Organizer abre Contratos no funil.
+2. Vê filtro por criação, busca por oportunidade e as abas Em andamento, Assinados e Cancelados.
+3. Cria contrato vinculado a uma oportunidade, com conteúdo a partir do modelo ou texto próprio, e salva em Em andamento.
+4. Edita o contrato em andamento.
+5. Envia o contrato ao contato da oportunidade.
+6. Registra a assinatura; o item passa à aba Assinados.
+7. Cancela um contrato em andamento; o item passa à aba Cancelados.
 
 ## 7. Fluxos alternativos
 
-- Aba Cancelados vazia: o texto visto foi "Nenhum orçamento encontrado!".
-- Abas Em andamento e Assinados: estavam vazias. O texto de cada uma não foi registrado.
-- Filtro "Criado em" e busca por oportunidade: os controles estavam visíveis. Nenhum valor foi aplicado. O resultado de filtrar ou buscar está Pendente.
+- Aba vazia: a tela informa que não há item.
+- Busca ou filtro sem correspondência: a lista fica vazia, sem erro.
+- Excluir contrato em andamento ainda não assinado: remove o registro.
+- Contrato assinado: não volta a Em andamento; cancelamento após assinatura, se necessário, vai para Cancelados.
+- Oportunidade de outra conta: não vincula.
 
 ## 8. Regras de negócio
 
-Não há RF Definido para esta lista. RF-075 e RF-077 estão Observado e não fecham regra. O que a visita não mostrou fica não definido:
-
-- O que o filtro "Criado em" restringe.
-- O que a busca por oportunidade compara.
-- Se Em andamento, Assinados e Cancelados são situações do contrato, e o que muda um item de aba.
-- Criar, assinar, cancelar e enviar.
-- Campos do contrato e o vínculo com oportunidade, orçamento e evento.
-- Se o texto "Nenhum orçamento encontrado!" aparece nas outras abas vazias, e o que a palavra orçamento indica nesta lista.
+- Contrato do funil pertence à conta e a uma oportunidade da mesma conta.
+- Situações: Em andamento, Assinado e Cancelado, espelhadas nas abas.
+- Enviar não assina; assinar não cancela.
+- O modelo da SPEC-028, quando usado, copia o texto para o contrato; depois o contrato tem vida própria.
+- Este fluxo é distinto do contrato de fornecedor no evento.
 
 ## 9. Validações
 
-Nenhuma validação foi vista. Pendente.
+Oportunidade obrigatória e da mesma conta. Conteúdo do contrato obrigatório para salvar. Situação só nas três previstas.
 
 ## 10. Estados
 
-Rótulos de aba vistos: Em andamento, Assinados, Cancelados. A passagem entre eles não foi executada. O ciclo de vida fica não definido.
+Em andamento → Assinado. Em andamento → Cancelado. Assinado → Cancelado quando o Organizer cancelar após assinatura. Exclusão só de Em andamento neste corte.
 
 ## 11. Dados necessários
 
-Não definido. A lista vazia não mostrou coluna nem campo.
+Oportunidade, conteúdo do contrato, data de criação, situação, data de envio e de assinatura quando existirem, referência ao modelo usado se houver.
 
 ## 12. Interface
 
-Controles vistos: filtro "Criado em", busca por oportunidade, abas Em andamento, Assinados e Cancelados. Na aba Cancelados, com a lista vazia, o texto "Nenhum orçamento encontrado!".
-
-A visita não mostrou cartão, coluna nem formulário. A interface do produto, se esta spec for aprovada, usa Angular Material, DA-044, com esses textos.
+Filtro Criado em, busca por oportunidade, abas Em andamento, Assinados e Cancelados. Ações criar, editar, enviar, assinar, cancelar e excluir quando couber. Angular Material, DA-044.
 
 ## 13. Erros
 
-Nenhum erro foi provocado. Na aba Cancelados vazia, o texto foi "Nenhum orçamento encontrado!". A visita não classificou essa frase como falha.
+Campo inválido indica o campo. Item de outra conta fica indisponível. Falha ao gravar mantém a situação anterior. Lista vazia não é erro.
 
 ## 14. Critérios de aceite
 
-O aceite abaixo descreve a visita. Vale depois da aprovação desta spec.
-
-1. A lista mostra o filtro "Criado em", a busca por oportunidade e as abas Em andamento, Assinados e Cancelados.
-2. Na aba Cancelados, sem itens, o texto visível é "Nenhum orçamento encontrado!".
-
-Criar, assinar, cancelar e enviar ficam sem critério até serem vistos.
+1. A lista mostra filtro, busca e as três abas.
+2. Criar com oportunidade e conteúdo coloca o contrato em Em andamento.
+3. Enviar mantém Em andamento e registra o envio.
+4. Assinar move para Assinados.
+5. Cancelar move para Cancelados.
+6. Outra conta não vê o contrato.
+7. Contrato de fornecedor do evento não aparece nesta lista.
 
 ## 15. Cenários de teste
 
-Abrir a lista com as três abas vazias. Na aba Cancelados, ler "Nenhum orçamento encontrado!". Criar, assinar, cancelar e enviar não têm cenário: essas ações não foram acionadas.
+Abas vazias. Criar, editar, enviar, assinar e cancelar. Busca por oportunidade. Duas contas. Tentativa sem oportunidade.
 
 ## 16. Dependências
 
-SPEC-001. SPEC-007 e RF-082 seguem com os quatro estágios já definidos. O cadastro da oportunidade do funil ainda não tem spec. SPEC-028 é o modelo de contrato. RF-059 e RF-060 são o contrato no fornecedor do evento e estão Observado.
+SPEC-001, SPEC-020 e SPEC-028.
 
 ## 17. Premissas e pontos não definidos
 
-Pendente, no sentido de pergunta em aberto, sem caminho escolhido:
-
-- Conteúdo de um contrato quando a lista tem item.
-- Ação e efeito de criar, assinar, cancelar e enviar.
-- Comportamento do filtro "Criado em" e da busca por oportunidade depois de preenchidos.
-- Texto das abas Em andamento e Assinados quando vazias.
-- Sentido de "Nenhum orçamento encontrado!" numa aba de contratos.
-- Campos, obrigatórios e validações.
-- Quem acessa, além da conta em que a tela foi aberta, e o isolamento entre contas.
-- Relação com oportunidade, orçamento, evento e com o modelo de contrato da SPEC-028.
-- Relatório ou impressão. RF-077 não foi exercido nesta tela.
-
-Não há RF novo. A lacuna fica não definida, como a skill pede quando não existe RF para a regra.
+Canal exato do envio (e-mail ou outro) além do registro de que foi enviado. Assinatura eletrônica com validade jurídica fica fora deste corte.

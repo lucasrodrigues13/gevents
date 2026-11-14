@@ -1,8 +1,6 @@
 # 020. Oportunidades do funil
 
-**Status: rascunho.** Não autoriza implementação. RF-075 e RF-077 continuam Observado. No brief o funil está fora do MVP; esta spec não trata isso como aprovação e não altera a SPEC-007.
-
-Fonte observada: quadro de oportunidades da referência, com as quatro colunas em 0 e R$ 0,00. As ações gerenciar estágios e adicionar oportunidade foram vistas e não usadas.
+**Status: aprovada.** O código segue esta spec.
 
 ## 1. Identificador e nome
 
@@ -10,100 +8,95 @@ SPEC-020. Oportunidades do funil.
 
 ## 2. Objetivo
 
-A conta autenticada vê o quadro das oportunidades nos quatro estágios já conhecidos, com quantidade e valor em cada coluna. O cadastro da oportunidade e a edição dos estágios ficam de fora.
+O Organizer gerencia o quadro de oportunidades do funil: cria, edita, exclui, filtra, exporta e move entre os quatro estágios, inclusive descarte com motivo. Os números alimentam o dashboard da SPEC-007.
 
 ## 3. Requisitos relacionados
 
-RF-075, Observado. O quadro, a quantidade, o valor, o filtro e a menção a estágios configuráveis vêm desse RF. Descarte com motivo, exportação, formulário público de lead, checagem de data, contratos, orçamentos e tarefas de reunião, ligação, e-mail ou tarefa continuam no texto do RF e fora deste fluxo: esta visita não os abriu.
-
-RF-082, Definido, cobre só o dashboard da SPEC-007. Esta spec não reescreve essa tela.
-
-RF-077, Observado. Relatórios do funil não entram aqui.
+RF-075, no recorte de oportunidades, quadro, filtro, exportação, descarte com motivo, formulário público de lead e checagem de data. RF-082 e SPEC-007 para quantidade e valor nos mesmos quatro estágios. Contratos, orçamentos e tarefas comerciais ficam nas SPEC-022, SPEC-025 e SPEC-023. RF-079 fica fora.
 
 ## 4. Atores e permissões
 
-O User autenticado vê o quadro da própria conta. Outro User não vê essas oportunidades. Quem responderia um formulário público de lead não usa esta tela. RF-025 e RF-028.
+O `Organizer` cria, lista, edita, exclui, filtra, exporta e muda estágio das oportunidades da própria conta. Outro `Organizer` não vê. `Admin` acessa qualquer conta. `Client` não acessa o funil neste corte. Lead preenche só o formulário público, sem login. Assistente e fornecedor com login ficam fora.
 
 ## 5. Pré-condições
 
-Conta autenticada, SPEC-001. O caminho no produto até este quadro não está definido. A barra lateral da SPEC-007 não ganha item nesta spec.
-
-Não há spec de cadastro da oportunidade. O quadro visto estava vazio, o mesmo caso em que a SPEC-007 mostra o funil zerado.
+Conta autenticada, SPEC-001. O dashboard da SPEC-007 reflete as mesmas oportunidades.
 
 ## 6. Fluxo principal
 
-1. A conta está no quadro de oportunidades.
-2. Vê quatro colunas, nesta ordem: Contato inicial, Enviado orçamento, Contratado e Descartado.
-3. Cada coluna mostra a quantidade de oportunidades da conta naquele estágio e o valor correspondente.
-4. Sem oportunidade, cada coluna mostra 0 e R$ 0,00.
-5. A tela mostra filtro por responsável, tipo de evento, data prevista e ordenação.
-6. A tela mostra as ações gerenciar estágios e adicionar oportunidade. Usá-las fica fora deste fluxo.
+1. O Organizer abre Oportunidades no funil de vendas.
+2. Vê o quadro com quatro colunas, nesta ordem: Contato inicial, Orçamento enviado, Contratado e Descartado. Cada coluna mostra quantidade e valor da conta.
+3. Cria oportunidade com nome, estágio, e ao menos um contato; opcionalmente fonte, valor da proposta, responsável, serviço/produto, dados do evento previsto, locais e demais contatos.
+4. A oportunidade aparece no cartão da coluna do estágio escolhido; quantidade e valor da coluna e do dashboard atualizam.
+5. Edita os mesmos campos e salva.
+6. Move a oportunidade entre estágios (exceto o descarte, que exige motivo).
+7. Exporta a lista filtrada da conta.
+8. Exclui a oportunidade quando não precisar mais dela.
 
 ## 7. Fluxos alternativos
 
-- Conta sem oportunidade: as quatro colunas ficam em 0 e R$ 0,00. Foi o único quadro visto.
-- Acionar gerenciar estágios ou adicionar oportunidade: não definido. O formulário e a edição de estágios não foram abertos.
-- Aplicar filtro ou ordenação: não definido. Os controles foram vistos; o resultado de usá-los, não.
-- Oportunidade já gravada, cartão na coluna ou mudança de estágio: não visto. Não definido.
+- Conta sem oportunidade: as quatro colunas ficam em 0 e R$ 0,00.
+- Nome vazio ou sem contato: não grava.
+- Mover para Descartado: exige motivo; sem motivo não grava o descarte.
+- Filtro por responsável, tipo de evento, data prevista e ordenação: restringe o quadro à própria conta.
+- Busca por nome da oportunidade: restringe os cartões visíveis.
+- Formulário público de lead: o visitante envia dados mínimos; a oportunidade nasce em Contato inicial na conta dona do link.
+- Checagem de data: ao informar data prevista, o sistema informa se a agenda da conta já tem compromisso naquela data; o Organizer decide se grava mesmo assim.
+- Estágios configuráveis e “gerenciar estágios” da referência ficam fora: os quatro estágios são fixos, alinhados à SPEC-007.
 
 ## 8. Regras de negócio
 
-- Os estágios deste quadro são os quatro de RF-075. Esta spec não cria estágio. RF-082 segue valendo para o dashboard: os mesmos quatro estágios, sem estágio novo.
-- Quantidade é o número de oportunidades da conta na coluna. Valor é a soma dos valores da coluna, RF-075. Sem oportunidade, o visto foi 0 e R$ 0,00.
-- O rótulo da segunda coluna, neste quadro, foi Enviado orçamento. A SPEC-007 escreve Orçamento enviado no dashboard. Esta spec mantém o texto do dashboard. Unificar os dois rótulos: não definido.
-- O filtro de RF-075, nesta visita, são os controles responsável, tipo de evento, data prevista e ordenação. As opções de cada controle não foram vistas.
-- Gerenciar estágios e adicionar oportunidade aparecem na tela e não foram usadas. O que cada uma grava: não definido.
-- O quadro mostra só oportunidades da própria conta. RF-025 e RF-028.
-- Descarte com motivo, exportação, formulário público de lead, checagem de data, contratos, orçamentos e tarefas comerciais permanecem no texto de RF-075 e fora deste fluxo.
-- Relatório do funil permanece em RF-077 e fora deste fluxo.
+- Os estágios são só os quatro da SPEC-007 e de RF-075 vistos na conta: contato inicial, orçamento enviado, contratado e descartado. Rótulo de produto: Orçamento enviado (não “Enviado orçamento”).
+- Quantidade é o número de oportunidades da conta na coluna. Valor é a soma dos valores informados na coluna. Oportunidade sem valor não soma.
+- Oportunidade pertence à conta do Organizer.
+- Descarte exige motivo. Motivo fica gravado e alimenta o relatório de motivos da SPEC-024.
+- Serviço/produto usa o catálogo da SPEC-026 quando existir item; o Organizer também pode informar texto livre na criação.
+- Responsável, neste corte sem assistente, é a própria conta do Organizer ou outro identificador interno da mesma conta; não há atribuição a outra conta.
+- Exportação cobre as oportunidades da conta no filtro atual.
+- RF-079 e peças da loja/vitrine/MeLink ficam fora.
 
 ## 9. Validações
 
-Não há formulário nesta spec. Não há campo para validar.
+Nome da oportunidade obrigatório. Estágio obrigatório e um dos quatro. Ao menos um contato com nome. Valor, se preenchido, é número não negativo. Data prevista, se preenchida, é data válida. Motivo obrigatório no descarte.
 
 ## 10. Estados
 
-O único estado visto é o quadro vazio: as quatro colunas existem, cada uma com quantidade 0 e valor R$ 0,00. Passagem de uma coluna para outra: não definida.
+Contato inicial, Orçamento enviado, Contratado e Descartado. Criação pode nascer em qualquer estágio, salvo o formulário público, que nasce em Contato inicial. Exclusão remove o registro.
 
 ## 11. Dados necessários
 
-Conta autenticada. Oportunidade com estágio e valor, quando um cadastro existir. Esse cadastro não foi visto. Responsável, tipo de evento e data prevista aparecem como nome de filtro, sem lista de opções e sem ficha da oportunidade.
+Nome, estágio, fonte opcional, valor opcional, responsável, serviço/produto, contatos (nome e, se houver, telefone e e-mail), tipo do evento, quantidade estimada de convidados, data prevista, horários e quantidades de padrinhos/damas quando informados, local e endereço de cerimônia e de recepção, motivo de descarte quando aplicável.
 
 ## 12. Interface
 
-Quatro colunas. Em cada uma, quantidade e valor. No vazio, 0 e R$ 0,00. Filtros: responsável, tipo de evento, data prevista e ordenação. Ações: gerenciar estágios e adicionar oportunidade.
+Quadro em quatro colunas com quantidade e valor. Busca, filtro, adicionar, editar, excluir e exportar. Formulário em blocos: sobre a oportunidade, sobre o evento, cerimônia, recepção e contatos. Angular Material, DA-044. Sem gerenciar estágios.
 
-O miolo do dashboard continua o da SPEC-007. Esta tela não traz gráfico.
+Textos dos estágios: Contato inicial, Orçamento enviado, Contratado e Descartado.
 
 ## 13. Erros
 
-A mensagem de falha ao carregar este quadro não foi vista: não definida. Dado de outra conta não aparece. RF-028.
+Campo inválido indica o campo. Descarte sem motivo não grava. Item de outra conta fica indisponível. Falha ao gravar mantém o estágio anterior. Quadro vazio não é erro.
 
 ## 14. Critérios de aceite
 
-1. O quadro mostra as colunas Contato inicial, Enviado orçamento, Contratado e Descartado.
+1. O quadro mostra os quatro estágios com quantidade e valor da própria conta.
 2. Sem oportunidade, cada coluna mostra 0 e R$ 0,00.
-3. A tela mostra os filtros responsável, tipo de evento, data prevista e ordenação.
-4. A tela mostra gerenciar estágios e adicionar oportunidade.
-5. O dashboard da SPEC-007 segue com os rótulos já aprovados, entre eles Orçamento enviado, e com o funil zerado enquanto não houver cadastro de oportunidade.
-6. Outra conta não aparece no quadro.
-7. O quadro não mostra coluna de contrato pendente, contrato assinado, descoberta nem orçamento aprovado.
+3. Criar com nome, estágio e contato coloca o cartão na coluna e atualiza o dashboard da SPEC-007.
+4. Sem nome ou sem contato, nada é gravado.
+5. Editar e excluir alteram só a conta do Organizer.
+6. Mover para Descartado exige motivo.
+7. Filtro e exportação não incluem outra conta.
+8. Lead pelo formulário público nasce em Contato inicial.
+9. Não há coluna além dos quatro estágios nem tela de gerenciar estágios.
 
 ## 15. Cenários de teste
 
-Conta sem oportunidade: quatro colunas em 0 e R$ 0,00, com os quatro filtros e as duas ações visíveis. Duas contas: cada uma vê só o próprio quadro. O dashboard da SPEC-007 permanece como já especificado, com o funil zerado. Abrir o formulário ou editar estágios fica fora do cenário.
+Quadro vazio. Criar, editar, excluir. Mudar entre os três estágios ativos. Descartar com e sem motivo. Filtrar e exportar. Duas contas. Lead público. Data prevista com compromisso na agenda. Conferir SPEC-007.
 
 ## 16. Dependências
 
-SPEC-001. A SPEC-007 permanece aprovada. O funil zerado dos dois lugares é a conta sem oportunidade. Quantidade e valor do dashboard só podem deixar de ser zero quando existir spec de cadastro; esta não é essa spec.
+SPEC-001, SPEC-007 e SPEC-019 para a checagem de data. SPEC-026 para serviço/produto cadastrado. SPEC-021, SPEC-022, SPEC-023, SPEC-024 e SPEC-025 complementam o funil.
 
 ## 17. Premissas e pontos não definidos
 
-- Esta spec é rascunho. RF-075 e RF-077 não passam a Definido. O funil não entra no MVP por este arquivo.
-- O caminho da conta até o quadro: não definido. A lateral da SPEC-007 permanece a da spec aprovada.
-- Formulário de adicionar oportunidade: não aberto. Campos, obrigatoriedade e o que ocorre ao salvar: não definidos.
-- Gerenciar estágios: não aberto. Criar, renomear, reordenar ou remover estágio: não definido.
-- Opções de responsável, tipo de evento, data prevista e ordenação: não definidas. Não se viu se a data prevista é um dia ou um intervalo.
-- Conteúdo do cartão, arrastar entre colunas e edição da oportunidade: não vistos.
-- Valor de oportunidade gravada, arredondamento e oportunidade sem valor continuam em aberto na SPEC-007. Esta visita viu R$ 0,00 só nas colunas vazias.
-- Descarte com motivo, exportação, formulário público, checagem de data, contratos, orçamentos, tarefas comerciais e relatórios do funil: não definidos aqui.
+Lista fechada de motivos de descarte. Se a checagem de data um dia passar a bloquear em vez de só avisar.

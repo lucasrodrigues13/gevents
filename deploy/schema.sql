@@ -641,3 +641,987 @@ BEGIN
 END $EF$;
 COMMIT;
 
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114140132_PapeisOrganizerClient') THEN
+    ALTER TABLE "AspNetUsers" ADD "OrganizerId" text;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114140132_PapeisOrganizerClient') THEN
+    CREATE INDEX "IX_AspNetUsers_OrganizerId" ON "AspNetUsers" ("OrganizerId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114140132_PapeisOrganizerClient') THEN
+    UPDATE "AspNetRoles"
+    SET "Name" = 'Organizer', "NormalizedName" = 'ORGANIZER'
+    WHERE "NormalizedName" = 'USER';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114140132_PapeisOrganizerClient') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20261114140132_PapeisOrganizerClient', '10.0.4');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    ALTER TABLE "Clientes" ADD "AcessoPlataforma" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    ALTER TABLE "Clientes" ADD "PermiteAnexos" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    ALTER TABLE "Clientes" ADD "PermiteContrato" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    ALTER TABLE "Clientes" ADD "PermiteConvidados" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    ALTER TABLE "Clientes" ADD "PermiteMapa" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    ALTER TABLE "Clientes" ADD "PermiteParcelas" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    ALTER TABLE "Clientes" ADD "PermiteRsvp" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    ALTER TABLE "Clientes" ADD "PermiteTarefas" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    ALTER TABLE "Clientes" ADD "UsuarioId" text;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    CREATE INDEX "IX_Clientes_UsuarioId" ON "Clientes" ("UsuarioId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114141254_AcessoClientePermissoes') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20261114141254_AcessoClientePermissoes', '10.0.4');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "TarefaModelo" ADD "DiasAntes" integer;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "ServicoModelo" ADD "ValorEstimado" numeric(12,2);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "ServicoEvento" ADD "OcultoParaClient" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "ServicoEvento" ADD "Ordem" integer NOT NULL DEFAULT 0;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "ServicoEvento" ADD "ServicoContaId" uuid;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "ServicoEvento" ADD "ValorEstimado" numeric(12,2);
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "ParcelaServico" ADD "Situacao" text NOT NULL DEFAULT '';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "Modelos" ADD "PermiteConvites" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "Modelos" ADD "PermiteGerais" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "Modelos" ADD "PermitePlanejamento" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "Modelos" ADD "PermiteServicosFornecedores" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    ALTER TABLE "Modelos" ADD "PermiteTarefas" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "Fornecedores" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        "FotoId" uuid,
+        "RazaoSocial" text,
+        "Cnpj" text,
+        "Cpf" text,
+        "NomeResponsavel" text,
+        "PrecoDe" numeric(12,2),
+        "PrecoAte" numeric(12,2),
+        "Site" text,
+        "Facebook" text,
+        "Instagram" text,
+        "Youtube" text,
+        "Pinterest" text,
+        "Pais" text,
+        "Cep" text,
+        "Endereco" text,
+        "Numero" text,
+        "Estado" text,
+        "Cidade" text,
+        "Bairro" text,
+        "Complemento" text,
+        "Banco" text,
+        "Agencia" text,
+        "ContaBancaria" text,
+        "TitularConta" text,
+        "TipoConta" text,
+        "DocumentosBancarios" text,
+        "PixTipo" text,
+        "PixChave" text,
+        "Diferencial" text,
+        "DiferencialVisivelCliente" boolean NOT NULL,
+        "InformacoesGerais" text,
+        "Portfolio" text,
+        CONSTRAINT "PK_Fornecedores" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "FornecedorNoServico" (
+        "Id" uuid NOT NULL,
+        "ServicoId" uuid NOT NULL,
+        "FornecedorId" uuid NOT NULL,
+        "Etapa" text NOT NULL,
+        "ValorOrcamento" numeric(12,2),
+        "Observacoes" text,
+        CONSTRAINT "PK_FornecedorNoServico" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_FornecedorNoServico_ServicoEvento_ServicoId" FOREIGN KEY ("ServicoId") REFERENCES "ServicoEvento" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "ItemServicoModelo" (
+        "Id" uuid NOT NULL,
+        "ServicoId" uuid NOT NULL,
+        "Tipo" text NOT NULL,
+        "Texto" text NOT NULL,
+        CONSTRAINT "PK_ItemServicoModelo" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_ItemServicoModelo_ServicoModelo_ServicoId" FOREIGN KEY ("ServicoId") REFERENCES "ServicoModelo" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "ModelosBriefing" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        "Origem" text NOT NULL,
+        "Padrao" boolean NOT NULL,
+        "CriadoEm" timestamp with time zone NOT NULL,
+        CONSTRAINT "PK_ModelosBriefing" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "ModelosCronograma" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Titulo" text NOT NULL,
+        "Descricao" text,
+        CONSTRAINT "PK_ModelosCronograma" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "ModelosInspiracao" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        CONSTRAINT "PK_ModelosInspiracao" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "ModelosMensagem" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        "Texto" text NOT NULL,
+        CONSTRAINT "PK_ModelosMensagem" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "ModelosRoteiro" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        CONSTRAINT "PK_ModelosRoteiro" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "ServicosConta" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" character varying(200) NOT NULL,
+        "Padrao" boolean NOT NULL,
+        CONSTRAINT "PK_ServicosConta" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "SubitemServico" (
+        "Id" uuid NOT NULL,
+        "ServicoId" uuid NOT NULL,
+        "Descricao" text NOT NULL,
+        "Quantidade" integer NOT NULL,
+        "ValorUnitario" numeric(12,2) NOT NULL,
+        CONSTRAINT "PK_SubitemServico" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_SubitemServico_ServicoEvento_ServicoId" FOREIGN KEY ("ServicoId") REFERENCES "ServicoEvento" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "VinculoModeloEvento" (
+        "Id" uuid NOT NULL,
+        "ModeloId" uuid NOT NULL,
+        "Tipo" text NOT NULL,
+        "BibliotecaId" uuid NOT NULL,
+        CONSTRAINT "PK_VinculoModeloEvento" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_VinculoModeloEvento_Modelos_ModeloId" FOREIGN KEY ("ModeloId") REFERENCES "Modelos" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "EmailFornecedor" (
+        "Id" uuid NOT NULL,
+        "FornecedorId" uuid NOT NULL,
+        "Endereco" text NOT NULL,
+        CONSTRAINT "PK_EmailFornecedor" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_EmailFornecedor_Fornecedores_FornecedorId" FOREIGN KEY ("FornecedorId") REFERENCES "Fornecedores" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "OrcamentoFornecedor" (
+        "Id" uuid NOT NULL,
+        "FornecedorId" uuid NOT NULL,
+        "Titulo" text NOT NULL,
+        "Link" text,
+        "AnexoId" uuid,
+        "VisivelClientes" boolean NOT NULL,
+        CONSTRAINT "PK_OrcamentoFornecedor" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_OrcamentoFornecedor_Fornecedores_FornecedorId" FOREIGN KEY ("FornecedorId") REFERENCES "Fornecedores" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "TelefoneFornecedor" (
+        "Id" uuid NOT NULL,
+        "FornecedorId" uuid NOT NULL,
+        "Responsavel" text,
+        "Ddi" text,
+        "Numero" text NOT NULL,
+        "Movel" boolean NOT NULL,
+        CONSTRAINT "PK_TelefoneFornecedor" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_TelefoneFornecedor_Fornecedores_FornecedorId" FOREIGN KEY ("FornecedorId") REFERENCES "Fornecedores" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "SecaoBriefing" (
+        "Id" uuid NOT NULL,
+        "ModeloId" uuid NOT NULL,
+        "Titulo" text NOT NULL,
+        "Descricao" text,
+        "Ordem" integer NOT NULL,
+        CONSTRAINT "PK_SecaoBriefing" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_SecaoBriefing_ModelosBriefing_ModeloId" FOREIGN KEY ("ModeloId") REFERENCES "ModelosBriefing" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "ItemCronograma" (
+        "Id" uuid NOT NULL,
+        "ModeloId" uuid NOT NULL,
+        "Rotulo" text,
+        "Data" date,
+        "Hora" time without time zone,
+        "Responsavel" text,
+        "RecadoFornecedores" text,
+        "Ordem" integer NOT NULL,
+        CONSTRAINT "PK_ItemCronograma" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_ItemCronograma_ModelosCronograma_ModeloId" FOREIGN KEY ("ModeloId") REFERENCES "ModelosCronograma" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "ItemInspiracao" (
+        "Id" uuid NOT NULL,
+        "GaleriaId" uuid NOT NULL,
+        "ArquivoId" uuid,
+        "Url" text,
+        "Ordem" integer NOT NULL,
+        CONSTRAINT "PK_ItemInspiracao" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_ItemInspiracao_ModelosInspiracao_GaleriaId" FOREIGN KEY ("GaleriaId") REFERENCES "ModelosInspiracao" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "SecaoRoteiro" (
+        "Id" uuid NOT NULL,
+        "ModeloId" uuid NOT NULL,
+        "Titulo" text,
+        "Horario" time without time zone,
+        "Musica" text,
+        "Ordem" integer NOT NULL,
+        CONSTRAINT "PK_SecaoRoteiro" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_SecaoRoteiro_ModelosRoteiro_ModeloId" FOREIGN KEY ("ModeloId") REFERENCES "ModelosRoteiro" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "FornecedorServico" (
+        "FornecedorId" uuid NOT NULL,
+        "ServicoContaId" uuid NOT NULL,
+        CONSTRAINT "PK_FornecedorServico" PRIMARY KEY ("FornecedorId", "ServicoContaId"),
+        CONSTRAINT "FK_FornecedorServico_Fornecedores_FornecedorId" FOREIGN KEY ("FornecedorId") REFERENCES "Fornecedores" ("Id") ON DELETE CASCADE,
+        CONSTRAINT "FK_FornecedorServico_ServicosConta_ServicoContaId" FOREIGN KEY ("ServicoContaId") REFERENCES "ServicosConta" ("Id") ON DELETE RESTRICT
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "PerguntaBriefing" (
+        "Id" uuid NOT NULL,
+        "SecaoId" uuid NOT NULL,
+        "Enunciado" text NOT NULL,
+        "Tipo" text NOT NULL,
+        "Ordem" integer NOT NULL,
+        CONSTRAINT "PK_PerguntaBriefing" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_PerguntaBriefing_SecaoBriefing_SecaoId" FOREIGN KEY ("SecaoId") REFERENCES "SecaoBriefing" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE TABLE "ItemRoteiro" (
+        "Id" uuid NOT NULL,
+        "SecaoId" uuid NOT NULL,
+        "Texto" text NOT NULL,
+        "Ordem" integer NOT NULL,
+        CONSTRAINT "PK_ItemRoteiro" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_ItemRoteiro_SecaoRoteiro_SecaoId" FOREIGN KEY ("SecaoId") REFERENCES "SecaoRoteiro" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_EmailFornecedor_FornecedorId" ON "EmailFornecedor" ("FornecedorId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_Fornecedores_ContaId" ON "Fornecedores" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_FornecedorNoServico_ServicoId" ON "FornecedorNoServico" ("ServicoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_FornecedorServico_ServicoContaId" ON "FornecedorServico" ("ServicoContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_ItemCronograma_ModeloId" ON "ItemCronograma" ("ModeloId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_ItemInspiracao_GaleriaId" ON "ItemInspiracao" ("GaleriaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_ItemRoteiro_SecaoId" ON "ItemRoteiro" ("SecaoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_ItemServicoModelo_ServicoId" ON "ItemServicoModelo" ("ServicoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_ModelosBriefing_ContaId" ON "ModelosBriefing" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_ModelosCronograma_ContaId" ON "ModelosCronograma" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_ModelosInspiracao_ContaId" ON "ModelosInspiracao" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_ModelosMensagem_ContaId" ON "ModelosMensagem" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_ModelosRoteiro_ContaId" ON "ModelosRoteiro" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_OrcamentoFornecedor_FornecedorId" ON "OrcamentoFornecedor" ("FornecedorId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_PerguntaBriefing_SecaoId" ON "PerguntaBriefing" ("SecaoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_SecaoBriefing_ModeloId" ON "SecaoBriefing" ("ModeloId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_SecaoRoteiro_ModeloId" ON "SecaoRoteiro" ("ModeloId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE UNIQUE INDEX "IX_ServicosConta_ContaId_Nome" ON "ServicosConta" ("ContaId", "Nome");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_SubitemServico_ServicoId" ON "SubitemServico" ("ServicoId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_TelefoneFornecedor_FornecedorId" ON "TelefoneFornecedor" ("FornecedorId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    CREATE INDEX "IX_VinculoModeloEvento_ModeloId" ON "VinculoModeloEvento" ("ModeloId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114150209_Specs011a018') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20261114150209_Specs011a018', '10.0.4');
+    END IF;
+END $EF$;
+COMMIT;
+
+START TRANSACTION;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    DROP INDEX "IX_Compromissos_EventoId";
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    ALTER TABLE "Perfis" ADD "CapturaLeadRsvp" boolean NOT NULL DEFAULT FALSE;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    ALTER TABLE "Compromissos" ALTER COLUMN "EventoId" DROP NOT NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    ALTER TABLE "Compromissos" ADD "Descricao" character varying(500) NOT NULL DEFAULT '';
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE TABLE "ContratosFunil" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "OportunidadeId" uuid NOT NULL,
+        "Conteudo" text NOT NULL,
+        "Situacao" text NOT NULL,
+        "CriadoEm" timestamp with time zone NOT NULL,
+        "EnviadoEm" timestamp with time zone,
+        "AssinadoEm" timestamp with time zone,
+        "ModeloId" uuid,
+        CONSTRAINT "PK_ContratosFunil" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE TABLE "LeadsRsvp" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "ConviteId" uuid NOT NULL,
+        "EventoId" uuid NOT NULL,
+        "NomeConvite" text NOT NULL,
+        "NomeEvento" text NOT NULL,
+        "Telefone" text,
+        "CriadoEm" timestamp with time zone NOT NULL,
+        "Situacao" text NOT NULL,
+        "OportunidadeId" uuid,
+        "ContatadoEm" timestamp with time zone,
+        CONSTRAINT "PK_LeadsRsvp" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE TABLE "MetricasRsvpFunil" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Visualizacoes" integer NOT NULL,
+        "CliquesBotao" integer NOT NULL,
+        CONSTRAINT "PK_MetricasRsvpFunil" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE TABLE "ModelosContratoFunil" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        "Texto" text NOT NULL,
+        CONSTRAINT "PK_ModelosContratoFunil" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE TABLE "ModelosOrcamentoFunil" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        "Texto" text NOT NULL,
+        "CorPrimaria" text,
+        "CorSecundaria" text,
+        CONSTRAINT "PK_ModelosOrcamentoFunil" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE TABLE "ModelosServicoFunil" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        "Descricao" character varying(200),
+        "Valor" numeric(12,2),
+        CONSTRAINT "PK_ModelosServicoFunil" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE TABLE "Oportunidades" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "Nome" text NOT NULL,
+        "Estagio" text NOT NULL,
+        "Fonte" text,
+        "ValorProposta" numeric(12,2),
+        "Responsavel" text NOT NULL,
+        "ServicoProduto" text,
+        "ModeloServicoFunilId" uuid,
+        "TipoEvento" text,
+        "QuantidadeConvidados" integer,
+        "DataPrevista" date,
+        "Horarios" text,
+        "QuantidadePadrinhos" integer,
+        "QuantidadeDamas" integer,
+        "LocalCerimonia" text,
+        "EnderecoCerimonia" text,
+        "LocalRecepcao" text,
+        "EnderecoRecepcao" text,
+        "Uf" text,
+        "Cidade" text,
+        "MotivoDescarte" text,
+        "CriadoEm" timestamp with time zone NOT NULL,
+        "EntradaNoEstagioEm" timestamp with time zone NOT NULL,
+        CONSTRAINT "PK_Oportunidades" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE TABLE "OrcamentosFunil" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "OportunidadeId" uuid NOT NULL,
+        "Conteudo" text NOT NULL,
+        "Valor" numeric(12,2),
+        "Situacao" text NOT NULL,
+        "CriadoEm" timestamp with time zone NOT NULL,
+        "EnviadoEm" timestamp with time zone,
+        "RespondidoEm" timestamp with time zone,
+        "ModeloId" uuid,
+        CONSTRAINT "PK_OrcamentosFunil" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE TABLE "TarefasFunil" (
+        "Id" uuid NOT NULL,
+        "ContaId" text NOT NULL,
+        "OportunidadeId" uuid NOT NULL,
+        "Titulo" text NOT NULL,
+        "Observacao" text,
+        "Tipo" text NOT NULL,
+        "Responsavel" text NOT NULL,
+        "Prazo" date NOT NULL,
+        "Completa" boolean NOT NULL,
+        "AnexoArquivoId" uuid,
+        CONSTRAINT "PK_TarefasFunil" PRIMARY KEY ("Id")
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE TABLE "ContatoOportunidade" (
+        "Id" uuid NOT NULL,
+        "OportunidadeId" uuid NOT NULL,
+        "Nome" text NOT NULL,
+        "Telefone" text,
+        "Email" text,
+        CONSTRAINT "PK_ContatoOportunidade" PRIMARY KEY ("Id"),
+        CONSTRAINT "FK_ContatoOportunidade_Oportunidades_OportunidadeId" FOREIGN KEY ("OportunidadeId") REFERENCES "Oportunidades" ("Id") ON DELETE CASCADE
+    );
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE UNIQUE INDEX "IX_Compromissos_EventoId" ON "Compromissos" ("EventoId") WHERE "EventoId" IS NOT NULL;
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE INDEX "IX_ContatoOportunidade_OportunidadeId" ON "ContatoOportunidade" ("OportunidadeId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE INDEX "IX_ContratosFunil_ContaId" ON "ContratosFunil" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE INDEX "IX_LeadsRsvp_ContaId" ON "LeadsRsvp" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE UNIQUE INDEX "IX_MetricasRsvpFunil_ContaId" ON "MetricasRsvpFunil" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE INDEX "IX_ModelosContratoFunil_ContaId" ON "ModelosContratoFunil" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE INDEX "IX_ModelosOrcamentoFunil_ContaId" ON "ModelosOrcamentoFunil" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE INDEX "IX_ModelosServicoFunil_ContaId" ON "ModelosServicoFunil" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE INDEX "IX_Oportunidades_ContaId" ON "Oportunidades" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE INDEX "IX_OrcamentosFunil_ContaId" ON "OrcamentosFunil" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    CREATE INDEX "IX_TarefasFunil_ContaId" ON "TarefasFunil" ("ContaId");
+    END IF;
+END $EF$;
+
+DO $EF$
+BEGIN
+    IF NOT EXISTS(SELECT 1 FROM "__EFMigrationsHistory" WHERE "MigrationId" = '20261114154200_Specs019a028') THEN
+    INSERT INTO "__EFMigrationsHistory" ("MigrationId", "ProductVersion")
+    VALUES ('20261114154200_Specs019a028', '10.0.4');
+    END IF;
+END $EF$;
+COMMIT;
+

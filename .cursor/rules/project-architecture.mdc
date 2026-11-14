@@ -7,11 +7,11 @@ alwaysApply: true
 
 A fonte é `docs/requirements.md`. Não invente stack nem camada.
 
-- .NET 10 LTS, API em `src/backend/Project.Api`, rotas `/api/v1`. Frontend Angular 22 estático em `src/frontend/`, com Angular Material. PostgreSQL, EF Core, Npgsql, migrations explícitas. Identity para senha, e-mail, lockout e roles. Sessão por JWT de acesso, 8 horas, sem refresh e sem lista de revogação. Roles só `Admin` e `User`.
+- .NET 10 LTS, API em `src/backend/Project.Api`, rotas `/api/v1`. Frontend Angular 22 estático em `src/frontend/`, com Angular Material. PostgreSQL, EF Core, Npgsql, migrations explícitas. Identity para senha, e-mail, lockout e roles. Sessão por JWT de acesso, 8 horas, sem refresh e sem lista de revogação. Roles: `Admin`, `Organizer` e `Client`.
 - Projetos em `src/backend/`: `Project.Domain`, `Project.Application`, `Project.Infrastructure`, `Project.Api`. A solution é `src/backend/gevents.slnx` e inclui esses projetos e os testes. Testes: `Project.Tests` e `Project.IntegrationTests`, em `tests/`. O Angular não entra na solution.
 - Domain não referencia nada. Application referencia só Domain. Infrastructure referencia Application e Domain. Api referencia Application e Infrastructure para compor.
 - Endpoint de negócio não usa `DbContext`. Endpoint de conta pode usar `UserManager`, `SignInManager` e `RoleManager`. A assinatura do JWT fica na Infrastructure, atrás de interface na Application.
 - Interface de recurso externo fica em Application e a implementação em Infrastructure. `ApplicationUser` só em Infrastructure, se houver campo extra. Entidade de domínio não herda `IdentityUser`.
 - Sem Generic Repository, Unit of Work extra, repositório de usuário, CQRS, MediatR, AutoMapper, fila, Redis, refresh token, OAuth próprio, login social, SSR e microsserviço.
 - Um VPS: Compose com API, Postgres e Caddy. O Caddy publica o build estático e encaminha `/api`. Arquivo local no volume. E-mail MailKit no pedido, sem fila. Sem `Database.Migrate()` na subida.
-- `User` não é papel de negócio. Não há cookie de autenticação. Não trate requisito Observado como aprovado.
+- `Admin` é admin geral (tudo e todas as contas). `Organizer` é o comprador do sistema e dono do tenant de negócio. Cadastro público cria `Organizer`. `Client` é subusuário sempre vinculado a um `Organizer`, com acesso limitado ao que o organizador concede. Assistente e login de fornecedor ficam fora deste corte. Não há cookie de autenticação. Não trate requisito Observado como aprovado.

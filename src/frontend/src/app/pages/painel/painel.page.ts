@@ -5,10 +5,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
 import { mensagemDeErro } from '../../core/mensagem-erro';
 import { NegocioClient, Painel } from '../../core/negocio.client';
+import { ToastService } from '../../core/toast.service';
+import { GdDataPipe } from '../../shared/gd-data.pipe';
 
 @Component({
   selector: 'app-painel',
-  imports: [RouterLink, MatCardModule, MatIconModule, MatListModule],
+  imports: [RouterLink, MatCardModule, MatIconModule, MatListModule, GdDataPipe],
   template: `
     <header class="gd-cabecalho">
       <div>
@@ -16,9 +18,6 @@ import { NegocioClient, Painel } from '../../core/negocio.client';
         <p>O que está em andamento na assessoria.</p>
       </div>
     </header>
-    @if (aviso()) {
-      <p class="aviso" role="alert">{{ aviso() }}</p>
-    }
     @if (painel(); as dados) {
       <section class="gd-numeros">
         <a class="gd-numero" routerLink="/eventos" [queryParams]="{ situacao: 'EmAndamento' }">
@@ -37,12 +36,12 @@ import { NegocioClient, Painel } from '../../core/negocio.client';
           <strong>{{ dados.cancelados }}</strong>
         </a>
         @for (estagio of dados.funil; track estagio.estagio) {
-          <div class="gd-numero">
+          <a class="gd-numero" routerLink="/oportunidades">
             <span>{{ estagio.estagio }}</span>
             <span class="gd-icone"><mat-icon>filter_alt</mat-icon></span>
             <strong>{{ estagio.quantidade }}</strong>
             <small>{{ estagio.valor }}</small>
-          </div>
+          </a>
         }
       </section>
       <mat-card>
@@ -56,7 +55,7 @@ import { NegocioClient, Painel } from '../../core/negocio.client';
                 <a mat-list-item [routerLink]="['/eventos', evento.id]">
                   <span matListItemTitle>{{ evento.nome }}</span>
                   @if (evento.data) {
-                    <span matListItemLine>{{ evento.data }}</span>
+                    <span matListItemLine>{{ evento.data | gdData }}</span>
                   }
                 </a>
               }
@@ -70,13 +69,13 @@ import { NegocioClient, Painel } from '../../core/negocio.client';
 })
 export class PainelPage implements OnInit {
   private readonly negocio = inject(NegocioClient);
+  private readonly toast = inject(ToastService);
   protected readonly painel = signal<Painel | null>(null);
-  protected readonly aviso = signal('');
 
   ngOnInit(): void {
     this.negocio.painel().subscribe({
       next: (painel) => this.painel.set(painel),
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 }

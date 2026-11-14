@@ -12,15 +12,17 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { mensagemDeErro } from '../../core/mensagem-erro';
+import { ToastService } from '../../core/toast.service';
 import { DIALOG } from '../../shared/dialog';
 import { ConfirmaDialog } from '../../shared/confirma-dialog';
+import { MascaraDirective } from '../../shared/mascara.directive';
 import { EventoResumo, ListaConvites, NegocioClient } from '../../core/negocio.client';
 
 @Component({
   selector: 'app-convidados',
   imports: [
     ReactiveFormsModule, RouterLink, MatCardModule, MatButtonModule, MatFormFieldModule, MatInputModule,
-    MatSelectModule, MatButtonToggleModule, MatCheckboxModule, MatIconModule, MatTableModule,
+    MatSelectModule, MatButtonToggleModule, MatCheckboxModule, MatIconModule, MatTableModule, MascaraDirective,
   ],
   styles: `
     .gd-modal { position: fixed; z-index: 40; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(640px, calc(100vw - 32px)); max-height: 90vh; overflow: auto; padding: 20px; }
@@ -64,7 +66,7 @@ import { EventoResumo, ListaConvites, NegocioClient } from '../../core/negocio.c
             <mat-option value="NaoComparecera">Não comparecerá</mat-option>
           </mat-select>
         </mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>Telefone</mat-label><input matInput formControlName="telefone" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Telefone</mat-label><input matInput formControlName="telefone" gdMascara="celular" /></mat-form-field>
         <mat-form-field appearance="outline"><mat-label>Observação</mat-label><input matInput formControlName="observacao" /></mat-form-field>
         <mat-checkbox formControlName="somenteConfirmados">Só confirmados</mat-checkbox>
         <button mat-stroked-button type="submit">Filtrar</button>
@@ -97,7 +99,7 @@ import { EventoResumo, ListaConvites, NegocioClient } from '../../core/negocio.c
         <mat-form-field appearance="outline"><mat-label>Observação</mat-label><input matInput formControlName="observacao" /></mat-form-field>
         <mat-form-field appearance="outline"><mat-label>Nome do convidado</mat-label><input matInput formControlName="convidado" /></mat-form-field>
         <mat-form-field appearance="outline"><mat-label>DDI</mat-label><input matInput formControlName="ddi" /></mat-form-field>
-        <mat-form-field appearance="outline"><mat-label>Celular</mat-label><input matInput formControlName="celular" /></mat-form-field>
+        <mat-form-field appearance="outline"><mat-label>Celular</mat-label><input matInput formControlName="celular" gdMascara="celular" /></mat-form-field>
         @if (transferAtivo()) {
           <mat-checkbox formControlName="usaTransfer">Usa transfer</mat-checkbox>
           @if (convite.controls.usaTransfer.value) {
@@ -120,7 +122,6 @@ import { EventoResumo, ListaConvites, NegocioClient } from '../../core/negocio.c
           <input type="file" accept=".xlsx,.xls" (change)="importar($event)" />
         </label>
       </p>
-      @if (aviso()) { <p class="aviso" role="alert">{{ aviso() }}</p> }
       @if (lista(); as dados) {
         <h2>Totais</h2>
         <p>Situação: {{ dados.porSituacao.map((item) => item.rotulo + ' ' + item.quantidade).join(', ') }}</p>
@@ -188,12 +189,12 @@ export class ConvidadosPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly negocio = inject(NegocioClient);
   private readonly rota = inject(ActivatedRoute);
+  private readonly toast = inject(ToastService);
   protected readonly eventos = signal<EventoResumo[]>([]);
   protected readonly lista = signal<ListaConvites | null>(null);
   protected readonly grupos = signal<{ id: string; nome: string }[]>([]);
   protected readonly locais = signal<string[]>([]);
   protected readonly visao = signal('convite');
-  protected readonly aviso = signal('');
   protected readonly eventoId = signal('');
   protected readonly transferAtivo = signal(false);
   protected readonly locaisTexto = signal('');
@@ -213,7 +214,7 @@ export class ConvidadosPage implements OnInit {
     if (!id) {
       this.negocio.eventos({ situacao: 'EmAndamento' }).subscribe({
         next: (eventos) => this.eventos.set(eventos),
-        error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+        error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
       });
       return;
     }
@@ -223,7 +224,7 @@ export class ConvidadosPage implements OnInit {
         this.locais.set(evento.locaisTransfer);
         this.locaisTexto.set(evento.locaisTransfer.join('\n'));
       },
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
     this.negocio.grupos().subscribe({ next: (grupos) => this.grupos.set(grupos) });
     this.carregar();
@@ -242,11 +243,8 @@ export class ConvidadosPage implements OnInit {
       observacao: valor.observacao,
       somenteConfirmados: valor.somenteConfirmados ? 'true' : '',
     }).subscribe({
-      next: (lista) => {
-        this.lista.set(lista);
-        this.aviso.set('');
-      },
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      next: (lista) => this.lista.set(lista),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 
@@ -255,9 +253,9 @@ export class ConvidadosPage implements OnInit {
     this.negocio.transfer(this.eventoId(), this.transferAtivo(), locais).subscribe({
       next: (evento) => {
         this.locais.set(evento.locaisTransfer);
-        this.aviso.set('Transfer salvo.');
+        this.toast.sucesso('Transfer salvo.');
       },
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 
@@ -266,8 +264,9 @@ export class ConvidadosPage implements OnInit {
       next: (grupo) => {
         this.grupos.update((lista) => [...lista, grupo]);
         this.grupoNome.set('');
+        this.toast.sucesso('Grupo criado.');
       },
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 
@@ -290,23 +289,27 @@ export class ConvidadosPage implements OnInit {
       next: () => {
         this.convite.reset({ ddi: '+55', usaTransfer: false });
         this.formularioConvite.set(false);
+        this.toast.sucesso('Convite criado.');
         this.carregar();
       },
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 
   protected principal(conviteId: string, convidadoId: string): void {
     this.negocio.definirPrincipal(conviteId, convidadoId).subscribe({
-      next: () => this.carregar(),
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      next: () => {
+        this.toast.sucesso('Telefone principal atualizado.');
+        this.carregar();
+      },
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 
   protected copiar(token: string): void {
     const link = `${location.origin}/rsvp/${token}`;
     void navigator.clipboard.writeText(link);
-    this.aviso.set('Link copiado.');
+    this.toast.sucesso('Link copiado.');
   }
 
   protected baixarQr(id: string): void {
@@ -319,7 +322,7 @@ export class ConvidadosPage implements OnInit {
         link.click();
         URL.revokeObjectURL(url);
       },
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 
@@ -327,12 +330,12 @@ export class ConvidadosPage implements OnInit {
     this.negocio.whatsapp(id).subscribe({
       next: (resposta) => {
         if (!resposta.url) {
-          this.aviso.set('O convite não tem telefone de principal.');
+          this.toast.erro('O convite não tem telefone de principal.');
           return;
         }
         window.open(resposta.url, '_blank', 'noopener');
       },
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 
@@ -345,14 +348,17 @@ export class ConvidadosPage implements OnInit {
         return;
       }
       this.negocio.removerConvidado(id).subscribe({
-        next: () => this.carregar(),
-        error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+        next: () => {
+          this.toast.sucesso('Convidado excluído.');
+          this.carregar();
+        },
+        error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
       });
     });
   }
 
   protected semEdicao(): void {
-    this.aviso.set('A edição do convite ainda não está disponível neste fluxo.');
+    this.toast.erro('A edição do convite ainda não está disponível neste fluxo.');
   }
 
   protected semExclusao(tipo: string): void {
@@ -361,7 +367,7 @@ export class ConvidadosPage implements OnInit {
       data: { titulo: 'Excluir', texto: `Confirma a exclusão deste ${tipo}?`, confirmar: 'Excluir' },
     }).afterClosed().subscribe((confirmou) => {
       if (confirmou) {
-        this.aviso.set('A exclusão ainda não está disponível neste fluxo.');
+        this.toast.erro('A exclusão ainda não está disponível neste fluxo.');
       }
     });
   }
@@ -376,7 +382,7 @@ export class ConvidadosPage implements OnInit {
         link.click();
         URL.revokeObjectURL(url);
       },
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 
@@ -386,8 +392,11 @@ export class ConvidadosPage implements OnInit {
       return;
     }
     this.negocio.importar(this.eventoId(), arquivo).subscribe({
-      next: () => this.carregar(),
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      next: () => {
+        this.toast.sucesso('Planilha importada.');
+        this.carregar();
+      },
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 }

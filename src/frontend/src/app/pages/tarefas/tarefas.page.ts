@@ -9,13 +9,15 @@ import { MatTableModule } from '@angular/material/table';
 import { AuthService } from '../../core/auth.service';
 import { mensagemDeErro } from '../../core/mensagem-erro';
 import { NegocioClient, SITUACOES_TAREFA, Tarefa } from '../../core/negocio.client';
+import { ToastService } from '../../core/toast.service';
 import { DIALOG } from '../../shared/dialog';
 import { ConfirmaDialog } from '../../shared/confirma-dialog';
+import { GdDataPipe } from '../../shared/gd-data.pipe';
 import { TarefaFormDialog } from './tarefa-form.dialog';
 
 @Component({
   selector: 'app-tarefas',
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatButtonToggleModule, MatIconModule, MatTableModule],
+  imports: [RouterLink, MatCardModule, MatButtonModule, MatButtonToggleModule, MatIconModule, MatTableModule, GdDataPipe],
   template: `
     <header class="gd-cabecalho">
       <div>
@@ -34,7 +36,6 @@ import { TarefaFormDialog } from './tarefa-form.dialog';
       <mat-button-toggle value="lista">Lista</mat-button-toggle>
       @if (eventoId()) { <mat-button-toggle value="quadro">Quadro</mat-button-toggle> }
     </mat-button-toggle-group>
-    @if (aviso()) { <p class="aviso" role="alert">{{ aviso() }}</p> }
     @if (visao() === 'lista') {
       <section class="gd-painel">
         @if (tarefas().length === 0) {
@@ -60,7 +61,7 @@ import { TarefaFormDialog } from './tarefa-form.dialog';
             </ng-container>
             <ng-container matColumnDef="prazo">
               <th mat-header-cell *matHeaderCellDef>Prazo</th>
-              <td mat-cell *matCellDef="let tarefa">{{ tarefa.prazo ?? '—' }}</td>
+              <td mat-cell *matCellDef="let tarefa">{{ tarefa.prazo | gdData }}</td>
             </ng-container>
             <ng-container matColumnDef="situacao">
               <th mat-header-cell *matHeaderCellDef>Situação</th>
@@ -90,7 +91,7 @@ import { TarefaFormDialog } from './tarefa-form.dialog';
           <section class="gd-painel">
             <h2>{{ coluna.rotulo }}</h2>
             @for (tarefa of daColuna(coluna.valor); track tarefa.id) {
-              <mat-card><mat-card-content>{{ tarefa.titulo }} @if (tarefa.prazo) { — {{ tarefa.prazo }} }</mat-card-content></mat-card>
+              <mat-card><mat-card-content>{{ tarefa.titulo }} @if (tarefa.prazo) { — {{ tarefa.prazo | gdData }} }</mat-card-content></mat-card>
             }
           </section>
         }
@@ -104,10 +105,10 @@ export class TarefasPage implements OnInit {
   private readonly rota = inject(ActivatedRoute);
   private readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
+  private readonly toast = inject(ToastService);
   protected readonly situacoes = SITUACOES_TAREFA;
   protected readonly tarefas = signal<Tarefa[]>([]);
   protected readonly visao = signal('lista');
-  protected readonly aviso = signal('');
   protected readonly eventoId = signal('');
   protected readonly email = this.auth.email.bind(this.auth);
   protected readonly colunas = ['titulo', 'evento', 'prazo', 'situacao', 'responsavel', 'acoes'];
@@ -139,7 +140,7 @@ export class TarefasPage implements OnInit {
       data: { titulo: 'Excluir tarefa', texto: 'Confirma a exclusão desta tarefa?', confirmar: 'Excluir' },
     }).afterClosed().subscribe((confirmou) => {
       if (confirmou) {
-        this.aviso.set('A exclusão ainda não está disponível neste fluxo.');
+        this.toast.erro('A exclusão ainda não está disponível neste fluxo.');
       }
     });
   }
@@ -147,11 +148,8 @@ export class TarefasPage implements OnInit {
   private carregar(): void {
     const pedido = this.eventoId() ? this.negocio.tarefasDoEvento(this.eventoId()) : this.negocio.tarefas();
     pedido.subscribe({
-      next: (tarefas) => {
-        this.tarefas.set(tarefas);
-        this.aviso.set('');
-      },
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      next: (tarefas) => this.tarefas.set(tarefas),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 }

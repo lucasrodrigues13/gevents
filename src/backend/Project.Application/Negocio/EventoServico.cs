@@ -2,6 +2,7 @@ using Project.Application.Cep;
 using Project.Application.Comum;
 using Project.Domain.Clientes;
 using Project.Domain.Eventos;
+using Project.Domain.Fornecedores;
 using Project.Domain.Tarefas;
 
 namespace Project.Application.Negocio;
@@ -49,14 +50,30 @@ public sealed record AssessoriaPedido(
     decimal? ValorEntrada,
     DateOnly? DataEntrada);
 
-public sealed record ParcelaLeitura(int Numero, DateOnly Vencimento, decimal Valor, bool Entrada);
+public sealed record ParcelaLeitura(int Numero, DateOnly Vencimento, decimal Valor, bool Entrada, SituacaoParcela Situacao);
+
+public sealed record SubitemLeitura(Guid Id, string Descricao, int Quantidade, decimal ValorUnitario, decimal Total);
+
+public sealed record FornecedorNoServicoLeitura(
+    Guid Id,
+    Guid FornecedorId,
+    string Fornecedor,
+    EtapaNegociacao Etapa,
+    decimal? ValorOrcamento,
+    string? Observacoes);
 
 public sealed record ServicoLeitura(
     Guid Id,
     string Nome,
     bool Contratado,
+    decimal? ValorEstimado,
     decimal? ValorContratado,
-    IReadOnlyList<ParcelaLeitura> Parcelas);
+    bool OcultoParaClient,
+    int Ordem,
+    Guid? ServicoContaId,
+    IReadOnlyList<ParcelaLeitura> Parcelas,
+    IReadOnlyList<SubitemLeitura> Subitens,
+    IReadOnlyList<FornecedorNoServicoLeitura> Fornecedores);
 
 public sealed record LocalLeitura(
     string? Nome,
@@ -119,7 +136,7 @@ public sealed record EventoResumo(
     int ConvidadosConfirmados,
     int Convidados);
 
-public sealed class EventoServico(IDados dados, IConsultaCep cep)
+public sealed class EventoServico(IDados dados, IConsultaCep cep, ClienteServico clientes)
 {
     public async Task<IReadOnlyList<EventoResumo>> ListarAsync(
         string contaId,
@@ -208,11 +225,18 @@ public sealed class EventoServico(IDados dados, IConsultaCep cep)
                 var enderecoCliente = await cep.ConsultarAsync(Mascaras.SoDigitos(cliente.Cep)!, ct);
                 if (enderecoCliente is not null)
                 {
+                    cliente.Pais = enderecoCliente.Pais;
                     cliente.Endereco = enderecoCliente.Endereco;
                     cliente.Estado = enderecoCliente.Estado;
                     cliente.Cidade = enderecoCliente.Cidade;
                     cliente.Bairro = enderecoCliente.Bairro;
                 }
+            }
+
+            var acesso = await clientes.AplicarAcessoAsync(contaId, cliente, pedido.Cliente?.AcessoPlataforma == true, ct);
+            if (!acesso.Ok)
+            {
+                return Resultado<EventoDetalhe>.Erro(acesso.Falha!.Codigo, acesso.Falha.Mensagem);
             }
         }
 
@@ -243,6 +267,7 @@ public sealed class EventoServico(IDados dados, IConsultaCep cep)
             QuantidadeDamas = pedido.QuantidadeDamas,
         };
 
+        var ordem = 0;
         foreach (var servico in modelo.Servicos)
         {
             evento.Servicos.Add(new ServicoEvento
@@ -250,17 +275,29 @@ public sealed class EventoServico(IDados dados, IConsultaCep cep)
                 Id = Guid.NewGuid(),
                 EventoId = evento.Id,
                 Nome = servico.Nome,
+                ValorEstimado = servico.ValorEstimado,
+                Ordem = ordem++,
             });
         }
 
-        var tarefas = modelo.Tarefas.Select(tarefa => new Tarefa
+        var tarefas = modelo.Tarefas.Select(tarefa =>
         {
-            Id = Guid.NewGuid(),
-            EventoId = evento.Id,
-            ContaId = contaId,
-            Titulo = tarefa.Titulo,
-            Situacao = SituacaoTarefa.Pendente,
-            ResponsavelContaId = contaId,
+            DateOnly? prazo = null;
+            if (tarefa.DiasAntes is int dias && evento.Data is DateOnly data)
+            {
+                prazo = data.AddDays(-dias);
+            }
+
+            return new Tarefa
+            {
+                Id = Guid.NewGuid(),
+                EventoId = evento.Id,
+                ContaId = contaId,
+                Titulo = tarefa.Titulo,
+                Prazo = prazo,
+                Situacao = SituacaoTarefa.Pendente,
+                ResponsavelContaId = contaId,
+            };
         }).ToArray();
 
         var agenda = evento.SalvarNaAgenda
@@ -269,6 +306,7 @@ public sealed class EventoServico(IDados dados, IConsultaCep cep)
                 Id = Guid.NewGuid(),
                 ContaId = contaId,
                 EventoId = evento.Id,
+                Descricao = evento.Nome,
                 Data = evento.Data,
                 Hora = evento.Hora,
             }
@@ -432,6 +470,7 @@ public sealed class EventoServico(IDados dados, IConsultaCep cep)
                 Vencimento = parcela.Vencimento,
                 Valor = parcela.Valor,
                 Entrada = parcela.Entrada,
+                Situacao = SituacaoParcela.Pendente,
             }).ToList(),
         };
         await dados.AdicionarServicoAsync(servico, ct);
@@ -507,6 +546,7 @@ public sealed class EventoServico(IDados dados, IConsultaCep cep)
         var encontrado = await cep.ConsultarAsync(Mascaras.SoDigitos(cepMascarado)!, ct);
         if (encontrado is not null)
         {
+            local.Pais = encontrado.Pais;
             local.Endereco = encontrado.Endereco;
             local.Estado = encontrado.Estado;
             local.Cidade = encontrado.Cidade;
@@ -516,57 +556,8 @@ public sealed class EventoServico(IDados dados, IConsultaCep cep)
         return Resultado<LocalEvento>.Sucesso(local);
     }
 
-    private async Task<EventoDetalhe> DetalheAsync(string contaId, Evento evento, DateOnly hoje, CancellationToken ct)
-    {
-        var tarefas = await dados.ListarTarefasAsync(contaId, evento.Id, ct);
-        var convites = await dados.ListarConvitesAsync(contaId, evento.Id, ct);
-        var convidados = convites.SelectMany(convite => convite.Convidados).ToArray();
-        return new EventoDetalhe(
-            evento.Id,
-            evento.Nome,
-            evento.PrimeiroNome,
-            evento.SegundoNome,
-            evento.Tipo,
-            evento.Situacao,
-            evento.Data,
-            evento.Hora,
-            Dias(evento.Data, hoje),
-            evento.OrcamentoEstimado,
-            evento.ConvidadosEstimados,
-            evento.TempoFesta,
-            evento.InicioCerimonia,
-            evento.InicioRecepcao,
-            evento.QuantidadePadrinhos,
-            evento.QuantidadeDamas,
-            null,
-            evento.SenhaSite,
-            evento.NotificarAssessor,
-            evento.NotificarAssistentes,
-            evento.NotificarClientes,
-            evento.SalvarNaAgenda,
-            null,
-            evento.ImagemId,
-            evento.TransferAtivo,
-            evento.LocaisTransfer.Select(local => local.Nome).ToArray(),
-            LerLocal(evento.Cerimonia ?? new LocalEvento()),
-            LerLocal(evento.Recepcao ?? new LocalEvento()),
-            evento.Tags.Select(tag => tag.Nome).ToArray(),
-            evento.Servicos.Select(servico => new ServicoLeitura(
-                servico.Id,
-                servico.Nome,
-                servico.Contratado,
-                servico.ValorContratado,
-                servico.Parcelas
-                    .OrderBy(parcela => parcela.Numero)
-                    .Select(parcela => new ParcelaLeitura(parcela.Numero, parcela.Vencimento, parcela.Valor, parcela.Entrada))
-                    .ToArray())).ToArray(),
-            tarefas.Count(tarefa => tarefa.Situacao == SituacaoTarefa.Concluida),
-            tarefas.Count,
-            convidados.Count(item => item.Situacao == Domain.Convidados.SituacaoConvidado.Confirmado),
-            convidados.Count(item => item.Situacao == Domain.Convidados.SituacaoConvidado.Pendente),
-            convidados.Count(item => item.Situacao == Domain.Convidados.SituacaoConvidado.NaoComparecera),
-            convidados.Length);
-    }
+    private Task<EventoDetalhe> DetalheAsync(string contaId, Evento evento, DateOnly hoje, CancellationToken ct) =>
+        EventoMapeamento.DetalheAsync(dados, contaId, evento, hoje, ct);
 
     private static void CopiarLocal(LocalEvento destino, LocalEvento origem)
     {
@@ -580,11 +571,9 @@ public sealed class EventoServico(IDados dados, IConsultaCep cep)
         destino.Bairro = origem.Bairro;
     }
 
-    private static LocalLeitura LerLocal(LocalEvento local) => new(
-        local.Nome, local.Pais, local.Cep, local.Endereco, local.Numero, local.Estado, local.Cidade, local.Bairro);
+    private static LocalLeitura LerLocal(LocalEvento local) => EventoMapeamento.LerLocal(local);
 
-    private static int? Dias(DateOnly? data, DateOnly hoje) =>
-        data is null ? null : data.Value.DayNumber - hoje.DayNumber;
+    private static int? Dias(DateOnly? data, DateOnly hoje) => EventoMapeamento.Dias(data, hoje);
 
     private static string? ValidarNumeros(SalvarEvento pedido)
     {

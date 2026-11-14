@@ -56,7 +56,57 @@ public sealed class Cliente
 
     public Guid? FotoId { get; set; }
 
+    /// <summary>Id do usuário Identity com role Client, quando o Organizer concede acesso (RF-056, RF-084).</summary>
+    public string? UsuarioId { get; set; }
+
+    public bool AcessoPlataforma { get; set; }
+
+    public bool PermiteConvidados { get; set; }
+
+    public bool PermiteTarefas { get; set; }
+
+    public bool PermiteAnexos { get; set; }
+
+    public bool PermiteParcelas { get; set; }
+
+    public bool PermiteRsvp { get; set; }
+
+    public bool PermiteMapa { get; set; }
+
+    public bool PermiteContrato { get; set; }
+
     public List<VinculoCliente> Vinculos { get; set; } = [];
+
+    public bool TemPermissao(ModuloCliente modulo) =>
+        AcessoPlataforma && modulo switch
+        {
+            ModuloCliente.Convidados => PermiteConvidados,
+            ModuloCliente.Tarefas => PermiteTarefas,
+            ModuloCliente.Anexos => PermiteAnexos,
+            ModuloCliente.Parcelas => PermiteParcelas,
+            ModuloCliente.Rsvp => PermiteRsvp,
+            ModuloCliente.Mapa => PermiteMapa,
+            ModuloCliente.Contrato => PermiteContrato,
+            _ => false,
+        };
+
+    public void AplicarPermissoes(
+        bool convidados,
+        bool tarefas,
+        bool anexos,
+        bool parcelas,
+        bool rsvp,
+        bool mapa,
+        bool contrato)
+    {
+        PermiteConvidados = convidados;
+        PermiteTarefas = tarefas;
+        PermiteAnexos = anexos;
+        PermiteParcelas = parcelas;
+        PermiteRsvp = rsvp;
+        PermiteMapa = mapa;
+        PermiteContrato = contrato;
+    }
 }
 
 public sealed class VinculoCliente

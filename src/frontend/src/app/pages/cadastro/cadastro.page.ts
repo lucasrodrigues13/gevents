@@ -1,12 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ContaClient } from '../../core/conta.client';
 import { mensagemDeErro } from '../../core/mensagem-erro';
+import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-cadastro',
@@ -31,9 +32,6 @@ import { mensagemDeErro } from '../../core/mensagem-erro';
               <mat-label>Confirme a senha</mat-label>
               <input matInput type="password" formControlName="confirmacao" autocomplete="new-password" />
             </mat-form-field>
-            @if (aviso()) {
-              <p class="aviso" role="alert">{{ aviso() }}</p>
-            }
             <button mat-flat-button type="submit" [disabled]="formulario.invalid || enviando()">Cadastrar</button>
           </form>
           <p><a routerLink="/entrar">Já tenho conta</a></p>
@@ -45,8 +43,9 @@ import { mensagemDeErro } from '../../core/mensagem-erro';
 export class CadastroPage {
   private readonly fb = inject(FormBuilder);
   private readonly conta = inject(ContaClient);
+  private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
-  protected readonly aviso = signal('');
   protected readonly enviando = signal(false);
   protected readonly formulario = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -56,24 +55,25 @@ export class CadastroPage {
 
   protected enviar(): void {
     if (this.formulario.invalid) {
+      this.formulario.markAllAsTouched();
+      this.toast.erro('Confira os campos do cadastro.');
       return;
     }
 
     const { email, senha, confirmacao } = this.formulario.getRawValue();
     if (senha !== confirmacao) {
-      this.aviso.set('A confirmação da senha não confere.');
+      this.toast.erro('A confirmação da senha não confere.');
       return;
     }
 
     this.enviando.set(true);
-    this.aviso.set('');
     this.conta.cadastrar(email, senha, confirmacao).subscribe({
       next: (resposta) => {
-        this.aviso.set(resposta.mensagem);
-        this.enviando.set(false);
+        this.toast.sucesso(resposta.mensagem);
+        void this.router.navigateByUrl('/entrar');
       },
       error: (erro: unknown) => {
-        this.aviso.set(mensagemDeErro(erro));
+        this.toast.erro(mensagemDeErro(erro));
         this.enviando.set(false);
       },
     });

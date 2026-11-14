@@ -26,8 +26,8 @@ public static class ContaEndpoints
 
     private static async Task<IResult> Cadastrar(
         CadastroPedido pedido,
-        UserManager<IdentityUser> usuarios,
-        IEmailSender<IdentityUser> email,
+        UserManager<ApplicationUser> usuarios,
+        IEmailSender<ApplicationUser> email,
         IConfiguration configuracao,
         IHostEnvironment ambiente,
         ILoggerFactory logs,
@@ -50,7 +50,7 @@ public static class ContaEndpoints
             return Erro(StatusCodes.Status400BadRequest, "validacao", "A confirmação da senha não confere.");
         }
 
-        var usuario = new IdentityUser
+        var usuario = new ApplicationUser
         {
             UserName = endereco,
             Email = endereco,
@@ -66,7 +66,7 @@ public static class ContaEndpoints
             return Erro(StatusCodes.Status400BadRequest, "validacao", "A senha não atende às regras.");
         }
 
-        var papel = await usuarios.AddToRoleAsync(usuario, Papeis.User);
+        var papel = await usuarios.AddToRoleAsync(usuario, Papeis.Organizer);
         if (!papel.Succeeded)
         {
             return Erro(StatusCodes.Status500InternalServerError, "erro", "Não foi possível concluir a ação.");
@@ -87,8 +87,8 @@ public static class ContaEndpoints
 
     private static async Task<IResult> Entrar(
         LoginPedido pedido,
-        UserManager<IdentityUser> usuarios,
-        SignInManager<IdentityUser> acesso,
+        UserManager<ApplicationUser> usuarios,
+        SignInManager<ApplicationUser> acesso,
         IEmissorJwt emissor)
     {
         var email = EmailNormalizado(pedido.Email);
@@ -115,12 +115,24 @@ public static class ContaEndpoints
         }
 
         var papeis = await usuarios.GetRolesAsync(usuario);
+        if (papeis.Contains(Papeis.Client))
+        {
+            try
+            {
+                usuario.GarantirVinculoClient();
+            }
+            catch (InvalidOperationException)
+            {
+                return CredencialInvalida();
+            }
+        }
+
         var emailConfirmado = usuario.Email ?? email;
-        var token = emissor.Emitir(usuario.Id, emailConfirmado, papeis.ToArray());
+        var token = emissor.Emitir(usuario.Id, emailConfirmado, papeis.ToArray(), usuario.OrganizerId);
         return Results.Ok(new { token, email = emailConfirmado, papeis });
     }
 
-    private static async Task<IResult> Confirmar(TokenPedido pedido, UserManager<IdentityUser> usuarios)
+    private static async Task<IResult> Confirmar(TokenPedido pedido, UserManager<ApplicationUser> usuarios)
     {
         var usuario = string.IsNullOrWhiteSpace(pedido.UsuarioId) ? null : await usuarios.FindByIdAsync(pedido.UsuarioId);
         if (usuario is null || string.IsNullOrWhiteSpace(pedido.Token))
@@ -139,8 +151,8 @@ public static class ContaEndpoints
 
     private static async Task<IResult> Reenviar(
         EmailPedido pedido,
-        UserManager<IdentityUser> usuarios,
-        IEmailSender<IdentityUser> email,
+        UserManager<ApplicationUser> usuarios,
+        IEmailSender<ApplicationUser> email,
         IConfiguration configuracao,
         IHostEnvironment ambiente,
         ILoggerFactory logs,
@@ -161,8 +173,8 @@ public static class ContaEndpoints
 
     private static async Task<IResult> EsqueciSenha(
         EmailPedido pedido,
-        UserManager<IdentityUser> usuarios,
-        IEmailSender<IdentityUser> email,
+        UserManager<ApplicationUser> usuarios,
+        IEmailSender<ApplicationUser> email,
         IConfiguration configuracao,
         IHostEnvironment ambiente,
         ILoggerFactory logs,
@@ -191,7 +203,7 @@ public static class ContaEndpoints
         return Results.Ok(new { mensagem = "Se a conta existir, enviaremos um link para redefinir a senha." });
     }
 
-    private static async Task<IResult> RedefinirSenha(RedefinicaoPedido pedido, UserManager<IdentityUser> usuarios)
+    private static async Task<IResult> RedefinirSenha(RedefinicaoPedido pedido, UserManager<ApplicationUser> usuarios)
     {
         if (string.IsNullOrWhiteSpace(pedido.Senha))
         {
@@ -235,9 +247,9 @@ public static class ContaEndpoints
     }
 
     private static async Task<bool> EnviarConfirmacaoAsync(
-        UserManager<IdentityUser> usuarios,
-        IEmailSender<IdentityUser> email,
-        IdentityUser usuario,
+        UserManager<ApplicationUser> usuarios,
+        IEmailSender<ApplicationUser> email,
+        ApplicationUser usuario,
         IConfiguration configuracao,
         IHostEnvironment ambiente,
         ILoggerFactory logs,

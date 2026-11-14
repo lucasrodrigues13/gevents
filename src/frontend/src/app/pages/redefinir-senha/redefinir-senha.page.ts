@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ContaClient } from '../../core/conta.client';
 import { mensagemDeErro } from '../../core/mensagem-erro';
+import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-redefinir-senha',
@@ -27,9 +28,6 @@ import { mensagemDeErro } from '../../core/mensagem-erro';
               <mat-label>Confirme a senha</mat-label>
               <input matInput type="password" formControlName="confirmacao" autocomplete="new-password" />
             </mat-form-field>
-            @if (aviso()) {
-              <p class="aviso" role="status">{{ aviso() }}</p>
-            }
             <button mat-flat-button type="submit" [disabled]="formulario.invalid || enviando()">Salvar</button>
           </form>
           <p><a routerLink="/entrar">Ir para o login</a></p>
@@ -42,7 +40,7 @@ export class RedefinirSenhaPage {
   private readonly fb = inject(FormBuilder);
   private readonly conta = inject(ContaClient);
   private readonly rota = inject(ActivatedRoute);
-  protected readonly aviso = signal('');
+  private readonly toast = inject(ToastService);
   protected readonly enviando = signal(false);
   protected readonly formulario = this.fb.nonNullable.group({
     senha: ['', [Validators.required, Validators.minLength(8)]],
@@ -54,23 +52,23 @@ export class RedefinirSenhaPage {
     const token = this.rota.snapshot.queryParamMap.get('token');
     const { senha, confirmacao } = this.formulario.getRawValue();
     if (!usuarioId || !token) {
-      this.aviso.set('O link é inválido ou expirou.');
+      this.toast.erro('O link é inválido ou expirou.');
       return;
     }
 
     if (senha !== confirmacao) {
-      this.aviso.set('A confirmação da senha não confere.');
+      this.toast.erro('A confirmação da senha não confere.');
       return;
     }
 
     this.enviando.set(true);
     this.conta.redefinir(usuarioId, token, senha, confirmacao).subscribe({
       next: (resposta) => {
-        this.aviso.set(resposta.mensagem);
+        this.toast.sucesso(resposta.mensagem);
         this.enviando.set(false);
       },
       error: (erro: unknown) => {
-        this.aviso.set(mensagemDeErro(erro));
+        this.toast.erro(mensagemDeErro(erro));
         this.enviando.set(false);
       },
     });

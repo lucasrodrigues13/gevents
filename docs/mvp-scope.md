@@ -1,85 +1,111 @@
 # Escopo do MVP
 
-**Status: aprovado.** Vale o comportamento das specs 001 a 007. O que a spec deixou de fora continua fora. Observação da referência que a spec não repetiu não virou requisito. A fonte da exploração é [brief.md](brief.md) e a seção 2.7 de [requirements.md](requirements.md).
-
-Entra o que a exploração fechou: tela vista, campos vistos e regra vista. Fica de fora o que parou em menu, rota, rótulo ou formulário não aberto.
+**Status: aprovado.** Vale o comportamento das specs **001 a 028**. O que a spec deixou de fora continua fora. Peças de marketplace (RF-079), assistente (RF-045), login de fornecedor (RF-060) e financeiro da empresa (RF-076) ficam fora deste corte. A fonte é [brief.md](brief.md), [inventario-referencia.md](inventario-referencia.md) e a seção 2.7 de [requirements.md](requirements.md).
 
 ## 1. Objetivo
 
-A assessoria entra na própria conta e cai numa tela de dashboards. Dali opera perfil, eventos, tarefas, clientes e convidados até o RSVP por link.
+O organizador entra na própria conta, vê dashboards e opera gestão de eventos, convidados, modelos, funil, agenda, serviços e fornecedores, com CRUD fechado nas specs aprovadas.
 
-## 2. Público
+## 2. Público e roles
 
-Assessoria, na conta autenticada, e convidado, que responde sem usuário.
+Três roles Identity:
 
-Cliente com login, assistente e fornecedor ficam de fora. A role `User` continua sem ser papel de negócio, RF-040.
+| Role | Significado |
+|---|---|
+| `Admin` | Admin geral: tudo e todas as contas. |
+| `Organizer` | Comprador do sistema; organiza eventos e dados do próprio tenant. Cadastro público cria `Organizer`. |
+| `Client` | Subusuário sempre vinculado a um `Organizer`; acesso limitado às flags concedidas (convidados, tarefas, anexos, parcelas, RSVP, mapa, contrato). |
 
-## 3. O que a exploração fechou
+Convidado responde RSVP por link, sem conta. Assistente e fornecedor com login ficam **fora** deste corte.
 
-| Módulo | Entra neste corte | Ficou de fora porque não fechou |
+Contato de negócio chamado “cliente” (cadastro na lista de clientes) não é a role `Client`; a role nasce quando o organizador concede login de plataforma.
+
+## 3. Agrupamento de menu (produto)
+
+Navegação lateral alinhada à Assessoria VIP. O agente de frontend implementa a casca; este documento fixa os grupos pretendidos:
+
+| Grupo | Itens / specs |
+|---|---|
+| Início | Dashboards (SPEC-007) |
+| Gestão de eventos | Lista e cadastro (002, 008), estatísticas e resumo (011), home do evento, serviços/fornecedores no evento (018), tarefas (003), clientes do evento (006, 009) |
+| Convidados | Convites, RSVP, grupos, transfer (004, 010) |
+| Modelos | Evento (012), briefing (013), roteiro (014), cronograma (015), inspirações (016), mensagens (017) |
+| Funil de vendas | Oportunidades (020), oportunidades de RSVP (021), contratos (022), tarefas comerciais (023), relatórios (024), orçamentos (025), modelos de serviço/orçamento/contrato (026–028) |
+| Agenda | Minha agenda (019) |
+| Serviços e fornecedores | Catálogo da conta (018) |
+| Conta | Perfil do organizador (005), autenticação (001) |
+
+Fora do menu deste corte: assistentes, financeiro da empresa, VIP Pay / Casar.com / loja / MeLink (RF-079).
+
+## 4. O que entra (Must)
+
+| Módulo | Entra | Specs |
 |---|---|---|
-| Conta | Cadastro, confirmação, login, bloqueio, senha, logout e bootstrap. SPEC-001 aprovada. | A conta deste corte está fechada na SPEC-001. |
-| Dashboards | Primeira tela do `User`. Menu na lateral. Miolo com dashboard de eventos e dashboard do funil. RF-080, RF-081 e RF-082. Referência visual: Angular Material, DA-044. | A grade de menus da referência. Estágios que não foram vistos. Gráfico que exigiria biblioteca nova. |
-| Perfil | Nome da empresa, responsável, e-mail somente leitura, CPF ou CNPJ, celular, nascimento e endereço. RF-044. | Não foi vista a divisão do endereço em CEP, rua e cidade. |
-| Eventos | Abas em andamento, concluído e cancelado. Busca por nome. Filtros de tipo, período e tags. Card com data, contagem, tags, tarefas e convidados. Criar e editar com os campos do formulário. Concluir e cancelar. Imagem opcional do evento. RF-048 e RF-049. | Aba Estatísticas, agrupar, equipe do dia, impressão, remover e modelo. O miolo do modelo não foi inventariado, então a obrigatoriedade vista na referência não entra. |
-| Home do evento | Contagem regressiva, dados do evento, tarefas concluídas e convidados por situação. | Budget, pagamentos, serviços, pendências do mês e equipe. Dependem de módulos que não fecharam. |
-| Clientes | Lista com busca, cadastro com nome, telefone e e-mail, vínculo com evento. RF-055. | Portal do cliente e a matriz de permissões. Vieram de flags, sem uso do portal. Último acesso depende desse portal. |
-| Tarefas | Do evento e de todos os eventos da conta. Lista e quadro por situação. Título, descrição, prazo em data, situação e responsável da conta. RF-061. | Quadro por dia, prazo relativo, checklist, perguntas, comentários, anexos, serviço, recálculo e aniversário. O recálculo foi um aviso, não uma execução. |
-| Convidados | Convite, convidados, grupos da conta, situação, faixa, custo, gênero, celular, observação e transfer com origem. Visão por convite ou por convidado. Busca, filtros e totais. RF-063. | Importação, exportação, impressão, mapa, portaria, QR Code e RSVP automático. |
-| RSVP | Link por convite, sem conta. Histórico acessada e respondida. A pessoa informa quem comparece. RF-064. | Formulário público não foi respondido. Link único do evento. Valor "enviada", porque este corte não dispara e-mail. |
+| Conta | Cadastro público → `Organizer`, confirmação, login, lockout, senha, logout, bootstrap das três roles | 001 |
+| Dashboards | Eventos e funil (quatro estágios) | 007 |
+| Perfil | Dados da empresa do Organizer | 005 |
+| Eventos | Lista, abas, CRUD, home, estatísticas e resumo | 002, 008, 011 |
+| Clientes (contato) | Lista, cadastro completo, vínculo ao evento; login `Client` com flags | 006, 009 |
+| Tarefas do evento | Lista, quadro por situação, CRUD | 003 |
+| Convidados / RSVP | Convite, convidados, grupos, transfer, link | 004, 010 |
+| Modelos | Seis bibliotecas com CRUD | 012–017 |
+| Serviços e fornecedores | Catálogo, serviço no evento, negociação, budget, parcelas | 018 |
+| Agenda | Visões e CRUD de compromisso | 019 |
+| Funil | Oportunidades, RSVP, contratos, tarefas, relatórios, orçamentos e modelos | 020–028 |
 
-## 4. Requisitos incluídos
+## 5. Requisitos incluídos
 
 | ID | Corte |
 |---|---|
-| RF-001 a RF-034, RF-036 a RF-038, RF-040 a RF-043 | Conta já confirmada. RF-039 não existe. |
-| RF-080, RF-081, RF-082 | Tela inicial e os dois dashboards. |
-| RF-044 | Perfil, nos campos vistos. |
-| RF-048, RF-049 | Lista e cadastro, sem os itens da tabela acima. |
-| RF-050 | Só os blocos da home cujo dado vem de evento, tarefa ou convidado. |
-| RF-055 | Cadastro e vínculo. Sem RF-056. |
-| RF-061 | Lista, quadro por situação e visão de todos os eventos. Sem RF-062. |
-| RF-063, RF-064 | Lista completa observada e link por convite. |
+| RF-001 a RF-034, RF-036 a RF-038, RF-040 a RF-043 | Conta e autorização com três roles. |
+| RF-080 a RF-082 | Tela inicial e dashboards. |
+| RF-083 a RF-086 | Tenant do Organizer; vínculo e permissões do Client. |
+| RF-044, RF-048 a RF-050, RF-053 a RF-059, RF-061, RF-063, RF-064, RF-068 a RF-072, RF-074, RF-075, RF-077, RF-078 | Domínio coberto pelas specs 002–028 no que cada spec descreve. |
+| RF-056 | Flags de acesso do Client, sem matriz inventada além do inventário. |
 
-## 5. Fora deste corte
+## 6. Fora deste corte
 
-RF-045, RF-046, RF-047, RF-051, RF-052, RF-053, RF-054, RF-056, RF-057, RF-058, RF-059, RF-060, RF-062, RF-065, RF-066, RF-067, RF-068, RF-069, RF-070, RF-071, RF-072, RF-073, RF-074, RF-076, RF-077, RF-078 e RF-079. De RF-075 entra só o que RF-082 usa: quantidade e valor nos quatro estágios vistos. O restante do funil continua de fora.
+| ID | Motivo |
+|---|---|
+| RF-045 | Assistente fora. |
+| RF-046, RF-047 | Busca global e notificações sem spec. |
+| RF-051, RF-052 | Equipe do dia e agrupar eventos. |
+| RF-060 | Login / link de fornecedor fora. |
+| RF-062, RF-065 | Redatar tarefas; RSVP automático em volume. |
+| RF-066, RF-067 | Mapa operacional completo e portaria (além do campo mesa já nas specs de convidados). |
+| RF-073 | Caixa global de anexos ainda Observado. |
+| RF-076 | Financeiro da assessoria (caixa da empresa). |
+| RF-079 | Marketplace / peças da plataforma de referência. |
 
-Motivo comum: a exploração não abriu o fluxo por dentro, ou a regra depende de papel diferente de `Admin` e `User`.
+## 7. Dependências
 
-## 6. Dependências
+1. Conta e roles (SPEC-001) antes de qualquer módulo autenticado.
+2. Perfil não bloqueia evento.
+3. Modelo de evento (012) antes de criar evento com checklist (008).
+4. Evento antes de tarefa, convidado, serviço no evento e Client vinculado.
+5. Funil (020+) independente do evento, mas agendas e checagem de data cruzam com 019.
+6. Arquivo técnico já definido: imagem do evento, anexos de fornecedor/serviço conforme 018.
 
-1. Conta, SPEC-001.
-2. Perfil da mesma conta, sem bloquear o evento.
-3. Evento, antes de tarefa, cliente vinculado e convite.
-4. Convite, antes do link de RSVP.
-5. Arquivo já definido, só para a imagem opcional do evento. Quem vê é a conta dona.
+## 8. Riscos e premissas
 
-## 7. Riscos e premissas
+- Specs 001–028 estão **aprovadas**; implementação segue a spec, sem plano técnico separado.
+- Pendências explícitas em cada spec §17 não bloqueiam o restante do CRUD fechado.
+- Canal de e-mail continua Gmail SMTP; disparo em massa (RSVP automático) fora.
+- Sem backup nesta versão.
 
-- O corte e as specs 001 a 007 estão aprovados. O código segue a spec, sem plano técnico separado.
-- Campos obrigatórios que a exploração não marcou continuam pendentes em cada spec.
-- Modelo obrigatório, assistente, portal do cliente, fornecedor, parcela, agenda e financeiro não entram neste corte.
-- O funil completo também não. O dashboard usa os quatro estágios vistos. Cadastro da oportunidade, descarte com motivo, formulário de lead e checagem de data continuam sem spec.
-- RSVP público continua o maior buraco: sabe-se o link, a ausência de conta e as três situações. Não se sabe o formulário que a referência mostra.
-- Não há backup nesta versão.
+## 9. Conclusão
 
-## 8. Conclusão
+O MVP expandido está pronto para implementação quando:
 
-O MVP está pronto quando:
+1. Organizer entra, vê dashboards e grava o perfil.
+2. Mantém modelos, cria eventos, estatísticas e home.
+3. Opera tarefas, clientes (contato), convidados e RSVP.
+4. Opera serviços, fornecedores, negociação e parcelas no evento.
+5. Opera agenda e funil completo (oportunidades até modelos).
+6. Pode criar `Client` vinculado com flags; Admin vê todas as contas.
+7. Outro Organizer não vê os dados do tenant.
 
-1. A assessoria entra, vê os dashboards de eventos e do funil, e grava o perfil.
-2. Cria um evento, filtra a própria lista e conclui ou cancela.
-3. Vê na home a contagem de tarefas e de convidados.
-4. Cria tarefas no evento e as encontra também na lista de todos os eventos.
-5. Cadastra um cliente e vincula ao evento.
-6. Monta convite e convidados com os campos vistos e copia o link.
-7. Alguém sem conta informa quem comparece, e a conta dona vê a situação.
-8. Outra conta não vê esses dados.
-
-As specs estão aprovadas. Os planos técnicos estão em [plans/README.md](plans/README.md), ainda como proposta. A implementação de cada uma começa depois da aprovação do plano correspondente.
-
-## 9. Specs
+## 10. Specs
 
 | Spec | Status |
 |---|---|
@@ -90,6 +116,24 @@ As specs estão aprovadas. Os planos técnicos estão em [plans/README.md](plans
 | [005-perfil-da-assessoria.md](specs/005-perfil-da-assessoria.md) | Aprovada |
 | [006-clientes.md](specs/006-clientes.md) | Aprovada |
 | [007-dashboards.md](specs/007-dashboards.md) | Aprovada |
-| [008-cadastro-completo-de-evento.md](specs/008-cadastro-completo-de-evento.md) | Aprovada. Incremento sobre a SPEC-002. |
-| [009-cadastro-completo-de-cliente.md](specs/009-cadastro-completo-de-cliente.md) | Aprovada. Incremento sobre a SPEC-006. |
-| [010-convites-convidados-completo.md](specs/010-convites-convidados-completo.md) | Aprovada. Incremento sobre a SPEC-004. |
+| [008-cadastro-completo-de-evento.md](specs/008-cadastro-completo-de-evento.md) | Aprovada |
+| [009-cadastro-completo-de-cliente.md](specs/009-cadastro-completo-de-cliente.md) | Aprovada |
+| [010-convites-convidados-completo.md](specs/010-convites-convidados-completo.md) | Aprovada |
+| [011-estatisticas-e-resumo-dos-eventos.md](specs/011-estatisticas-e-resumo-dos-eventos.md) | Aprovada |
+| [012-modelos-de-evento.md](specs/012-modelos-de-evento.md) | Aprovada |
+| [013-modelos-de-briefing.md](specs/013-modelos-de-briefing.md) | Aprovada |
+| [014-modelos-de-roteiro.md](specs/014-modelos-de-roteiro.md) | Aprovada |
+| [015-modelos-de-cronograma.md](specs/015-modelos-de-cronograma.md) | Aprovada |
+| [016-modelos-de-inspiracoes.md](specs/016-modelos-de-inspiracoes.md) | Aprovada |
+| [017-modelos-de-mensagens.md](specs/017-modelos-de-mensagens.md) | Aprovada |
+| [018-servicos-e-fornecedores.md](specs/018-servicos-e-fornecedores.md) | Aprovada |
+| [019-minha-agenda.md](specs/019-minha-agenda.md) | Aprovada |
+| [020-oportunidades-do-funil.md](specs/020-oportunidades-do-funil.md) | Aprovada |
+| [021-oportunidades-de-rsvp.md](specs/021-oportunidades-de-rsvp.md) | Aprovada |
+| [022-contratos-do-funil.md](specs/022-contratos-do-funil.md) | Aprovada |
+| [023-tarefas-do-funil.md](specs/023-tarefas-do-funil.md) | Aprovada |
+| [024-relatorios-do-funil.md](specs/024-relatorios-do-funil.md) | Aprovada |
+| [025-orcamentos-do-funil.md](specs/025-orcamentos-do-funil.md) | Aprovada |
+| [026-modelos-de-servicos-do-funil.md](specs/026-modelos-de-servicos-do-funil.md) | Aprovada |
+| [027-modelo-de-orcamento-do-funil.md](specs/027-modelo-de-orcamento-do-funil.md) | Aprovada |
+| [028-modelo-de-contrato-do-funil.md](specs/028-modelo-de-contrato-do-funil.md) | Aprovada |

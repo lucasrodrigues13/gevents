@@ -22,4 +22,4 @@ RUN set -eu; \
     if [ -z "$src" ]; then src=/tmp/dist; fi; \
     mkdir -p /srv/frontend; \
     cp -a "$src"/. /srv/frontend/
-EXPOSE 80
+EXPOSE 80 443

@@ -20,18 +20,21 @@ Fora: aba Estatísticas (RF-078), agrupar (RF-052), equipe do dia (RF-051), impr
 
 | Ator | Pode |
 |---|---|
-| User da conta | Criar, listar, filtrar, abrir, editar, concluir e cancelar os próprios eventos. Ver a imagem do próprio evento. |
-| Outro User | Não vê evento, home nem imagem. |
+| Organizer | Criar, listar, filtrar, abrir, editar, concluir e cancelar os próprios eventos. Ver a imagem do próprio evento. |
+| Outro Organizer | Não vê evento, home nem imagem. |
+| Admin | Admin geral; fora do miolo desta spec de operação da conta. |
+| Client | Não opera este cadastro. Acesso limitado a evento/módulo, se existir, fica em RF-056. |
 | Visitante | Não acessa. |
 
 ## 5. Pré-condições
 
-Usuário autenticado, SPEC-001. Não há biblioteca de modelos.
+`Organizer` autenticado, SPEC-001. Não há biblioteca de modelos.
 
 ## 6. Fluxo principal
 
-1. O usuário informa o nome e, se quiser, os demais dados da seção 11.
-2. O sistema grava o evento na conta, em andamento.
+1. O Organizer informa o nome e, se quiser, os demais dados da seção 11.
+2. O sistema grava o evento na conta do Organizer, em andamento.
+
 3. A aba em andamento mostra o card.
 4. Busca por nome e filtros de tipo, período e tag reduzem a lista.
 5. Ao abrir, a home mostra os dados, a contagem regressiva se houver data, as tarefas concluídas e os convidados por situação.
@@ -50,7 +53,8 @@ Usuário autenticado, SPEC-001. Não há biblioteca de modelos.
 
 ## 8. Regras de negócio
 
-- O evento pertence à conta autenticada.
+- O evento pertence ao Organizer autenticado.
+
 - Situação inicial: em andamento.
 - Encerrar é concluir ou cancelar.
 - Modelo não é pedido. A obrigatoriedade da referência fica de fora junto com RF-053.

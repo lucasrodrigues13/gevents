@@ -16,9 +16,9 @@ RF-061, no corte do escopo. Fora: RF-062, quadro por dia, prazo relativo, checkl
 
 ## 4. Atores e permissões
 
-O User da conta dona do evento cria, lista, edita e muda a situação. Outro User não vê. Visitante e convidado não acessam.
+O Organizer dono do evento cria, lista, edita e muda a situação. Outro Organizer não vê. Visitante e convidado do RSVP não acessam. Admin fica fora do miolo desta spec. Client só age em tarefa se a flag correspondente existir quando RF-056 estiver no escopo; neste corte a operação é do Organizer.
 
-O responsável é a própria conta. Não há atribuição a outra pessoa.
+O responsável é a própria conta do Organizer. Não há atribuição a outra pessoa.
 
 ## 5. Pré-condições
 
@@ -26,10 +26,11 @@ Evento da conta, SPEC-002. Tarefa em evento concluído ou cancelado continua nã
 
 ## 6. Fluxo principal
 
-1. No evento, o usuário informa título e, se quiser, descrição e prazo.
+1. No evento, o Organizer informa título e, se quiser, descrição e prazo.
 2. A tarefa nasce pendente, responsável a conta atual.
 3. A lista do evento e o quadro por situação mostram a tarefa.
-4. O usuário edita título, descrição e prazo.
+4. O Organizer edita título, descrição e prazo.
+
 5. Muda a situação entre pendente, em andamento, concluída e atrasada.
 6. A lista de todos os eventos da conta mostra a mesma tarefa, com o nome do evento.
 
@@ -57,7 +58,8 @@ Título obrigatório, sem ficar só com espaços. Prazo, se preenchido, é data 
 
 ## 10. Estados
 
-Criação vai para pendente. Dali, e das outras três, o usuário pode ir para qualquer uma das quatro: pendente, em andamento, concluída e atrasada.
+Criação vai para pendente. Dali, e das outras três, o Organizer pode ir para qualquer uma das quatro: pendente, em andamento, concluída e atrasada.
+
 
 ## 11. Dados necessários
 

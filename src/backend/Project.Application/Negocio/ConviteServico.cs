@@ -396,12 +396,26 @@ public sealed class ConviteServico(IDados dados, IPlanilhaConvites planilha, IGe
             await dados.SalvarConvitesAsync(ct);
         }
 
+        var resumo = await dados.ResumoEventoPorIdAsync(convite.EventoId, ct);
+        if (resumo is { } dadosEvento)
+        {
+            var perfil = await dados.ObterPerfilAsync(dadosEvento.ContaId, ct);
+            if (perfil?.CapturaLeadRsvp != false)
+            {
+                await dados.IncrementarVisualizacaoRsvpAsync(dadosEvento.ContaId, ct);
+            }
+        }
+
         return Resultado<RsvpPublico>.Sucesso(new RsvpPublico(
             convite.Nome,
             convite.Convidados.Select(item => new ConvidadoPublico(item.Id, item.Nome, item.Situacao)).ToArray()));
     }
 
-    public async Task<Resultado<RsvpPublico>> ResponderAsync(string token, IReadOnlyList<RespostaRsvp>? respostas, CancellationToken ct)
+    public async Task<Resultado<RsvpPublico>> ResponderAsync(
+        string token,
+        IReadOnlyList<RespostaRsvp>? respostas,
+        bool? pretendeRealizarEvento,
+        CancellationToken ct)
     {
         var convite = await dados.ObterConvitePorTokenAsync(token, ct);
         if (convite is null || !await dados.EventoEmAndamentoAsync(convite.EventoId, ct))
@@ -432,6 +446,35 @@ public sealed class ConviteServico(IDados dados, IPlanilhaConvites planilha, IGe
 
         convite.RespondidoEm = DateTimeOffset.UtcNow;
         await dados.SalvarConvitesAsync(ct);
+
+        if (pretendeRealizarEvento == true)
+        {
+            var resumo = await dados.ResumoEventoPorIdAsync(convite.EventoId, ct);
+            if (resumo is { } dadosEvento)
+            {
+                var perfil = await dados.ObterPerfilAsync(dadosEvento.ContaId, ct);
+                if (perfil?.CapturaLeadRsvp != false)
+                {
+                    var telefone = convite.Convidados
+                        .Select(item => Domain.Comum.Texto.Limpo(item.Celular))
+                        .FirstOrDefault(item => item is not null);
+                    await dados.InserirLeadRsvpAsync(new Domain.Funil.LeadRsvp
+                    {
+                        Id = Guid.NewGuid(),
+                        ContaId = dadosEvento.ContaId,
+                        ConviteId = convite.Id,
+                        EventoId = convite.EventoId,
+                        NomeConvite = convite.Nome,
+                        NomeEvento = dadosEvento.Nome,
+                        Telefone = telefone,
+                        CriadoEm = DateTimeOffset.UtcNow,
+                        Situacao = Domain.Funil.SituacaoLeadRsvp.Ativo,
+                    }, ct);
+                    await dados.IncrementarCliqueRsvpAsync(dadosEvento.ContaId, ct);
+                }
+            }
+        }
+
         return Resultado<RsvpPublico>.Sucesso(new RsvpPublico(
             convite.Nome,
             convite.Convidados.Select(item => new ConvidadoPublico(item.Id, item.Nome, item.Situacao)).ToArray()));

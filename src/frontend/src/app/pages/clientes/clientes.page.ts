@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { mensagemDeErro } from '../../core/mensagem-erro';
 import { Cliente, NegocioClient, ROTULO_PAPEL } from '../../core/negocio.client';
+import { ToastService } from '../../core/toast.service';
 import { DIALOG } from '../../shared/dialog';
 import { ConfirmaDialog } from '../../shared/confirma-dialog';
 import { ClienteFormDialog } from './cliente-form.dialog';
@@ -26,7 +27,6 @@ import { ClienteFormDialog } from './cliente-form.dialog';
         Novo cliente
       </button>
     </header>
-    @if (aviso()) { <p class="aviso" role="alert">{{ aviso() }}</p> }
     <section class="gd-painel">
       <div class="gd-barra">
         <span></span>
@@ -86,8 +86,8 @@ import { ClienteFormDialog } from './cliente-form.dialog';
 export class ClientesPage implements OnInit {
   private readonly negocio = inject(NegocioClient);
   private readonly dialog = inject(MatDialog);
+  private readonly toast = inject(ToastService);
   protected readonly clientes = signal<Cliente[]>([]);
-  protected readonly aviso = signal('');
   protected readonly busca = signal('');
   protected readonly colunas = ['nome', 'contato', 'eventos', 'acesso', 'acoes'];
 
@@ -118,18 +118,15 @@ export class ClientesPage implements OnInit {
       data: { titulo: 'Excluir cliente', texto: 'Confirma a exclusão deste cliente?', confirmar: 'Excluir' },
     }).afterClosed().subscribe((confirmou) => {
       if (confirmou) {
-        this.aviso.set('A exclusão ainda não está disponível neste fluxo.');
+        this.toast.erro('A exclusão ainda não está disponível neste fluxo.');
       }
     });
   }
 
   private carregar(): void {
     this.negocio.clientes(this.busca()).subscribe({
-      next: (clientes) => {
-        this.clientes.set(clientes);
-        this.aviso.set('');
-      },
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      next: (clientes) => this.clientes.set(clientes),
+      error: (erro: unknown) => this.toast.erro(mensagemDeErro(erro)),
     });
   }
 }

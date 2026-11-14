@@ -1,6 +1,6 @@
 # 011. Estatísticas e resumo dos eventos
 
-**Status: rascunho.** Incremento da lista de eventos, ao lado da SPEC-002 e da SPEC-008. Fonte observada: [inventario-referencia.md](../inventario-referencia.md) §1.1 e §1.2. RF-048 e RF-078 permanecem Observado. Esta spec não os aprova e não altera o corte de [mvp-scope.md](../mvp-scope.md).
+**Status: aprovada.** O código segue esta spec. Incremento da lista de eventos, ao lado da SPEC-002 e da SPEC-008. Fonte: [inventario-referencia.md](../inventario-referencia.md) §1.1 e §1.2.
 
 ## 1. Identificador e nome
 
@@ -8,63 +8,57 @@ SPEC-011. Estatísticas e resumo dos eventos.
 
 ## 2. Objetivo
 
-Na lista de eventos, a conta vê a aba Estatísticas e o resumo de todos os eventos, no que a tela mostrou. Lista, busca, filtros, card e cadastro continuam nas specs já escritas.
+Na lista de eventos, o Organizer vê a aba Estatísticas (somente leitura) e o bloco Resumo de todos os eventos com atalhos de navegação para módulos relacionados. Lista, busca, filtros, card e cadastro continuam nas specs já aprovadas.
 
 ## 3. Requisitos relacionados
 
-Os dois RF abaixo estão Observado. Nada do que está Observado entra como regra aprovada.
+RF-078 (estatísticas de eventos). RF-048 somente nos atalhos e no bloco de resumo do topo; abas de situação, busca, filtros, card e cadastro permanecem na SPEC-002 e na SPEC-008.
 
-RF-048, Lista de eventos. Comportamento observado: "Abas em andamento, concluído e cancelado. Busca por nome. Filtros de tipo, equipe, assistente, período, modelo e tags. Card com data, contagem, modelo, tarefas e convidados. Ações de editar, cancelar, concluir, remover e imprimir a lista." Regras vistas: "Tags vistas: assessoria completa, parcial e final. São dados da conta, não uma lista fechada. Atalhos no topo: pagamentos, tarefas da semana, anexos, equipe escalada, aniversários." Ator: Assessoria. Depende de RF-049.
-
-Deste RF, esta spec usa só os atalhos do topo. Abas, busca, filtros, card e cadastro permanecem na SPEC-002 e na SPEC-008.
-
-RF-078, Estatísticas de eventos. Comportamento observado: "Existe uma aba com esse nome na lista de eventos." Regras vistas: "Total, concluídos, em andamento e cancelados com percentual. Eventos por mês no ano atual. Ranking de serviços no orçamento (eventos concluídos), fornecedores mais contratados e serviços mais utilizados." Ator: Assessoria. Depende de RF-048.
-
-O fluxo não está no corte aprovado. Em mvp-scope.md, a aba Estatísticas fica de fora da lista de eventos, e RF-078 está fora do corte.
-
-Fora deste arquivo: reescrita da lista, da busca, dos filtros e do cadastro. Destino dos atalhos do resumo. Impressão da lista, nomeada em RF-048, cujo fluxo não foi aberto. Atalho "+" do card, que não foi aberto. Gravação e exclusão.
+Fora: RF-079 (marketplace e peças da plataforma de referência). Impressão da lista. Atalho "+" do card. CRUD sobre as estatísticas em si (não há criação nem edição de números).
 
 ## 4. Atores e permissões
 
-O User da conta vê totais, mês, rankings e o resumo dos próprios eventos. Outro User não entra nesses números. Visitante não acessa.
+| Ator | Pode |
+|---|---|
+| Organizer | Ver totais, gráfico, rankings e o resumo dos próprios eventos. Usar os atalhos para navegar aos módulos relacionados da própria conta. |
+| Client | Não acessa esta aba nem o resumo da lista de eventos do Organizer, salvo se flag de permissão futura o autorizar; neste corte, fora. |
+| Admin | Acessa as estatísticas e o resumo de qualquer conta. |
+| Visitante | Não acessa. |
 
-Na referência o ator é a Assessoria. Não surge papel de negócio além de `Admin` e `User`.
+Assistente e fornecedor com login ficam fora deste corte.
 
 ## 5. Pré-condições
 
-Usuário autenticado, SPEC-001. Eventos e as três situações vêm da SPEC-002. A SPEC-008 continua responsável pelo cadastro completo e não é relida aqui.
-
-Serviço e fornecedor, usados pelos rankings, não têm spec aprovada. Sem esses dados, o que o ranking exibe fica na seção 17.
+Conta autenticada, SPEC-001. Eventos e as três situações vêm da SPEC-002. Serviços e fornecedores da conta alimentam os rankings (SPEC-018).
 
 ## 6. Fluxo principal
 
-1. O usuário abre a lista de eventos da própria conta.
+1. O Organizer abre a lista de eventos da própria conta.
 2. Vê o bloco Resumo de todos os eventos e o bloco Aniversários.
 3. Abre a aba Estatísticas.
-4. Vê o total, as três situações com quantidade e percentual, o bloco de eventos por mês no ano atual e os três rankings.
-5. Volta para uma aba de situação. A situação dos eventos permanece a da SPEC-002.
+4. Vê o total, as três situações com quantidade e percentual, o gráfico de eventos por mês no ano atual e os três rankings.
+5. Pode clicar num atalho do resumo e navegar ao módulo correspondente.
+6. Volta para uma aba de situação. A situação dos eventos permanece a da SPEC-002.
 
 ## 7. Fluxos alternativos
 
-- Conta sem evento: total e as três quantidades ficam em zero. O percentual com total zero não foi visto.
-- Conta sem evento concluído: o ranking de orçamento não tem o recorte que RF-078 nomeia. O que a tela mostra nesse caso não foi visto.
-- Conta sem serviço ou sem fornecedor: o conteúdo dos rankings não foi visto.
+- Conta sem evento: total e as três quantidades ficam em zero; percentuais ficam em zero; gráfico e rankings ficam vazios.
+- Conta sem evento concluído: o ranking de orçamento aparece vazio.
+- Conta sem serviço ou sem fornecedor: os rankings afetados aparecem vazios.
 - Evento de outra conta: não entra em total, situação, mês nem ranking.
-- Clicar em Pagamentos, Tarefas, Anexos, Equipe escalada ou Aniversários: o destino não foi aberto.
-- Busca ou filtro ativos na lista: não foi visto se a aba e o resumo acompanham esse recorte.
+- Busca ou filtro ativos na lista de situações: a aba Estatísticas e o resumo continuam sobre todos os eventos da conta, sem herdar o filtro da lista.
 
 ## 8. Regras de negócio
 
-- A lista tem a aba Estatísticas. RF-078.
-- A aba mostra o total de eventos e, com percentual, concluídos, em andamento e cancelados. RF-078.
-- A aba mostra eventos por mês no ano atual. RF-078.
-- A aba mostra o ranking de serviços no orçamento, calculado sobre eventos concluídos. RF-078.
-- A aba mostra o ranking dos fornecedores mais contratados e o ranking dos serviços mais utilizados. RF-078.
-- No topo da lista há atalhos de pagamentos, tarefas da semana, anexos, equipe escalada e aniversários. RF-048.
-- O atalho de tarefas mostra o contador "Para essa semana". O bloco de aniversários mostra "Lembretes de aniversários" com o contador "Para hoje". RF-048, no rótulo visto. A conta que gera cada número não tem RF e fica não definida.
-- As três quantidades usam as situações da SPEC-002. O total é a quantidade de eventos da conta.
-- Os números são os da conta autenticada. RF-078 fala nos eventos da assessoria.
-- Onde o RF não fecha fórmula, ordenação, recorte ou destino, a regra fica não definida. Esta spec não escolhe o valor.
+- A lista tem a aba Estatísticas junto das abas Em andamento, Concluído e Cancelado. RF-078.
+- A aba mostra o total de eventos da conta e, com percentual, concluídos, em andamento e cancelados. RF-078. Percentual = quantidade da situação / total, com total zero resultando em 0%.
+- A aba mostra eventos por mês no ano atual, usando a data do evento. RF-078. Evento sem data não entra no gráfico.
+- A aba mostra o ranking de serviços no orçamento, calculado só sobre eventos concluídos: posição, serviço e percentual de participação no orçamento. RF-078.
+- A aba mostra o ranking dos fornecedores mais contratados (posição, fornecedor, quantidade) e o dos serviços mais utilizados (posição, serviço, quantidade). RF-078. "Contratado" segue a etapa Contratado da SPEC-018. "Utilizado" conta serviço presente em evento da conta.
+- Os números são só da conta do Organizer autenticado, salvo Admin.
+- No topo da lista há o bloco Resumo: Pagamentos, Tarefas (contador "Para essa semana"), Anexos e Equipe escalada; ao lado, Aniversários com "Lembretes de aniversários" e contador "Para hoje". RF-048.
+- Os atalhos são navegação, não CRUD: Pagamentos → módulo de pagamentos dos eventos; Tarefas → tarefas com recorte da semana; Anexos → anexos da conta/eventos; Equipe escalada → escala/equipe do dia; Aniversários → lembretes de aniversário do dia. O miolo de cada destino permanece na spec do módulo.
+- Não há gravação, exclusão nem edição de estatística. CRUD das estatísticas: N/A.
 
 ## 9. Validações
 
@@ -72,86 +66,63 @@ Não há campo editável nesta spec. Não há gravação para validar.
 
 ## 10. Estados
 
-A aba não tem situação própria. Ela lê Em andamento, Concluído e Cancelado da SPEC-002. Nenhum bloco desta spec muda essa situação.
+A aba não tem situação própria. Lê Em andamento, Concluído e Cancelado da SPEC-002. Nenhum bloco desta spec muda essa situação.
 
 ## 11. Dados necessários
 
-Eventos da conta, com a situação da SPEC-002, para o total e para as três quantidades.
+Eventos da conta, com situação e data, para total, percentuais e gráfico.
 
-Eventos por mês: o bloco é do ano atual. Qual data coloca o evento no mês não foi definida.
+Ranking de orçamento (eventos concluídos): posição, nome do serviço, percentual.
 
-Ranking de orçamento, só eventos concluídos: posição, serviço e percentual. A base do percentual não foi definida.
+Ranking de fornecedores: posição, nome do fornecedor, quantidade de contratações.
 
-Ranking de fornecedores: posição, fornecedor e quantidade. O que conta como contratado não foi definido.
+Ranking de serviços mais utilizados: posição, nome do serviço, quantidade.
 
-Ranking de serviços mais utilizados: posição, serviço e quantidade. O que conta como utilizado não foi definido.
-
-Resumo: os quatro rótulos e os dois contadores. A origem de cada contador não foi definida.
+Resumo: rótulos dos atalhos; contador de tarefas da semana; contador de aniversários de hoje.
 
 ## 12. Interface
 
-Quatro abas na lista: Em andamento, Concluído, Cancelado e Estatísticas. As três primeiras seguem a SPEC-002. A aba Estatísticas foi vista com uma contagem; o que essa contagem numera fica na seção 17.
+Quatro abas na lista: Em andamento, Concluído, Cancelado e Estatísticas. As três primeiras seguem a SPEC-002.
 
-Na aba Estatísticas:
+Na aba Estatísticas: total; três situações com quantidade e percentual; gráfico "Eventos por mês (ano atual)"; três rankings com as colunas da seção 11.
 
-- Total de eventos.
-- Concluídos, em andamento e cancelados, cada um com quantidade e percentual.
-- Gráfico "Eventos por mês (ano atual)".
-- "Ranking dos serviços que mais consomem as partes do orçamento dos seus eventos", sobre eventos concluídos, com posição, serviço e percentual.
-- "Ranking dos fornecedores mais contratados", com posição, fornecedor e quantidade.
-- "Ranking dos serviços mais utilizados", com posição, serviço e quantidade.
-
-Acima das abas, o bloco "Resumo de todos os eventos": Pagamentos, Tarefas com o contador "Para essa semana", Anexos e Equipe escalada. Ao lado, o bloco "Aniversários": "Lembretes de aniversários" com o contador "Para hoje".
-
-Não há formulário, botão de gravar, exclusão nem impressão nesta tela, no que foi percorrido.
+Acima das abas: Resumo de todos os eventos (Pagamentos, Tarefas, Anexos, Equipe escalada) e Aniversários. Sem formulário de gravação nesta tela.
 
 ## 13. Erros
 
-Falha ao carregar não revela evento de outra conta. O texto de erro da referência não foi visto. Lista sem evento não é erro: as quantidades ficam em zero. Percentual e rankings nesse caso seguem a seção 17.
+Falha ao carregar não revela evento de outra conta. Lista sem evento não é erro: quantidades e percentuais em zero; rankings vazios.
 
 ## 14. Critérios de aceite
 
 1. A lista da conta mostra a aba Estatísticas junto das três abas da SPEC-002.
-2. A aba mostra o total da conta e a quantidade em cada situação da SPEC-002, com um percentual em cada situação.
-3. A aba mostra "Eventos por mês (ano atual)" e os três rankings, com as colunas da seção 12. O ranking de orçamento declara o recorte de eventos concluídos.
-4. O resumo mostra Pagamentos, Tarefas com "Para essa semana", Anexos e Equipe escalada. Aniversários mostra "Lembretes de aniversários" com "Para hoje".
-5. Evento de outra conta não entra nesses números.
-6. Abrir a aba não muda situação, não grava e não imprime.
-7. Busca, filtros, card e cadastro continuam os da SPEC-002 e da SPEC-008.
+2. A aba mostra o total da conta e a quantidade em cada situação, com percentual; com total zero, percentuais são 0%.
+3. A aba mostra "Eventos por mês (ano atual)" e os três rankings, com as colunas da seção 11. O ranking de orçamento só usa eventos concluídos.
+4. O resumo mostra Pagamentos, Tarefas com "Para essa semana", Anexos e Equipe escalada; Aniversários mostra "Lembretes de aniversários" com "Para hoje".
+5. Clicar num atalho navega ao módulo relacionado da própria conta.
+6. Evento de outra conta não entra nesses números.
+7. Abrir a aba não muda situação, não grava e não imprime.
+8. Busca, filtros, card e cadastro continuam os da SPEC-002 e da SPEC-008.
 
 ## 15. Cenários de teste
 
-Conta com um evento em andamento, um concluído e um cancelado. Resultado: total 3 e quantidade 1 em cada situação. O percentual aparece. O valor do percentual não é critério.
+Conta com um evento em andamento, um concluído e um cancelado: total 3, quantidade 1 em cada situação, percentuais presentes.
 
-Conta sem evento. Resultado: total e as três quantidades em zero.
+Conta sem evento: total e quantidades em zero; rankings vazios.
 
-Duas contas com quantidades diferentes. Resultado: cada uma vê só os próprios totais.
+Duas contas com quantidades diferentes: cada Organizer vê só os próprios totais; Admin vê a conta escolhida.
 
-Evento concluído de outra conta. Resultado: não aparece no total nem no ranking de orçamento.
+Evento concluído de outra conta: não entra no total nem no ranking de orçamento.
 
-Aba Em andamento, com a quarta aba presente. Resultado: a lista dessa aba continua só com eventos em andamento da conta, pela SPEC-002.
-
-Resumo visível. Resultado: os rótulos e os dois contadores aparecem. Clicar neles não tem destino exigido.
+Clicar em Tarefas no resumo: abre o módulo de tarefas no recorte da semana.
 
 ## 16. Dependências
 
-SPEC-001 e SPEC-002. A SPEC-008 segue dona do cadastro completo.
-
-Os rankings dependem de serviço e fornecedor (RF-058 e RF-057), ainda sem spec aprovada. O resumo aponta para pagamentos (RF-068), tarefas (RF-061), anexos (RF-073) e equipe (RF-051). O miolo desses atalhos não foi aberto e não é fluxo desta spec. O lembrete de aniversário continua fora da SPEC-003.
-
-RF-077 não cobre esta aba. O próprio RF-077 manda ver RF-078.
+SPEC-001, SPEC-002. SPEC-008 dona do cadastro completo. SPEC-018 para serviço e fornecedor nos rankings. Destinos dos atalhos: pagamentos (RF-068), tarefas (RF-061 / SPEC-003), anexos (RF-073), equipe (RF-051).
 
 ## 17. Premissas e pontos não definidos
 
-- RF-048 e RF-078 continuam Observado. Aprovar esta spec é decisão do usuário.
-- O corte aprovado deixa a aba Estatísticas e o RF-078 de fora. Esta spec não os traz para o corte.
-- Fórmula do percentual, arredondamento e o percentual quando o total é zero.
-- Qual data entra em "Eventos por mês (ano atual)". Meses sem evento. Troca de ano.
-- O que a contagem da aba Estatísticas numera.
-- Se busca e filtros da lista restringem a aba ou o resumo.
-- Quantas linhas cada ranking mostra, como empate se ordena e o que o percentual do ranking de orçamento divide.
-- O que a quantidade de "mais contratados" e de "mais utilizados" conta.
-- O que o ranking mostra sem evento concluído, sem serviço ou sem fornecedor.
-- A conta dos contadores "Para essa semana" e "Para hoje": quais tarefas, de quem é o aniversário, início da semana e fuso.
-- Destino ao clicar em Pagamentos, Tarefas, Anexos, Equipe escalada e Aniversários.
-- Imprimir a lista, nomeado em RF-048, e o atalho "+" do card. Os dois não foram abertos. Não há fluxo de gravação, exclusão nem impressão nesta spec.
+- Fórmula exata do percentual do ranking de orçamento (base do denominador) quando há vários serviços.
+- Quantidade máxima de linhas exibidas em cada ranking e desempate.
+- Início da semana do contador "Para essa semana" e fuso horário dos contadores.
+- Conteúdo exato do lembrete de aniversário (qual pessoa: cliente, membro da equipe).
+- Impressão da lista (RF-048) permanece fora desta spec.

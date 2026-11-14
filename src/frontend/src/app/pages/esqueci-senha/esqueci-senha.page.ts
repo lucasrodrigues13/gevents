@@ -7,6 +7,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ContaClient } from '../../core/conta.client';
 import { mensagemDeErro } from '../../core/mensagem-erro';
+import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-esqueci-senha',
@@ -23,9 +24,6 @@ import { mensagemDeErro } from '../../core/mensagem-erro';
               <mat-label>E-mail</mat-label>
               <input matInput type="email" formControlName="email" autocomplete="username" />
             </mat-form-field>
-            @if (aviso()) {
-              <p class="aviso" role="status">{{ aviso() }}</p>
-            }
             <button mat-flat-button type="submit" [disabled]="formulario.invalid || enviando()">Enviar link</button>
           </form>
           <p><a routerLink="/entrar">Voltar ao login</a></p>
@@ -37,7 +35,7 @@ import { mensagemDeErro } from '../../core/mensagem-erro';
 export class EsqueciSenhaPage {
   private readonly fb = inject(FormBuilder);
   private readonly conta = inject(ContaClient);
-  protected readonly aviso = signal('');
+  private readonly toast = inject(ToastService);
   protected readonly enviando = signal(false);
   protected readonly formulario = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -45,17 +43,18 @@ export class EsqueciSenhaPage {
 
   protected enviar(): void {
     if (this.formulario.invalid) {
+      this.toast.erro('Informe um e-mail válido.');
       return;
     }
 
     this.enviando.set(true);
     this.conta.esqueciSenha(this.formulario.getRawValue().email).subscribe({
       next: (resposta) => {
-        this.aviso.set(resposta.mensagem);
+        this.toast.sucesso(resposta.mensagem);
         this.enviando.set(false);
       },
       error: (erro: unknown) => {
-        this.aviso.set(mensagemDeErro(erro));
+        this.toast.erro(mensagemDeErro(erro));
         this.enviando.set(false);
       },
     });

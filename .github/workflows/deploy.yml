@@ -1,0 +1,55 @@
+# Dispara no push da main e também pelo botão "Run workflow".
+# Os valores não ficam neste arquivo. Cadastre os segredos do repositório:
+#   SSH_HOST          IP público da VPS
+#   SSH_USER          usuário SSH, em geral root
+#   SSH_PRIVATE_KEY   chave privada inteira, com as linhas BEGIN e END
+#   SSH_PORT          opcional; se vazio, usa 22
+
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-vps
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Publicar na VPS
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -z "${SSH_HOST}" ] || [ -z "${SSH_USER}" ] || [ -z "${SSH_PRIVATE_KEY}" ]; then
+            echo "Cadastre SSH_HOST, SSH_USER e SSH_PRIVATE_KEY nos segredos do repositório."
+            exit 1
+          fi
+          port="${SSH_PORT:-22}"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" | tr -d '\r' > ~/.ssh/gevents_deploy
+          chmod 600 ~/.ssh/gevents_deploy
+          ssh-keyscan -p "$port" -H "$SSH_HOST" >> ~/.ssh/known_hosts
+          destino="${SSH_USER}@${SSH_HOST}"
+          ssh_base="ssh -i ${HOME}/.ssh/gevents_deploy -p ${port} -o StrictHostKeyChecking=yes -o ConnectTimeout=20 -o ServerAliveInterval=30"
+          $ssh_base "$destino" "mkdir -p /opt/gevents"
+          rsync -az --delete \
+            --exclude '.git/' \
+            --exclude '.env' \
+            --exclude 'node_modules/' \
+            -e "$ssh_base" \
+            ./ "${destino}:/opt/gevents/"
+          $ssh_base "$destino" "if [ ! -f /opt/gevents/.env ]; then cp /opt/gevents/.env.example /opt/gevents/.env; chmod 600 /opt/gevents/.env; echo 'Preencha /opt/gevents/.env e rode este workflow de novo.'; exit 1; fi"
+          $ssh_base "$destino" "cd /opt/gevents && docker compose -f compose.production.yaml up -d --build --remove-orphans --wait"

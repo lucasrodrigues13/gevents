@@ -12,6 +12,10 @@ RUN dotnet publish src/backend/Project.Api/Project.Api.csproj -c Release -o /app
 FROM mcr.microsoft.com/dotnet/aspnet:10.0
 WORKDIR /app
 COPY --from=build /app .
+# Volume nomeado herda o dono deste diretório. A API roda como APP_UID.
+RUN mkdir -p /keys /storage \
+    && chown "$APP_UID:$APP_UID" /keys /storage \
+    && chmod 700 /keys /storage
 ENV ASPNETCORE_URLS=http://+:8080
 USER $APP_UID
 EXPOSE 8080

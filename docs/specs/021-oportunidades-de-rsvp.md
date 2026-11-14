@@ -1,8 +1,6 @@
 # 021. Oportunidades de RSVP
 
-**Status: rascunho.** Fora do Must de [mvp-scope.md](../mvp-scope.md): a seção 5 deixa RF-077 de fora e, de RF-075, só a quantidade e o valor dos quatro estágios no dashboard. RF-075 e RF-077 continuam Observado. Quem responde presença por link continua na SPEC-004 e na SPEC-010.
-
-Fonte da observação: tela do funil, oportunidades de RSVP, na conta de referência. Os três ícones da linha não foram acionados.
+**Status: aprovada.** O código segue esta spec.
 
 ## 1. Identificador e nome
 
@@ -10,96 +8,81 @@ SPEC-021. Oportunidades de RSVP.
 
 ## 2. Objetivo
 
-A assessoria consulta os convidados que disseram pretender realizar um evento nos próximos dois anos.
+O Organizer consulta leads gerados pela confirmação de presença quando o convidado declara pretender realizar um evento nos próximos dois anos, e decide descartar o lead ou gerar oportunidade no funil.
 
 ## 3. Requisitos relacionados
 
-Nenhum RF aprovado descreve esta lista. RF-075 e RF-077 estão Observado e não entram como regra. A proposta RF-145 está só neste rascunho e no resumo de revisão. Ela ainda não está em `docs/requirements.md` e não está aprovada.
-
-| ID | Nome | Comportamento observado | Ator | Regras vistas | Depende de | Status |
-|---|---|---|---|---|---|---|
-| RF-145 | Oportunidades de RSVP | Lista de convidados que disseram pretender realizar evento nos próximos dois anos. Há busca por convite ou evento. | Assessoria | Cada linha mostra o convite, o evento e a data de criação, mais os ícones de pasta com menos, pasta com mais e telefone. Os ícones não foram acionados. | — | Observado |
-
-Presença, link e convite permanecem na SPEC-004 e na SPEC-010.
+RF-075, no recorte de oportunidades de RSVP e integração do RSVP com o funil. Presença, link e convite permanecem na SPEC-004 e na SPEC-010. O quadro de oportunidades é a SPEC-020. Relatório de oportunidades de RSVP é a SPEC-024. RF-079 fica fora.
 
 ## 4. Atores e permissões
 
-A assessoria consulta a lista na própria conta. Quem responde o link de presença permanece na SPEC-004. A role `User` identifica a conta, RF-040.
-
-Quem mais abre a lista, e se outra conta a vê, fica pendente na seção 17.
+O `Organizer` lista e age sobre os leads RSVP da própria conta. Outro `Organizer` não vê. `Admin` acessa qualquer conta. `Client` não acessa. Quem responde o link de presença permanece na SPEC-004, sem login de Organizer. Assistente e fornecedor com login ficam fora.
 
 ## 5. Pré-condições
 
-Conta da assessoria, SPEC-001. A linha mostra evento e convite já existentes, SPEC-002 e SPEC-004. O passo em que o convidado declara a intenção ainda não tem spec.
+Conta autenticada, SPEC-001. Evento e convite existem, SPEC-002 e SPEC-004. A configuração do RSVP da conta permite a pergunta de intenção de realizar evento e o envio ao funil.
 
 ## 6. Fluxo principal
 
-1. A assessoria abre a lista de oportunidades de RSVP.
-2. A lista mostra os convidados que disseram pretender realizar evento nos próximos dois anos.
-3. A busca usa convite ou evento.
-4. Cada linha mostra o convite, o evento e a data de criação.
-5. Cada linha mostra os ícones de pasta com menos, pasta com mais e telefone.
+1. O Organizer abre Oportunidades de RSVP.
+2. A lista mostra convidados que disseram pretender realizar evento nos próximos dois anos.
+3. Cada linha mostra o convite, o evento e a data de criação do lead.
+4. O Organizer busca por convite ou por evento.
+5. A partir da linha, gera uma oportunidade no funil (estágio Contato inicial) ou descarta o lead, ou abre o contato telefônico já informado no RSVP.
 
 ## 7. Fluxos alternativos
 
-Os três ícones ficam sem fluxo até serem acionados. Busca sem correspondência e lista sem linhas não foram vistas.
+- Lista vazia: a tela informa que não há lead.
+- Busca sem correspondência: a lista fica sem linhas, sem erro.
+- Gerar oportunidade: cria registro na SPEC-020 e remove ou marca o lead como convertido, sem duplicar na lista ativa.
+- Descartar lead: tira o item da lista ativa; não cria oportunidade.
+- Conta de outro Organizer: leads não aparecem.
 
 ## 8. Regras de negócio
 
-- A lista reúne quem disse pretender realizar evento nos próximos dois anos. Proposta RF-145, Observado, sem aprovação.
-- A busca é por convite ou evento. Proposta RF-145. Fica não definido se a busca é um campo ou dois, e o que conta como acerto.
-- A linha mostra o convite, o evento e a data de criação. Proposta RF-145. Fica não definido a qual registro a data pertence.
-- Os três ícones aparecem na linha. A ação de cada um não tem RF e fica não definida.
-- Presença, link e convite continuam na SPEC-004 e na SPEC-010.
-- O vínculo com os quatro estágios do funil e com um item do catálogo de relatórios fica não definido. RF-075 e RF-077 não fecham esse vínculo.
+- A lista reúne só quem respondeu a intenção nos próximos dois anos no fluxo de RSVP da própria conta.
+- Gerar oportunidade cria item em Contato inicial na SPEC-020, com nome derivado do contato/convidado quando disponível.
+- Esta lista não é o quadro de estágios; o quadro continua na SPEC-020.
+- Descarte aqui é do lead RSVP, distinto do descarte com motivo de uma oportunidade já no quadro.
+- Telefone na linha usa o dado já coletado; não inventa contato.
 
 ## 9. Validações
 
-Nenhuma validação foi vista.
+Não há formulário de criação manual nesta tela. Ação sobre lead inexistente ou de outra conta não grava.
 
 ## 10. Estados
 
-A lista não mostrou estado próprio nem transição de linha.
+Lead ativo na lista, convertido em oportunidade, ou descartado. Convertido e descartado não reaparecem na lista ativa.
 
 ## 11. Dados necessários
 
-Na linha: convite, evento e data de criação. Os ícones estão na linha. O dado por trás de cada ícone não foi visto.
+Convite, evento, data de criação do lead, dados de contato disponíveis do RSVP.
 
 ## 12. Interface
 
-Lista com busca. Em cada linha: convite, evento, data de criação, pasta com menos, pasta com mais e telefone. Os rótulos exatos não foram transcritos. A rota do produto fica pendente.
+Lista com busca por convite ou evento. Em cada linha: convite, evento, data de criação e ações de descartar, gerar oportunidade e contato. Angular Material, DA-044.
 
 ## 13. Erros
 
-Nenhum erro foi visto.
+Lead de outra conta fica indisponível. Falha ao gerar oportunidade mantém o lead na lista. Lista vazia não é erro.
 
 ## 14. Critérios de aceite
 
-1. A lista mostra convidados que disseram pretender realizar evento nos próximos dois anos.
-2. A busca é por convite ou evento.
-3. A linha mostra o convite, o evento e a data de criação.
-4. A linha mostra os ícones de pasta com menos, pasta com mais e telefone.
-5. O efeito dos três ícones fica fora deste aceite.
+1. A lista mostra só leads RSVP da própria conta com intenção nos próximos dois anos.
+2. A linha mostra convite, evento e data de criação.
+3. A busca filtra por convite ou evento.
+4. Gerar oportunidade cria item em Contato inicial na SPEC-020.
+5. Descartar remove o lead da lista ativa sem criar oportunidade.
+6. Outra conta não vê os leads.
 
 ## 15. Cenários de teste
 
-Abrir a lista e conferir quem aparece, a busca por convite, a busca por evento e as três informações da linha. Os ícones permanecem sem acionamento. Conta sem linhas, busca sem acerto e duas contas ainda não têm resultado visto.
+Lista vazia. Lead após RSVP com intenção. Busca por convite e por evento. Gerar oportunidade e conferir SPEC-020. Descartar. Duas contas.
 
 ## 16. Dependências
 
-SPEC-001, SPEC-002 e SPEC-004. A SPEC-010 permanece a lista completa de convite e convidado. O dashboard do funil, SPEC-007, não passa a ler esta lista.
+SPEC-001, SPEC-002, SPEC-004, SPEC-010 e SPEC-020. SPEC-024 lê métricas deste fluxo.
 
 ## 17. Premissas e pontos não definidos
 
-- Efeito do ícone de pasta com menos.
-- Efeito do ícone de pasta com mais.
-- Efeito do ícone de telefone.
-- Se a busca é um campo ou dois, e o critério de correspondência.
-- A qual registro a data de criação pertence.
-- Rótulos, ordenação, lista vazia e busca sem resultado.
-- Se a linha abre outra tela.
-- Onde o convidado declara a intenção de realizar evento nos próximos dois anos.
-- Se a linha é uma oportunidade nos estágios de RF-075.
-- Se a tela é o item Oportunidades de RSVP do catálogo de relatórios de RF-077.
-- Acesso sem login e visibilidade para outra conta.
-- A proposta RF-145 ainda não está em `docs/requirements.md`.
+Texto exato da pergunta no RSVP público. Se o lead convertido permanece arquivado para auditoria além de sair da lista ativa.

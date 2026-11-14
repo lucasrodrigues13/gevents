@@ -1,3 +1,5 @@
+using Project.Domain.Fornecedores;
+
 namespace Project.Domain.Eventos;
 
 public sealed class Evento
@@ -99,13 +101,53 @@ public sealed class ServicoEvento
 
     public string Nome { get; set; } = "";
 
+    public Guid? ServicoContaId { get; set; }
+
     public string? FornecedorContaId { get; set; }
 
     public bool Contratado { get; set; }
 
+    public decimal? ValorEstimado { get; set; }
+
     public decimal? ValorContratado { get; set; }
 
+    public bool OcultoParaClient { get; set; }
+
+    public int Ordem { get; set; }
+
     public List<ParcelaServico> Parcelas { get; set; } = [];
+
+    public List<SubitemServico> Subitens { get; set; } = [];
+
+    public List<FornecedorNoServico> Fornecedores { get; set; } = [];
+}
+
+public sealed class SubitemServico
+{
+    public Guid Id { get; set; }
+
+    public Guid ServicoId { get; set; }
+
+    public string Descricao { get; set; } = "";
+
+    public int Quantidade { get; set; } = 1;
+
+    public decimal ValorUnitario { get; set; }
+}
+
+public sealed class FornecedorNoServico
+{
+    public Guid Id { get; set; }
+
+    public Guid ServicoId { get; set; }
+
+    public Guid FornecedorId { get; set; }
+
+    public EtapaNegociacao Etapa { get; set; }
+
+    public decimal? ValorOrcamento { get; set; }
+
+    public string? Observacoes { get; set; }
 }
 
 public sealed class ParcelaServico
@@ -121,6 +163,8 @@ public sealed class ParcelaServico
     public decimal Valor { get; set; }
 
     public bool Entrada { get; set; }
+
+    public SituacaoParcela Situacao { get; set; }
 }
 
 public sealed class LocalTransfer
@@ -138,7 +182,9 @@ public sealed class CompromissoAgenda
 
     public string ContaId { get; set; } = "";
 
-    public Guid EventoId { get; set; }
+    public Guid? EventoId { get; set; }
+
+    public string Descricao { get; set; } = "";
 
     public DateOnly? Data { get; set; }
 

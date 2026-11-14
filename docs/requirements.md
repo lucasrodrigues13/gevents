@@ -14,7 +14,7 @@ Nenhum código, solution, entidade, migration ou arquivo de infraestrutura faz p
 
 ## 1. Visão geral
 
-Aplicação web para gestão de cerimonial e assessoria de eventos, com a interface em Angular e os casos de uso numa API .NET. A primeira entrega técnica é a base: contas, autenticação, autorização e a estrutura da solution. As funcionalidades de evento, convidado, fornecedor e financeiro entram em specifications posteriores.
+Aplicação web para gestão de cerimonial e assessoria de eventos, com a interface em Angular e os casos de uso numa API .NET. Contas usam as roles `Admin`, `Organizer` e `Client`. O corte funcional aprovado está em [mvp-scope.md](mvp-scope.md) e nas specs 001–028.
 
 A API, o build estático do Angular, o PostgreSQL e os arquivos ficam na mesma VPS, sob Docker Compose, com o Caddy na frente. A primeira versão não usa microsserviço, mensageria, fila de e-mail nem infraestrutura distribuída.
 
@@ -35,7 +35,7 @@ Nos requisitos de conta, o status **Definido** significa **Confirmado** para est
 | RF-005 | O login só é permitido depois da confirmação do e-mail. | Definido |
 | RF-006 | O cadastro tem proteção contra tentativas automatizadas, com os recursos nativos do ASP.NET Core, inclusive o limite de RF-017. | Definido |
 | RF-007 | Falhas de cadastro são informadas sem expor dados sensíveis nem detalhes internos. | Definido |
-| RF-008 | Toda conta criada pelo cadastro público recebe somente a role `User`. | Definido |
+| RF-008 | Toda conta criada pelo cadastro público recebe somente a role `Organizer`. | Definido |
 | RF-009 | O formulário de cadastro não oferece campo de role. O visitante não escolhe o próprio privilégio. | Definido |
 | RF-010 | O cadastro público não atribui a role `Admin`. O primeiro visitante que se cadastra não vira administrador. | Definido |
 
@@ -72,20 +72,24 @@ Nos requisitos de conta, o status **Definido** significa **Confirmado** para est
 
 | ID | Requisito | Status |
 |---|---|---|
-| RF-024 | Existem duas roles iniciais: `Admin` e `User`. | Definido |
+| RF-024 | Existem três roles: `Admin`, `Organizer` e `Client`. | Definido |
 | RF-025 | Página privada exige usuário autenticado. | Definido |
 | RF-026 | Página administrativa exige a role `Admin`. | Definido |
-| RF-027 | Usuário com role `User` não acessa recurso administrativo. | Definido |
+| RF-027 | Conta com role `Organizer` ou `Client` não acessa recurso administrativo. | Definido |
 | RF-028 | A autorização é verificada no servidor com `[Authorize]`, roles e policies do ASP.NET Core. Esconder um link na interface não protege a página. | Definido |
-| RF-040 | A role `User` identifica a conta comum. Ela não representa, por si só, assessoria, casal, fornecedor ou outra entidade de negócio. Nenhuma role nova será criada até um requisito funcional justificar. | Definido |
+| RF-040 | `Admin` é o admin geral: acesso a tudo e a todas as contas. `Organizer` é o comprador do sistema (organiza eventos e dados da própria conta). `Client` é subusuário Identity sempre vinculado a um `Organizer`, com acesso limitado ao que o organizador concede. Assistente e fornecedor com login não são roles neste corte. | Definido |
+| RF-083 | Dados de negócio da conta (eventos, clientes de contato, modelos, funil, agenda, serviços e fornecedores) pertencem ao tenant do `Organizer`. Outro `Organizer` não os vê. | Definido |
+| RF-084 | Toda conta `Client` está vinculada a exatamente um `Organizer`. | Definido |
+| RF-085 | O `Organizer` cria e gerencia as contas `Client` da própria conta e define as permissões de módulos e eventos concedidas a cada uma. | Definido |
+| RF-086 | O `Client` só acessa recursos do `Organizer` vinculado e somente o que as permissões concederem (flags vistas: convidados, tarefas, anexos, parcelas, RSVP, mapa e contrato). | Definido |
 
 ### 2.5. Bootstrap do administrador inicial
 
 | ID | Requisito | Status |
 |---|---|---|
-| RF-029 | Na inicialização, quando o bootstrap está habilitado, a aplicação garante as roles `Admin` e `User`, cria o administrador inicial se ele ainda não existe e atribui a role `Admin`. | Definido |
+| RF-029 | Na inicialização, quando o bootstrap está habilitado, a aplicação garante as roles `Admin`, `Organizer` e `Client`, cria o administrador inicial se ele ainda não existe e atribui a role `Admin`. | Definido |
 | RF-030 | A operação é idempotente: não duplica role nem usuário e não altera a senha de um usuário que já existe. | Definido |
-| RF-031 | Se já existir um usuário comum com o e-mail configurado para o administrador, o bootstrap interrompe a operação e não promove esse usuário. | Definido |
+| RF-031 | Se já existir um usuário `Organizer` ou `Client` com o e-mail configurado para o administrador, o bootstrap interrompe a operação e não promove esse usuário. | Definido |
 | RF-032 | O administrador criado pelo bootstrap consegue entrar sem passar pelo fluxo público de confirmação de e-mail. A confirmação é registrada de forma segura durante o bootstrap. | Definido |
 | RF-033 | O bootstrap fica desligado por padrão. Só roda quando `Bootstrap__Enabled` está habilitado. Credencial ausente ou inválida faz a inicialização falhar, sem gravar senha ou segredo em log. | Definido |
 | RF-034 | Não existe endpoint público para disparar o bootstrap. Ele não usa `HasData()` do EF Core, senha fixa no código nem seed genérico de usuários. | Definido |
@@ -96,52 +100,52 @@ O comportamento detalhado está na seção 8.4.
 
 | ID | Requisito | Status |
 |---|---|---|
-| RF-035 | O comportamento aprovado para implementação é o das specs 001 a 010. O restante desta seção continua observado e fica de fora até existir spec própria. | Pendente |
+| RF-035 | O comportamento aprovado para implementação é o das specs 001 a 028, no recorte de [mvp-scope.md](mvp-scope.md). RF observados sem spec aprovada neste corte (assistente, login de fornecedor, peças de marketplace e o que a spec deixar de fora) permanecem fora do código. | Definido |
 
-A fonte é [docs/brief.md](brief.md), leitura da plataforma de referência, sem nova exploração. O corte aprovado está em [docs/mvp-scope.md](mvp-scope.md). Os RF abaixo continuam observados. A spec aprovada é que limita o que entra no código.
+A fonte é [docs/brief.md](brief.md) e [docs/inventario-referencia.md](inventario-referencia.md). O corte aprovado está em [docs/mvp-scope.md](mvp-scope.md). A spec aprovada limita o que entra no código. RFs promovidos a Definido abaixo cobrem só o que as specs 001–028 descrevem.
 
-### 2.7. Requisitos observados na referência
+### 2.7. Requisitos de domínio (referência e promoção)
 
-Nada desta seção está confirmado. Regras que não foram vistas não foram completadas.
+Ator “Assessoria” na referência corresponde ao `Organizer` neste produto. Status **Definido** só para o que as specs 001–028 cobrem. O que permanece Observado ou Pendente fica fora do código até nova decisão.
 
-| ID | Nome | Comportamento observado | Ator | Regras vistas | Depende de | Status |
+| ID | Nome | Comportamento | Ator | Regras | Depende de | Status |
 |---|---|---|---|---|---|---|
-| RF-044 | Perfil da assessoria | Cadastro da empresa com nome, responsável, e-mail, CPF ou CNPJ, celular, nascimento e endereço. | Assessoria | E-mail da conta não é editável na tela vista. | RF-011 | Observado |
-| RF-045 | Assistentes | A assessoria cadastra assistentes e limita módulos. | Assessoria, assistente | Cada permissão é independente. A referência tem mais papéis do que `Admin` e `User`. | RF-040, DP-016 | Observado |
-| RF-046 | Busca global | Campo para buscar eventos ou ferramentas. | Assessoria | Não foi medido o que a busca devolve. | RF-048 | Observado |
-| RF-047 | Notificações | Sino com lista e ação de marcar como lidas. | Assessoria | O conteúdo de cada aviso não foi aberto. | — | Observado |
-| RF-048 | Lista de eventos | Abas em andamento, concluído e cancelado. Busca por nome. Filtros de tipo, equipe, assistente, período, modelo e tags. Card com data, contagem, modelo, tarefas e convidados. Ações de editar, cancelar, concluir, remover e imprimir a lista. | Assessoria | Tags vistas: assessoria completa, parcial e final. São dados da conta, não uma lista fechada. Atalhos no topo: pagamentos, tarefas da semana, anexos, equipe escalada, aniversários. Inventário em [inventario-referencia.md](inventario-referencia.md) §1.1. | RF-049 | Observado |
-| RF-049 | Cadastro do evento | Cria evento com imagem, modelo, casal, nome, data, hora, orçamento estimado, número estimado de convidados e locais de cerimônia e recepção. | Assessoria | Na referência o modelo é obrigatório e define o tipo. Depois do salvar pede valor da assessoria (total, parcelas, entrada). Edição tem quatro abas, com horário de convite, tempo de festa, horários de cerimônia e recepção, padrinhos, damas e endereço completo de cada local. Campos em [inventario-referencia.md](inventario-referencia.md) §1.3 e §1.5. | RF-053 | Observado |
-| RF-050 | Home do evento | Contagem regressiva, código, atalhos de budget, pagamentos, tarefas, convidados, serviços por categoria e pendências do mês. | Assessoria | Também mostra equipe do dia, gerenciar clientes, planejamento de budget, observações gerais, lista de serviços do modelo, compromissos e despesas. Código visto no formato `12729CXQT`. | RF-048, RF-058, RF-061, RF-063, RF-068 | Observado |
-| RF-051 | Equipe do dia | Ação para escalar quem trabalha no evento. | Assessoria | Modal com Minha equipe e Mural de recados. Membro tem Dados, Endereço, Dados bancários e Compromissos. Escalar pergunta se notifica por e-mail. Conflito de agenda aparece em vermelho. Campos em [inventario-referencia.md](inventario-referencia.md) §1.8. | RF-045, RF-050 | Observado |
-| RF-052 | Agrupar eventos | Há rotas de eventos agrupados. | Assessoria | O fluxo não foi aberto. | RF-048 | Pendente |
-| RF-053 | Modelo de evento | Biblioteca de modelos. Tipos vistos: casamento, 15 anos, aniversário, corporativo e formatura. Aplicar o modelo na criação do evento. | Assessoria | Criar pede Nome e Tipo. O editor tem abas Checklist, Tarefas, Briefings, Roteiros, Inspirações, RSVP e Mensagens, Permissões. Checklist lista serviços com tarefas, fornecedores, alinhamentos, comparativos e valor estimado. Miolo das outras abas ainda não aberto. | — | Observado |
-| RF-054 | Outros modelos | Bibliotecas de briefing, roteiro, cronograma, inspiração e mensagem. | Assessoria | Cada biblioteca foi vista no menu, não no editor. | RF-069, RF-070, RF-071, RF-072, RF-065 | Observado |
-| RF-055 | Clientes da assessoria | Lista com busca. Cartão com nome, telefone, e-mail, eventos vinculados e último acesso. | Assessoria | Formulário em três abas. Obrigatórios: nome, papel, e-mail, DDI, celular. Papéis vistos: Anfitrião, Aniversariante, Avó, Avô, Comissão, Formando(a), Mãe, Noiva, Noivo, Pai, Promotor, Representante, Tia, Tio. Endereço dividido. Vínculo nasce no evento, não neste formulário. Campos em [inventario-referencia.md](inventario-referencia.md) §5. | RF-049 | Observado |
-| RF-056 | Acesso do cliente | O cliente entra só no próprio evento. Há flags de permissão para convidados, tarefas, anexos, parcelas, RSVP, mapa e contrato. | Cliente, assessoria | As flags vieram do frontend. O portal do cliente não foi usado. | RF-045, RF-055 | Observado |
-| RF-057 | Catálogo de fornecedores | Busca, filtro, exportação, mescla e status completo, incompleto ou dados solicitados. Há abas de catálogo, solicitação de dados e lista de serviços. | Assessoria | Formulário com oito abas: Dados, Redes sociais, Endereço, Dados bancários, Orçamentos, Diferencial, Inf. gerais, Portfólio. Nome e serviços obrigatórios. Telefones e e-mails são listas. Campos em [inventario-referencia.md](inventario-referencia.md) §1.11. | — | Observado |
-| RF-058 | Serviços e budget | No evento, cada serviço tem fornecedor, tarefas e valor. A home compara estimado e contratado. | Assessoria | A lista de categorias vista é a de um modelo de casamento, não um catálogo fixo do produto. | RF-049, RF-057, RF-061 | Observado |
-| RF-059 | Negociação | Estágios vistos: recomendado, orçamento solicitado, orçamento recebido, contratado, contrato solicitado, contrato recebido. | Assessoria | No hub do evento a trilha tem quatro etapas empilhadas, com seta para voltar uma: Recomendado, Orçamento solicitado, Orçamento recebido, Contratado. Solicitar contrato é ação do contratado, não uma quinta coluna na trilha. | RF-058 | Observado |
-| RF-060 | Link do fornecedor | Há rotas para o fornecedor completar dados, responder orçamento e enviar contrato sem a conta da assessoria. | Fornecedor | Os formulários públicos não foram preenchidos. | RF-057, RF-059 | Observado |
-| RF-061 | Tarefas | Situações pendente, em andamento, concluída e atrasada. Visões por situação, responsável, prazo e serviço. Lista, quadro por situação e quadro por dia. Prazo também relativo ao evento. Tarefa com descrição, checklist, perguntas, comentários e anexos. Há lista de todos os eventos e destaque da semana. | Assessoria, cliente | Cliente só age se a permissão existir. O conjunto exato de campos obrigatórios não foi fechado. | RF-049, RF-058 | Observado |
-| RF-062 | Redatar tarefas | Ao mudar a data do evento, os prazos das tarefas podem ser recalculados. | Assessoria | Visto como aviso no produto, não executado. | RF-049, RF-061 | Observado |
-| RF-063 | Convites e convidados | Convite agrupa convidados. Grupos configuráveis. Situação: pendente, confirmado ou não comparecerá. Faixa etária, custo, gênero, celular, observação e transfer. Visão por convite ou por convidado. Busca, filtro, criação, importação, exportação e impressão. | Assessoria | Convite: nome obrigatório, DDI, celular, grupo, observação, transfer e origem. Convidado: nome obrigatório, RSVP, mesa, gênero, faixa, custo, RG, CPF. Telefone fica no convite. Planilha padrão em 11 colunas. Campos em [inventario-referencia.md](inventario-referencia.md) §2. | RF-049 | Observado |
-| RF-064 | RSVP por link | Link por convite e link único do evento. Histórico: enviada, acessada, respondida. | Convidado, assessoria | Há também QR Code do convite, envio por WhatsApp e configuração da página (fonte, data, cor, contato). O formulário público ainda não foi respondido. | RF-063 | Observado |
-| RF-065 | RSVP automático | Mensagens e disparos automáticos, com configuração. Mudar a data do evento pode desligar envios. | Assessoria | A configuração não foi concluída. Depende de envio em volume, acima do uso atual do Gmail. | RF-064, RNF-020 | Observado |
-| RF-066 | Mapa de mesas | Item de menu, com trava de data. | Assessoria | Cadastro da mesa: nome ou número obrigatório, quantidade de lugares, observação até 1000 caracteres, convidados. Filtro do seletor: sem mesa e só confirmados. | RF-063 | Observado |
-| RF-067 | Checklist de presença | Item de menu e relatório com presentes, ausentes, mesa e contagem. Há menção a uso offline. | Assessoria | Tela com Ler QR Code, Acesso offline, totais pendentes, presentes e não compareceram. O check-in de uma pessoa não foi executado. | RF-063 | Observado |
-| RF-068 | Parcelas do evento | Parcelas por serviço e fornecedor. Visão por mês ou por fornecedor. Filtros de período, pagador, status e forma de pagamento. Campos de vencimento, valor, juros, número da parcela e pago. Impressão de custos. | Assessoria | Parcela no hub: Status (Pago, Pendente), vencimento, pagamento, valor, juros, pago por, forma (Cartão de crédito, Cartão de débito, Boleto, TED, DOC, Cheque, Dinheiro, Transferência, Pix, Permuta, Outros), observação, comprovantes. | RF-058 | Observado |
-| RF-069 | Roteiro | Seções ordenáveis, observação, anexo, clonagem, impressão e permissão de ver ou editar para o cliente. | Assessoria, cliente | Rótulos vistos. O editor não foi percorrido. | RF-049, RF-054 | Observado |
-| RF-070 | Cronograma | Data, hora, responsável, recado a fornecedores, salvar como modelo, impressão e compartilhamento. | Assessoria | Rótulos vistos. A grade não foi percorrida. | RF-049, RF-054 | Observado |
-| RF-071 | Briefing | Do zero ou de modelo, com seções, perguntas, status de resposta, link público e impressão. | Assessoria, cliente | Rótulos vistos. Um briefing respondido não foi aberto. | RF-054 | Observado |
-| RF-072 | Inspirações | Galerias de referência. | Assessoria, cliente | Menu e rótulo de galeria. O miolo não foi aberto. | RF-054 | Observado |
-| RF-073 | Anexos | Por fornecedor, serviço, tarefa e observação geral, mais uma caixa de todos os eventos. | Assessoria | As abas foram vistas na home e nas rotas. O fluxo de upload do produto de referência não foi especificado. | RF-049, DA-035 | Observado |
-| RF-074 | Agenda | Mês, semana, dia e lista. Evento com data pode gerar compromisso. Confirmação de presença em compromisso por link. Há permissão de ver só os próprios compromissos. | Assessoria, assistente | Compromisso exige data. O formulário do compromisso não foi aberto. | RF-049 | Observado |
-| RF-075 | Funil de vendas | Quadro com quantidade e valor. Estágios vistos na conta: contato inicial, orçamento enviado, contratado e descartado. Estágios configuráveis. Descarte com motivo. Filtro, exportação, formulário público de lead, checagem de data, contratos, orçamentos e tarefas de reunião, ligação, e-mail ou tarefa. | Assessoria, lead | Não foi visto se a checagem de data bloqueia o cadastro ou só avisa. | RF-074 | Observado |
-| RF-076 | Financeiro da assessoria | Caixa da empresa, separado do budget do evento. Transações de recebimento, despesa e transferência. Contas, categorias, recibo, saldo realizado e previsto, pendências e fluxo de caixa. | Assessoria | A integração automática com a parcela do evento foi vista como configuração, não comprovada num lançamento. | RF-068 | Observado |
-| RF-077 | Relatórios e impressões | Catálogos de funil e do financeiro, mais impressões de convidados, custos, roteiro, cronograma, briefing, alinhamento, tarefas, resumo e agenda. | Assessoria | A aba Estatísticas da lista de eventos não entra aqui. Ver RF-078. | Vários, conforme o relatório | Observado |
-| RF-078 | Estatísticas de eventos | Existe uma aba com esse nome na lista de eventos. | Assessoria | Total, concluídos, em andamento e cancelados com percentual. Eventos por mês no ano atual. Ranking de serviços no orçamento (eventos concluídos), fornecedores mais contratados e serviços mais utilizados. | RF-048 | Observado |
-| RF-079 | Peças da plataforma de referência | VIP Pay, site e vitrine Casar.com, loja de modelos, MeLink, indicação e vídeos explicativos aparecem na referência. | Assessoria | São produtos da plataforma observada, não pedidos do nosso cliente. | — | Observado |
+| RF-044 | Perfil da assessoria | Cadastro da empresa com nome, responsável, e-mail, CPF ou CNPJ, celular, nascimento e endereço. | Organizer | E-mail da conta não é editável. SPEC-005. | RF-011 | Definido |
+| RF-045 | Assistentes | A assessoria cadastra assistentes e limita módulos. | Assessoria, assistente | Fora deste corte. Não vira role. | RF-040 | Observado (fora do corte) |
+| RF-046 | Busca global | Campo para buscar eventos ou ferramentas. | Organizer | Não fechado nas specs 001–028. | RF-048 | Observado |
+| RF-047 | Notificações | Sino com lista e ação de marcar como lidas. | Organizer | Não fechado nas specs 001–028. | — | Observado |
+| RF-048 | Lista de eventos | Abas em andamento, concluído e cancelado; busca; filtros; card; atalhos de resumo. | Organizer | SPEC-002, SPEC-008, SPEC-011 (resumo/atalhos). | RF-049 | Definido |
+| RF-049 | Cadastro do evento | Criação e edição com campos do inventário. | Organizer | SPEC-002 e SPEC-008. | RF-053 | Definido |
+| RF-050 | Home do evento | Contagem, código, atalhos, serviços, pendências. | Organizer | Blocos cobertos pelas specs de evento, tarefa, convidado, serviço e parcela. | RF-048, RF-058, RF-061, RF-063, RF-068 | Definido |
+| RF-051 | Equipe do dia | Escalar equipe no evento. | Organizer | Fora deste corte (depende de assistente/equipe). | RF-045, RF-050 | Observado (fora do corte) |
+| RF-052 | Agrupar eventos | Rotas de eventos agrupados. | Organizer | Fluxo não aberto. | RF-048 | Pendente |
+| RF-053 | Modelo de evento | Biblioteca e editor; aplicar na criação. | Organizer | SPEC-012 e SPEC-008. | — | Definido |
+| RF-054 | Outros modelos | Bibliotecas de briefing, roteiro, cronograma, inspiração e mensagem. | Organizer | SPEC-013 a SPEC-017. | RF-069, RF-070, RF-071, RF-072 | Definido |
+| RF-055 | Clientes da assessoria | Lista e cadastro de contatos; vínculo no evento. | Organizer | SPEC-006 e SPEC-009. Contato ≠ role `Client`. | RF-049 | Definido |
+| RF-056 | Acesso do cliente | Conta `Client` no evento; flags de permissão. | Client, Organizer | Flags: convidados, tarefas, anexos, parcelas, RSVP, mapa, contrato. RF-084 a RF-086. | RF-055, RF-084 | Definido |
+| RF-057 | Catálogo de fornecedores | Catálogo, solicitação de dados e serviços da conta. | Organizer | SPEC-018. | — | Definido |
+| RF-058 | Serviços e budget | Serviço no evento com fornecedor, tarefas e valor. | Organizer | SPEC-018. | RF-049, RF-057, RF-061 | Definido |
+| RF-059 | Negociação | Trilha recomendado → orçamento solicitado → recebido → contratado. | Organizer | SPEC-018. | RF-058 | Definido |
+| RF-060 | Link do fornecedor | Fornecedor completa dados / orçamento / contrato sem conta da assessoria. | Fornecedor | Fora deste corte. | RF-057, RF-059 | Observado (fora do corte) |
+| RF-061 | Tarefas | Situações, lista e quadro; responsável da conta. | Organizer, Client | SPEC-003. Client só com permissão. | RF-049, RF-058 | Definido |
+| RF-062 | Redatar tarefas | Recalcular prazos ao mudar a data do evento. | Organizer | Não fechado em spec aprovada. | RF-049, RF-061 | Observado |
+| RF-063 | Convites e convidados | Convite, convidados, grupos, transfer, importação. | Organizer | SPEC-004 e SPEC-010. | RF-049 | Definido |
+| RF-064 | RSVP por link | Link por convite; histórico. | Convidado, Organizer | SPEC-004 e SPEC-010. | RF-063 | Definido |
+| RF-065 | RSVP automático | Disparos automáticos em volume. | Organizer | Fora do canal Gmail atual; não fechado. | RF-064, RNF-020 | Observado |
+| RF-066 | Mapa de mesas | Cadastro de mesa e lugares. | Organizer | Campo mesa em SPEC-010; mapa operacional completo ainda sem spec própria além do inventário. | RF-063 | Observado |
+| RF-067 | Checklist de presença | Portaria / check-in. | Organizer | Não fechado em spec 001–028. | RF-063 | Observado |
+| RF-068 | Parcelas do evento | Parcelas por serviço e fornecedor. | Organizer | SPEC-018 (hub e parcelas). | RF-058 | Definido |
+| RF-069 | Roteiro | Seções, clonagem, impressão; biblioteca em SPEC-014. | Organizer, Client | Biblioteca Definida (SPEC-014). Editor no evento ainda fino. | RF-049, RF-054 | Definido |
+| RF-070 | Cronograma | Grade e biblioteca (SPEC-015). | Organizer | Biblioteca Definida. | RF-049, RF-054 | Definido |
+| RF-071 | Briefing | Modelo e seções (SPEC-013). | Organizer, Client | Biblioteca Definida. | RF-054 | Definido |
+| RF-072 | Inspirações | Galerias (SPEC-016). | Organizer, Client | Biblioteca Definida. | RF-054 | Definido |
+| RF-073 | Anexos | Por fornecedor, serviço, tarefa e observação. | Organizer | Coberto em parte por SPEC-018 e upload técnico; caixa global ainda Observado. | RF-049, DA-035 | Observado |
+| RF-074 | Agenda | Visões e CRUD de compromisso. | Organizer | SPEC-019. Assistente fora. | RF-049 | Definido |
+| RF-075 | Funil de vendas | Quadro, oportunidades, descarte, lead, contratos, orçamentos, tarefas comerciais e modelos. | Organizer, lead | SPEC-020 a SPEC-028. Estágios fixos dos quatro vistos. | RF-074 | Definido |
+| RF-076 | Financeiro da assessoria | Caixa da empresa separado do evento. | Organizer | Fora deste corte. | RF-068 | Observado (fora do corte) |
+| RF-077 | Relatórios e impressões | Catálogos do funil (SPEC-024); demais impressões conforme módulo. | Organizer | Relatórios do funil Definidos. Financeiro e impressões soltas fora. | RF-075 | Definido |
+| RF-078 | Estatísticas de eventos | Aba Estatísticas e resumo. | Organizer | SPEC-011. | RF-048 | Definido |
+| RF-079 | Peças da plataforma de referência | VIP Pay, Casar.com, loja, MeLink, indicação. | — | Fora do produto. | — | Observado (fora do corte) |
 
 ### 2.8. Tela inicial
 
@@ -149,7 +153,7 @@ Decisão deste produto. A referência abre um painel de menus. Aqui a primeira t
 
 | ID | Requisito | Status |
 |---|---|---|
-| RF-080 | Depois do login, o `User` cai numa tela de dashboards da própria conta. Essa tela não é uma grade de atalhos dos módulos. O menu lateral leva aos módulos. | Definido |
+| RF-080 | Depois do login, o `Organizer` cai numa tela de dashboards da própria conta. Essa tela não é uma grade de atalhos dos módulos. O menu lateral leva aos módulos. | Definido |
 | RF-081 | O dashboard de eventos mostra a quantidade em andamento, concluída e cancelada, e lista os eventos em andamento com nome e data. | Definido |
 | RF-082 | O dashboard do funil mostra quantidade e valor nos estágios já vistos: contato inicial, orçamento enviado, contratado e descartado. Não cria estágio novo. | Definido |
 
@@ -202,7 +206,7 @@ Não há cookie de autenticação. DA-019 registra isso.
 | DA-004 | .NET 10 LTS, C#, ASP.NET Core. | Definido |
 | DA-005 | PostgreSQL, Entity Framework Core, Code First e Migrations. O provider é Npgsql. | Definido |
 | DA-006 | Autenticação com ASP.NET Core Identity para senha, normalização, lockout, roles e tokens de e-mail. A sessão da API é um JWT de acesso. Sem cookie de autenticação, sem refresh token, sem lista de revogação, sem servidor OAuth2 próprio e sem provedor externo de identidade. | Definido |
-| DA-007 | Autorização com o sistema nativo do ASP.NET Core, baseada nas roles `Admin` e `User`. | Definido |
+| DA-007 | Autorização com o sistema nativo do ASP.NET Core, baseada nas roles `Admin`, `Organizer` e `Client`. | Definido |
 | DA-008 | O Domain não referencia Identity, EF Core nem ASP.NET Core. Nenhuma entidade de domínio herda de `IdentityUser`. | Definido |
 | DA-009 | `ApplicationUser`, se um campo extra for realmente necessário, fica na Infrastructure. Enquanto o `IdentityUser` padrão atender, essa classe não será criada. | Definido |
 | DA-010 | Login e as operações que o Identity já resolve usam `UserManager` e `SignInManager.CheckPasswordSignIn` nos endpoints de conta da Api. Não haverá serviço só para encapsular essas APIs. A assinatura do JWT fica na Infrastructure, atrás de interface na Application. O logout não invalida o token no servidor. | Definido |
@@ -229,7 +233,7 @@ Não há cookie de autenticação. DA-019 registra isso.
 | DA-031 | Token de recuperação de senha com validade de 1 hora, gerado e validado pelo Identity. | Definido |
 | DA-032 | Migration de produção é explícita no deploy, de preferência por script SQL idempotente do EF Core. A aplicação não chama `Database.Migrate()` na inicialização nem ao subir o container. | Definido |
 | DA-033 | Backup fica fora desta versão. Vira obrigação antes de dados reais em produção. Nenhuma ferramenta de backup entra agora. | Definido |
-| DA-034 | `User` não é entidade de negócio. Novas roles esperam requisito funcional. | Definido |
+| DA-034 | As três roles de Identity são `Admin`, `Organizer` e `Client`. Contato de negócio chamado “cliente” não é a role `Client`. Assistente e fornecedor com login não entram neste corte. | Definido |
 | DA-035 | Arquivos ficam em `/storage/{categoria}/{ano}/{mês}/{guid}.{extensão}`, com a raiz configurável. A extensão segue o tipo validado. O nome original só existe no banco, sanitizado. | Definido |
 | DA-036 | Metadados do arquivo ficam no PostgreSQL. O conteúdo binário fica só no volume. | Definido |
 | DA-037 | Arquivo privado é lido pela aplicação, com autenticação e autorização. O Caddy não serve o volume. A resposta usa o MIME validado, `Content-Disposition: attachment` com o nome sanitizado e `X-Content-Type-Options: nosniff`. | Definido |
@@ -254,7 +258,7 @@ Não há cookie de autenticação. DA-019 registra isso.
 | Schema | Code First e EF Core Migrations | Definido |
 | Contas | ASP.NET Core Identity | Definido |
 | Sessão | JWT de acesso, 8 horas, sem refresh | Definido |
-| Autorização | Roles `Admin` e `User` | Definido |
+| Autorização | Roles `Admin`, `Organizer` e `Client` | Definido |
 | E-mail | Gmail SMTP + MailKit | Definido |
 | Arquitetura | Clean Architecture simplificada | Definido |
 | Execução | API e frontend estático na mesma VPS | Definido |
@@ -397,12 +401,13 @@ Confirmação de e-mail antes do login é obrigatória para quem veio do cadastr
 
 | Role | Quem recebe | Acesso |
 |---|---|---|
-| `User` | Todo cadastro público | Páginas autenticadas comuns. Não é um papel de negócio. |
-| `Admin` | Somente o bootstrap, ou um procedimento administrativo futuro explícito | Páginas administrativas |
+| `Organizer` | Todo cadastro público | Conta compradora: opera eventos, modelos, funil, agenda e dados do próprio tenant. Não acessa área de `Admin`. |
+| `Client` | Criação pelo `Organizer` (não pelo cadastro público) | Subusuário sempre vinculado a um `Organizer`. Só o que as permissões concederem (RF-084 a RF-086). |
+| `Admin` | Somente o bootstrap, ou um procedimento administrativo futuro explícito | Admin geral: tudo e todas as contas. |
 
 Não há tela em que o próprio usuário eleve o próprio privilégio.
 
-Assistente, casal, fornecedor e convidado não viram role nesta etapa. Isso espera RF-035 e DP-016.
+Assistente e fornecedor com login não são roles neste corte (RF-045 e RF-060 fora). Convidado responde por link, sem conta.
 
 ### 8.3. Sessão
 
@@ -433,11 +438,12 @@ Quando habilitado, a ordem é:
 
 1. Conferir se e-mail e senha foram informados e se a senha cumpre DA-028. Se faltar ou for inválida, a inicialização falha sem escrever o segredo no log.
 2. Criar a role `Admin` se ela não existir.
-3. Criar a role `User` se ela não existir.
-4. Se não existir usuário com o e-mail configurado, criar o administrador pelo `UserManager`, marcar o e-mail como confirmado e atribuir `Admin`.
-5. Se o usuário já existir e já tiver a role `Admin`, não alterar nada. A senha permanece como está.
-6. Se o usuário já existir como usuário comum, interromper o bootstrap. A resolução é manual.
-7. Repetir a inicialização não duplica role nem usuário.
+3. Criar a role `Organizer` se ela não existir.
+4. Criar a role `Client` se ela não existir.
+5. Se não existir usuário com o e-mail configurado, criar o administrador pelo `UserManager`, marcar o e-mail como confirmado e atribuir `Admin`.
+6. Se o usuário já existir e já tiver a role `Admin`, não alterar nada. A senha permanece como está.
+7. Se o usuário já existir como `Organizer` ou `Client` (sem `Admin`), interromper o bootstrap. A resolução é manual.
+8. Repetir a inicialização não duplica role nem usuário.
 
 Depois que o administrador entrou pela primeira vez, `Bootstrap__Enabled` volta a desligado. A aplicação não apaga a variável sozinha. Quem opera a VPS desliga.
 
@@ -447,7 +453,7 @@ Restrições já fechadas:
 - Sem endpoint HTTP para rodar o bootstrap.
 - Sem redefinir senha administrativa a cada startup.
 - Sem promover cadastro público a `Admin`, inclusive o primeiro cadastro.
-- Sem framework genérico de seeds. O código deste bootstrap serve só para as duas roles e para o primeiro administrador.
+- Sem framework genérico de seeds. O código deste bootstrap serve só para as três roles e para o primeiro administrador.
 
 ### 8.5. E-mail transacional
 
@@ -629,7 +635,7 @@ A suíte unitária não acessa banco, rede nem Gmail, e cabe em todo pull reques
 
 A suíte de integração sobe PostgreSQL com Testcontainers e usa Npgsql. O banco é descartável e não aponta para desenvolvimento nem produção. `WebApplicationFactory` exercita o HTTP sem um servidor à parte. O provider InMemory do EF Core não substitui esses cenários.
 
-Autenticação que a integração precisa cobrir: cadastro válido, e-mail duplicado, login válido e inválido, confirmação de e-mail, recuperação de senha, bloqueio após as tentativas, página administrativa negada ao `User`, página administrativa permitida ao `Admin` e bootstrap idempotente. O `IEmailSender<TUser>` dos testes é uma implementação local. Nenhum teste envia mensagem pelo Gmail.
+Autenticação que a integração precisa cobrir: cadastro válido (role `Organizer`), e-mail duplicado, login válido e inválido, confirmação de e-mail, recuperação de senha, bloqueio após as tentativas, página administrativa negada ao `Organizer` e ao `Client`, página administrativa permitida ao `Admin` e bootstrap idempotente das três roles. O `IEmailSender<TUser>` dos testes é uma implementação local. Nenhum teste envia mensagem pelo Gmail.
 
 Arquivo que a integração precisa cobrir: upload válido, extensão recusada, arquivo acima do limite, arquivo vazio, assinatura incompatível, tentativa de path traversal, acesso sem autorização, falha ao gravar o metadado e limpeza do temporário quando o fluxo quebra. O diretório usado é temporário e exclusivo do teste.
 
@@ -659,9 +665,9 @@ Itens já fechados saíram desta lista. O rastro está na seção 15.
 
 ### DP-016. Aprovação dos requisitos de domínio
 
-O catálogo observado está na seção 2.7, RF-044 a RF-079. Falta aprovar o que entra no produto. Melhorias pedidas pelo cliente ainda não existem.
+O catálogo está na seção 2.7, RF-044 a RF-079. O corte aprovado está em [mvp-scope.md](mvp-scope.md) e nas specs 001–028. Roles fechadas: `Admin`, `Organizer` e `Client` (RF-024, RF-040, RF-083 a RF-086).
 
-Enquanto isso, a autorização implementada é `Admin` e `User`, e `User` não é papel de negócio, conforme RF-040. RF-045, RF-056 e RF-060 não podem ser implementados como roles novas sem uma decisão que altere RF-040.
+Permanecem fora ou Observados neste corte: RF-045 (assistente), RF-060 (login de fornecedor), RF-076 (financeiro da empresa), RF-079 (marketplace), RF-046, RF-047, RF-051, RF-052, RF-062, RF-065, RF-066 operacional completo, RF-067 e RF-073 global. Melhorias pedidas pelo cliente ainda não existem como RF novos.
 
 ## 13. Atividades futuras
 
@@ -676,7 +682,7 @@ Não são pendências desta etapa e não entram na implementação agora.
 - Fila ou worker, só se um caso concreto deixar a requisição lenta. E-mail desta versão não justifica.
 - Monitoramento além do log nativo.
 - Teste de ponta a ponta com navegador, se um fluxo crítico pedir.
-- Roles de negócio, só depois de RF que as justifiquem.
+- Assistente e login de fornecedor, só depois de promover RF-045 e RF-060.
 
 ## 14. Conflitos e pontos de atenção
 
@@ -688,14 +694,14 @@ Decisões anteriores que este texto altera ou que precisam de cuidado:
 4. **Migrations.** A proposta de comando explícito virou DA-032. `Database.Migrate()` na subida deixa de ser opção.
 5. **Cookie.** A duração de 8 horas chegou a ser fechada em DA-029 como cookie com sliding expiration. Essa forma foi substituída pelo JWT. O registro da troca está no item 17.
 6. **MailKit e a regra de poucos pacotes.** DA-014 evita biblioteca sem necessidade. MailKit entra porque o `SmtpClient` de `System.Net.Mail` não é o caminho recomendado para SMTP. Não entram outros pacotes de e-mail.
-7. **Nome `IEmailSender`.** No .NET 10 o Identity chama `IEmailSender<TUser>`. A implementação segue esse contrato. Não será adotado o `IEmailSender` não genérico do pacote de UI.
+7. **Nome** `IEmailSender`**.** No .NET 10 o Identity chama `IEmailSender<TUser>`. A implementação segue esse contrato. Não será adotado o `IEmailSender` não genérico do pacote de UI.
 8. **Um prazo para dois tokens.** A recuperação permanece em 1 hora e a confirmação passou a 24 horas, DA-043. O provider padrão do Identity não carrega os dois prazos. A implementação usa dois providers nativos, sem criptografia própria. DP-013 fecha com isso.
 9. **Letra minúscula na senha.** DA-028 desliga número, maiúscula e caractere especial. Não fala de minúscula. O padrão do Identity, que exige uma minúscula, permanece. Uma senha de 8 dígitos continua inválida por causa disso.
-10. **`User` e o brief.** O brief descreve assessoria, assistente, casal, fornecedor e convidado sem conta. RF-040 impede tratar a role `User` como esses papéis. O convidado por link e a conta pública só convivem se forem coisas diferentes, o que DP-016 ainda precisa escrever.
+10. **Roles e o brief.** A assessoria da referência é o `Organizer`. Contato de negócio “cliente” (SPEC-006/009) não é a role `Client`. Assistente e fornecedor com login ficam fora (RF-045, RF-060). Convidado responde por link, sem conta.
 11. **IP compartilhado.** Cinco cadastros por hora no mesmo IP podem atingir uma rede inteira. O número está definido e pode ser ajustado no `appsettings.json`. O lockout por conta não substitui esse limite.
 12. **Migration sem backup.** DA-032 pede revisão especial do que é destrutivo. Sem cópia do banco, essa revisão é o único freio.
 13. **Api referencia Infrastructure.** Continua intencional para o `Program.cs`. Endpoint de negócio não usa `DbContext` nem MailKit. A regra da seção 7.1 permanece.
-14. **Bootstrap sem role `Admin`.** Está definido o que fazer se o e-mail não existe, se já é `Admin` e se já é usuário comum. Não está definido o que fazer se o e-mail do bootstrap existe e a role `Admin` foi removida depois. A resolução continua manual.
+14. **Bootstrap sem role** `Admin`**.** Está definido o que fazer se o e-mail não existe, se já é `Admin` e se já é usuário comum. Não está definido o que fazer se o e-mail do bootstrap existe e a role `Admin` foi removida depois. A resolução continua manual.
 15. **Quem vê qual arquivo.** A entrega técnica está fechada: autenticação, autorização e resposta segura. A regra de qual usuário acessa qual arquivo continua no domínio, DP-016. Sem esse requisito, não há tela de upload de negócio.
 16. **Testcontainers.** A suíte de integração precisa de Docker para subir o PostgreSQL. Isso é intencional: o provider InMemory não reproduz constraint nem migration. A suíte unitária segue sem Docker, para o pull request continuar leve.
 17. **Interface e sessão.** A interface deixou de ser Razor Pages com AdminLTE, DA-003 e DA-044, e passou a ser o build estático do Angular, com a API em `Project.Api`. A sessão deixou de ser cookie, RF-012, DA-006, DA-029, RNF-013 e RNF-016, e passou a ser JWT de acesso de 8 horas, sem renovação, sem refresh e sem lista de revogação. DA-019 deixa de propor `SameSite`. O logout do cliente não invalida um token já emitido.

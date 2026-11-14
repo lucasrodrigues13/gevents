@@ -8,7 +8,7 @@ SPEC-007. Dashboards.
 
 ## 2. Objetivo
 
-Depois do login, a assessoria vê a situação da própria conta. A tela mostra dashboards. O menu fica na lateral e não ocupa o miolo.
+Depois do login, o Organizer vê a situação da própria conta. A tela mostra dashboards. O menu fica na lateral e não ocupa o miolo.
 
 ## 3. Requisitos relacionados
 
@@ -16,11 +16,11 @@ RF-080, RF-081 e RF-082. Estágios do funil vistos em RF-075. Situações de eve
 
 ## 4. Atores e permissões
 
-O `User` vê só números e listas da própria conta. Outro `User` não entra nessa conta. O convidado do RSVP não vê esta tela.
+O `Organizer` vê só números e listas da própria conta. Outro `Organizer` não entra nessa conta. O convidado do RSVP não vê esta tela. Admin e Client ficam fora deste miolo neste corte.
 
 ## 5. Pré-condições
 
-Usuário autenticado, SPEC-001. Evento vem da SPEC-002. Oportunidade do funil ainda não tem spec de cadastro. Enquanto isso, o dashboard do funil existe e mostra zero.
+Organizer autenticado, SPEC-001. Evento vem da SPEC-002. Oportunidade do funil ainda não tem spec de cadastro. Enquanto isso, o dashboard do funil existe e mostra zero.
 
 ## 6. Fluxo principal
 
@@ -74,7 +74,8 @@ Falha ao carregar mostra mensagem genérica e não mostra dado parcial de outra 
 
 ## 14. Critérios de aceite
 
-1. O login do `User` abre esta tela, não uma grade de módulos.
+1. O login do `Organizer` abre esta tela, não uma grade de módulos.
+
 2. A lateral contém os módulos do corte e o miolo contém os dois dashboards.
 3. Com eventos nas três situações, cada cartão mostra a contagem da própria conta.
 4. A lista mostra só em andamento, com nome e data.

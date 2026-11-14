@@ -95,6 +95,14 @@ app-root {
   border-right: 1px solid color-mix(in oklch, var(--gd-sidebar-foreground) 12%, transparent);
   padding: 16px 12px 12px;
   box-sizing: border-box;
+  overflow-y: auto;
+}
+
+.gd-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 4px;
 }
 
 .gd-marca {
@@ -154,6 +162,20 @@ app-root {
   color: var(--gd-primary);
 }
 
+.gd-item-breve {
+  opacity: 0.48;
+  cursor: default;
+  pointer-events: none;
+}
+
+.gd-item-breve small {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in oklch, var(--gd-sidebar-foreground) 55%, transparent);
+}
+
 .gd-topo {
   height: 64px;
   display: flex;
@@ -165,8 +187,61 @@ app-root {
   box-sizing: border-box;
 }
 
+.gd-topo-titulo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.gd-topo-titulo strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.gd-topo-titulo span {
+  font-size: 12px;
+  color: var(--gd-muted-foreground);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .gd-topo .espaco {
   flex: 1;
+}
+
+.gd-toast {
+  --mdc-snackbar-container-shape: 10px;
+  border-radius: 10px !important;
+  font-weight: 500;
+}
+
+.gd-toast .mdc-snackbar__surface {
+  border-radius: 10px !important;
+  box-shadow: none !important;
+  border: 1px solid transparent;
+}
+
+.gd-toast-sucesso .mdc-snackbar__surface {
+  background: color-mix(in oklch, var(--gd-success) 18%, var(--gd-card)) !important;
+  color: var(--gd-success) !important;
+  border-color: color-mix(in oklch, var(--gd-success) 35%, transparent) !important;
+}
+
+.gd-toast-sucesso .mat-mdc-snack-bar-label {
+  color: var(--gd-success) !important;
+}
+
+.gd-toast-erro .mdc-snackbar__surface {
+  background: color-mix(in oklch, var(--gd-destructive) 16%, var(--gd-card)) !important;
+  color: var(--gd-destructive) !important;
+  border-color: color-mix(in oklch, var(--gd-destructive) 35%, transparent) !important;
+}
+
+.gd-toast-erro .mat-mdc-snack-bar-label {
+  color: var(--gd-destructive) !important;
 }
 
 .gd-conteudo {

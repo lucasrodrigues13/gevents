@@ -16,16 +16,17 @@ RF-063, RF-064. Fora deste arquivo: RSVP automático (RF-065), mapa operacional 
 
 ## 4. Atores e permissões
 
-O User da conta mantém grupos, convites e convidados do próprio evento. Quem tem o link de RSVP continua no recorte da SPEC-004, sem os campos novos.
+O Organizer mantém grupos, convites e convidados do próprio evento. Quem tem o link de RSVP continua no recorte da SPEC-004, sem os campos novos. Admin fica fora do miolo desta spec. Client não gerencia a lista neste corte; acesso a convidados/RSVP via flags fica em RF-056.
 
 ## 5. Pré-condições
 
-Evento da conta, SPEC-002. A SPEC-004 continua valendo para situações, totais e o link por convite.
+Evento da conta do Organizer, SPEC-002. A SPEC-004 continua valendo para situações, totais e o link por convite.
 
 ## 6. Fluxo principal
 
-1. A conta cria grupos pelo nome.
+1. O Organizer cria grupos pelo nome.
 2. Cria um convite com nome e, se quiser, grupo e observação.
+
 3. Inclui pelo menos um convidado: nome obrigatório; DDI, celular, RSVP, mesa, gênero, faixa, custo, RG e CPF opcionais.
 4. No convite, escolhe o telefone de um convidado deste convite. Esse convidado fica principal e o telefone do convite passa a ser o dele.
 5. Com transfer ativo no evento, o convite pergunta se usa o serviço e, se sim, o local de origem.
@@ -43,8 +44,9 @@ Evento da conta, SPEC-002. A SPEC-004 continua valendo para situações, totais 
 
 ## 8. Regras de negócio
 
-- Grupo pertence à conta. Padrão visto: Amigos, Amigos da Noiva, Amigos do Noivo, Família da Noiva, Família do Noivo. Criar grupo novo é só o nome.
-- Convidado e convite têm telefone. O do convidado é o cadastro da pessoa, com DDI e celular. O do convite não é digitado à parte: a conta escolhe um convidado deste convite que já tenha telefone. Esse convidado é o principal, e o único. O telefone mostrado no convite é o dele. Trocar a escolha troca o principal. Convidado sem telefone não pode ser escolhido. Sem escolha, o convite fica sem telefone e sem principal. Se o telefone do principal mudar, o convite mostra o número novo. Se o principal sair do convite ou perder o telefone, o convite fica sem telefone e sem principal.
+- Grupo pertence à conta do Organizer. Padrão visto: Amigos, Amigos da Noiva, Amigos do Noivo, Família da Noiva, Família do Noivo. Criar grupo novo é só o nome.
+- Convidado e convite têm telefone. O do convidado é o cadastro da pessoa, com DDI e celular. O do convite não é digitado à parte: o Organizer escolhe um convidado deste convite que já tenha telefone.
+ Esse convidado é o principal, e o único. O telefone mostrado no convite é o dele. Trocar a escolha troca o principal. Convidado sem telefone não pode ser escolhido. Sem escolha, o convite fica sem telefone e sem principal. Se o telefone do principal mudar, o convite mostra o número novo. Se o principal sair do convite ou perder o telefone, o convite fica sem telefone e sem principal.
 - Situações na lista: Pendente, Confirmado, Não comparecerá. No ícone do convidado a recusa aparece como Cancelado.
 - Faixas vistas nos totais: Adulto, Idoso, Adolescente, Criança, Criança de colo.
 - Custos: Inteira, Meia, Gratuita. A planilha também traz Free.

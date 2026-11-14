@@ -400,6 +400,9 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# Segredos locais e da VPS. O modelo versionado é .env.example.
+.env
+
 # Dados locais da aplicação
 data-protection-keys/
 keys/

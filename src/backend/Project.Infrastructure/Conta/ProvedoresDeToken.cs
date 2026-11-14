@@ -5,14 +5,14 @@ using Microsoft.Extensions.Options;
 
 namespace Project.Infrastructure.Conta;
 
-public sealed class ConfirmacaoEmailTokenProvider : DataProtectorTokenProvider<IdentityUser>
+public sealed class ConfirmacaoEmailTokenProvider : DataProtectorTokenProvider<ApplicationUser>
 {
     public const string Nome = "ConfirmacaoEmail";
 
     public ConfirmacaoEmailTokenProvider(
         IDataProtectionProvider dataProtectionProvider,
         IOptions<ConfirmacaoEmailTokenProviderOptions> options,
-        ILogger<DataProtectorTokenProvider<IdentityUser>> logger)
+        ILogger<DataProtectorTokenProvider<ApplicationUser>> logger)
         : base(dataProtectionProvider, Microsoft.Extensions.Options.Options.Create<DataProtectionTokenProviderOptions>(options.Value), logger)
     {
     }
@@ -27,14 +27,14 @@ public sealed class ConfirmacaoEmailTokenProviderOptions : DataProtectionTokenPr
     }
 }
 
-public sealed class RedefinicaoSenhaTokenProvider : DataProtectorTokenProvider<IdentityUser>
+public sealed class RedefinicaoSenhaTokenProvider : DataProtectorTokenProvider<ApplicationUser>
 {
     public const string Nome = "RedefinicaoSenha";
 
     public RedefinicaoSenhaTokenProvider(
         IDataProtectionProvider dataProtectionProvider,
         IOptions<RedefinicaoSenhaTokenProviderOptions> options,
-        ILogger<DataProtectorTokenProvider<IdentityUser>> logger)
+        ILogger<DataProtectorTokenProvider<ApplicationUser>> logger)
         : base(dataProtectionProvider, Microsoft.Extensions.Options.Options.Create<DataProtectionTokenProviderOptions>(options.Value), logger)
     {
     }

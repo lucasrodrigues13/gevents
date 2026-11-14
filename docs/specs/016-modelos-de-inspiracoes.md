@@ -1,6 +1,6 @@
 # 016. Modelos de inspirações
 
-**Status: rascunho.** Fora do corte do MVP. RF-054 e RF-072 permanecem Observado. Fonte: a tela `modelo_inspiracoes` da referência, aberta sem galeria. A ação "Criar nova galeria" não foi acionada.
+**Status: aprovada.** O código segue esta spec. Fonte: [inventario-referencia.md](../inventario-referencia.md) §6 e leitura VIP (`/modelo_inspiracoes`). Inspirações no evento permanecem em RF-072.
 
 ## 1. Identificador e nome
 
@@ -8,78 +8,97 @@ SPEC-016. Modelos de inspirações.
 
 ## 2. Objetivo
 
-Descrever a biblioteca de modelos de inspiração quando não há galeria cadastrada.
+O Organizer mantém a biblioteca de galerias de inspiração: listar, criar galeria com nome, editar conteúdo (imagens/referências), clonar quando disponível e excluir.
 
 ## 3. Requisitos relacionados
 
-RF-054 e RF-072, os dois Observado. O corte em [mvp-scope.md](../mvp-scope.md) deixa os dois de fora. Nenhum dos dois traz o texto do estado vazio.
+RF-054 (biblioteca de inspiração). RF-072 (inspirações / galerias no contexto do evento e visão do Client).
 
-Proposta ainda não gravada em `docs/requirements.md`:
-
-| ID | Nome | Comportamento observado | Ator | Regras vistas | Depende de | Status |
-|---|---|---|---|---|---|---|
-| RF-110 | Estado vazio dos modelos de inspiração | Sem galeria cadastrada, a biblioteca mostra o texto "Sem galerias cadastradas" e a ação "Criar nova galeria". | Assessoria | A ação foi vista e não foi acionada. Conteúdo da galeria e o fluxo de criação não foram vistos. | RF-054, RF-072 | Observado |
-
-Fora deste arquivo: aba Inspirações do modelo de evento (RF-053), inspirações dentro do evento, conteúdo da galeria, destino de "Criar nova galeria" e a visão do cliente citada em RF-072.
+Fora: RF-079. Assistente. Fornecedor com login. Aba Inspirações do modelo de evento (vínculo na SPEC-012).
 
 ## 4. Atores e permissões
 
-A tela foi vista na conta da assessoria. RF-072 também nomeia o cliente. Essa visão não foi aberta. Quem mais acessa a biblioteca fica não definido. A role `User` não vira papel de negócio, RF-040.
+| Ator | Pode |
+|---|---|
+| Organizer | CRUD das galerias da própria conta. |
+| Client | Não edita a biblioteca. No evento, vê inspirações se a flag (RF-056 / RF-072) permitir. |
+| Admin | Acessa galerias de qualquer conta. |
+| Visitante | Não acessa a biblioteca. |
 
 ## 5. Pré-condições
 
-Conta autenticada, SPEC-001. A biblioteca está sem galeria cadastrada. A abertura sem sessão não foi testada.
+Conta autenticada, SPEC-001.
 
 ## 6. Fluxo principal
 
-1. A assessoria abre a biblioteca de modelos de inspiração.
-2. A tela mostra o texto "Sem galerias cadastradas".
-3. A mesma tela mostra a ação "Criar nova galeria".
-4. A ação segue sem acionamento. O fluxo visto termina aqui.
+1. O Organizer abre Modelos de Inspirações.
+2. Se não houver galeria, vê o estado vazio e a ação "Criar nova galeria".
+3. Cria uma galeria informando o nome e salva.
+4. Edita a galeria: adiciona, reordena ou remove imagens/referências.
+5. Salva.
+6. Pode clonar uma galeria existente.
+7. Pode excluir uma galeria própria, com confirmação.
 
 ## 7. Fluxos alternativos
 
-- Acionar "Criar nova galeria" fica não definido. A ação não foi usada.
-- Biblioteca com ao menos uma galeria fica não definido. A lista não foi vista.
-- O cliente nesta biblioteca fica não definido. A visão não foi aberta.
+- Sem galerias: texto "Sem galerias cadastradas" (ou equivalente visto: mensagem orientando a clicar em "Criar nova galeria").
+- Nome vazio: não grava.
+- Galeria sem imagens: permitida; lista a galeria vazia.
+- Galeria de outra conta: Organizer não vê.
+- Uso no evento: RF-072, fora do miolo desta biblioteca.
 
 ## 8. Regras de negócio
 
-- Sem galeria cadastrada, a biblioteca mostra "Sem galerias cadastradas" e a ação "Criar nova galeria". RF-110, Observado, proposto nesta spec e ainda ausente de `requirements.md`.
-- Efeito da ação, campos da galeria, imagens, ordem, vínculo com evento, vínculo com modelo de evento e acesso do cliente ficam não definidos. Não há RF para isso.
+- A biblioteca de inspiração é uma das bibliotecas de RF-054; o item é a galeria (RF-072).
+- Estado vazio mostra orientação e a ação de criar.
+- Clonar gera cópia editável na conta.
+- Excluir remove a galeria da biblioteca; referências já usadas em evento mantêm o que foi copiado/anexado no evento.
+- Isolamento por conta do Organizer.
+- Upload de imagem segue as regras gerais de arquivo do produto (DA de arquivo), sem antimalware obrigatório neste corte se ainda não estiver no Must.
 
 ## 9. Validações
 
-Nenhuma validação foi vista. Fica não definido.
+Nome da galeria obrigatório, sem só espaços. Arquivo de imagem em tipo/tamanho aceitos pelo produto. Galeria alheia rejeitada sem vazar dado.
 
 ## 10. Estados
 
-Estado visto: biblioteca sem galeria. Estado com galeria cadastrada fica não definido.
+Biblioteca sem galerias; biblioteca com uma ou mais galerias. Sem situação adicional por galeria.
 
 ## 11. Dados necessários
 
-O nome visto para o item é galeria. Nenhum campo da galeria foi visto. Fica não definido.
+Lista: nome da galeria.
+
+Criar / editar: nome; imagens ou itens de referência (arquivo/URL conforme a UI).
+
+Clonar / excluir: identificador.
 
 ## 12. Interface
 
-Tela sem galeria, com o texto "Sem galerias cadastradas" e a ação "Criar nova galeria".
+Tela com "Criar nova galeria". Estado vazio com texto de ausência de galerias. Lista de galerias e editor de conteúdo. Confirmação ao excluir.
 
 ## 13. Erros
 
-Nenhum erro foi visto. Fica não definido.
+Campo ou arquivo inválido permanece no formulário. Falha ao salvar mantém o anterior. Galeria alheia não revela dado.
 
 ## 14. Critérios de aceite
 
-1. Sem galeria cadastrada, a biblioteca mostra o texto "Sem galerias cadastradas" e a ação "Criar nova galeria".
+1. Sem galeria, a biblioteca mostra o estado vazio e "Criar nova galeria".
+2. Criar com nome grava a galeria; sem nome, não grava.
+3. Editar permite adicionar e remover imagens/referências.
+4. Clonar gera cópia editável.
+5. Excluir remove da biblioteca.
+6. Outra conta não vê a galeria.
 
 ## 15. Cenários de teste
 
-Abrir a biblioteca numa conta sem galeria. Conferir o texto "Sem galerias cadastradas" e a ação "Criar nova galeria". O cenário não aciona a ação.
+Abrir conta sem galeria e ver o vazio. Criar galeria com nome. Adicionar uma imagem. Clonar. Excluir a cópia. Conta B não vê a galeria da conta A.
 
 ## 16. Dependências
 
-SPEC-001. RF-054 e RF-072, ainda Observado. RF-110, proposto e ainda não gravado em `requirements.md`.
+SPEC-001. RF-054. RF-072. SPEC-012 pode vincular na aba Inspirações.
 
 ## 17. Premissas e pontos não definidos
 
-Destino de "Criar nova galeria". Campos, imagens e nome da galeria. Lista, edição, exclusão e ordenação quando há galerias. Uso no evento e na aba Inspirações do modelo de evento (RF-053). Visão do cliente (RF-072). Isolamento da biblioteca por conta. Abertura sem sessão. Qualquer validação.
+- Se a referência aceita só upload, só URL ou ambos.
+- Limite de imagens por galeria e tamanho máximo por arquivo.
+- Texto exato do estado vazio (a referência varia entre "Sem galerias cadastradas" e frase com instrução).

@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { ContaClient } from '../../core/conta.client';
 import { mensagemDeErro } from '../../core/mensagem-erro';
+import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-confirmar-email',
@@ -14,7 +15,7 @@ import { mensagemDeErro } from '../../core/mensagem-erro';
           <mat-card-title>Confirmar e-mail</mat-card-title>
         </mat-card-header>
         <mat-card-content>
-          <p role="status">{{ aviso() }}</p>
+          <p role="status">{{ status() }}</p>
           <p><a routerLink="/entrar">Ir para o login</a></p>
         </mat-card-content>
       </mat-card>
@@ -24,19 +25,29 @@ import { mensagemDeErro } from '../../core/mensagem-erro';
 export class ConfirmarEmailPage implements OnInit {
   private readonly rota = inject(ActivatedRoute);
   private readonly conta = inject(ContaClient);
-  protected readonly aviso = signal('Confirmando o e-mail...');
+  private readonly toast = inject(ToastService);
+  protected readonly status = signal('Confirmando o e-mail...');
 
   ngOnInit(): void {
     const usuarioId = this.rota.snapshot.queryParamMap.get('usuarioId');
     const token = this.rota.snapshot.queryParamMap.get('token');
     if (!usuarioId || !token) {
-      this.aviso.set('O link é inválido ou expirou.');
+      const mensagem = 'O link é inválido ou expirou.';
+      this.status.set(mensagem);
+      this.toast.erro(mensagem);
       return;
     }
 
     this.conta.confirmar(usuarioId, token).subscribe({
-      next: (resposta) => this.aviso.set(resposta.mensagem),
-      error: (erro: unknown) => this.aviso.set(mensagemDeErro(erro)),
+      next: (resposta) => {
+        this.status.set(resposta.mensagem);
+        this.toast.sucesso(resposta.mensagem);
+      },
+      error: (erro: unknown) => {
+        const mensagem = mensagemDeErro(erro);
+        this.status.set(mensagem);
+        this.toast.erro(mensagem);
+      },
     });
   }
 }

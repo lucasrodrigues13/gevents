@@ -7,7 +7,7 @@ using MimeKit;
 
 namespace Project.Infrastructure.Conta;
 
-public sealed class MailKitEmailSender : IEmailSender<IdentityUser>
+public sealed class MailKitEmailSender : IEmailSender<ApplicationUser>
 {
     private readonly EmailOpcoes _opcoes;
 
@@ -16,17 +16,17 @@ public sealed class MailKitEmailSender : IEmailSender<IdentityUser>
         _opcoes = opcoes.Value;
     }
 
-    public Task SendConfirmationLinkAsync(IdentityUser user, string email, string confirmationLink)
+    public Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
     {
         return EnviarAsync(email, "Confirme seu e-mail", $"Use este link para confirmar sua conta: {confirmationLink}", CancellationToken.None);
     }
 
-    public Task SendPasswordResetLinkAsync(IdentityUser user, string email, string resetLink)
+    public Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
     {
         return EnviarAsync(email, "Redefina sua senha", $"Use este link para redefinir sua senha: {resetLink}", CancellationToken.None);
     }
 
-    public Task SendPasswordResetCodeAsync(IdentityUser user, string email, string resetCode)
+    public Task SendPasswordResetCodeAsync(ApplicationUser user, string email, string resetCode)
     {
         return EnviarAsync(email, "Redefina sua senha", "Foi gerado um código para redefinir sua senha.", CancellationToken.None);
     }

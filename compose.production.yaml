@@ -1,0 +1,112 @@
+# VPS de teste. Segredos vêm do .env ao lado deste arquivo, que não entra no Git.
+# O workflow publica este diretório em /opt/gevents e roda:
+#   docker compose -f compose.production.yaml up -d --build --remove-orphans --wait
+
+name: gevents
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-gevents}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:-gevents}
+    volumes:
+      - banco:/var/lib/postgresql/data
+    networks:
+      - interna
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gevents} -d ${POSTGRES_DB:-gevents}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  migrate:
+    image: postgres:16-alpine
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      PGHOST: postgres
+      PGUSER: ${POSTGRES_USER:-gevents}
+      PGDATABASE: ${POSTGRES_DB:-gevents}
+    volumes:
+      - ./deploy/schema.sql:/schema.sql:ro
+    command: ["psql", "-v", "ON_ERROR_STOP=1", "-f", "/schema.sql"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - interna
+    restart: "no"
+
+  api:
+    build:
+      context: .
+      dockerfile: src/backend/Project.Api/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__Default: Host=postgres;Port=5432;Database=${POSTGRES_DB:-gevents};Username=${POSTGRES_USER:-gevents};Password=${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      Jwt__Secret: ${JWT_SECRET:?defina JWT_SECRET no .env}
+      Jwt__Issuer: gevents
+      Jwt__Audience: gevents
+      Jwt__ExpiryHours: "8"
+      DataProtection__KeysPath: /keys
+      Storage__Root: /storage
+      PublicUrl: https://${DOMAIN:?defina DOMAIN no .env}
+      Cors__Origins__0: https://${DOMAIN:?defina DOMAIN no .env}
+      Email__Host: ${EMAIL_HOST:-smtp.gmail.com}
+      Email__Port: ${EMAIL_PORT:-587}
+      Email__Username: ${EMAIL_USERNAME:?defina EMAIL_USERNAME no .env}
+      Email__Password: ${EMAIL_PASSWORD:?defina EMAIL_PASSWORD no .env}
+      Email__From: ${EMAIL_FROM:?defina EMAIL_FROM no .env}
+      Email__StartTls: ${EMAIL_STARTTLS:-true}
+      Bootstrap__Enabled: ${BOOTSTRAP_ENABLED:-false}
+      Bootstrap__AdminEmail: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      Bootstrap__AdminPassword: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      ForwardedHeaders__KnownNetworks__0: 172.16.0.0/12
+      ForwardedHeaders__KnownNetworks__1: 10.0.0.0/8
+      ForwardedHeaders__KnownNetworks__2: 192.168.0.0/16
+    volumes:
+      - storage:/storage
+      - chaves:/keys
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    networks:
+      - interna
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'echo > /dev/tcp/127.0.0.1/8080'"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  frontend:
+    build:
+      context: .
+      dockerfile: src/frontend/Dockerfile
+    environment:
+      SITE_ADDRESS: ${DOMAIN:?defina DOMAIN no .env}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - interna
+    restart: unless-stopped
+
+volumes:
+  banco:
+  storage:
+  chaves:
+  caddy_data:
+  caddy_config:
+
+networks:
+  interna:

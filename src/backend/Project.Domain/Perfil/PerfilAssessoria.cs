@@ -17,4 +17,6 @@ public sealed class PerfilAssessoria
     public DateOnly? Nascimento { get; set; }
 
     public string? Endereco { get; set; }
+
+    public bool CapturaLeadRsvp { get; set; } = true;
 }

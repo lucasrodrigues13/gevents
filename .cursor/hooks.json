@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "hooks": {
+    "beforeShellExecution": [
+      {
+        "command": "node .cursor/hooks/auto-allow-dev.mjs",
+        "timeout": 10
+      }
+    ],
+    "subagentStop": [
+      {
+        "type": "prompt",
+        "prompt": "If this subagent was implementing gevents specs 019-028 (or earlier unfinished approved specs) and stopped before finishing all remaining approved specs 019-028, return a followup_message that resumes the same mission: continue implementing remaining approved specs until done or blocked only by token/quota limits. Do not ask the user to click Allow. Do not commit unless the user asked. If the subagent already finished 019-028 successfully or was unrelated (docs-only, UX-only), return no followup. Hook input: $ARGUMENTS",
+        "loop_limit": 20
+      }
+    ]
+  }
+}

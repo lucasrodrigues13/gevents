@@ -1,8 +1,6 @@
 # 012. Modelos de evento
 
-**Status: rascunho.** RF-053 está Observado. Esta spec não o promove a aprovado e não autoriza código. O corte aprovado em [mvp-scope.md](../mvp-scope.md) deixa RF-053 de fora. A criação do evento com modelo obrigatório permanece na SPEC-008.
-
-Fonte desta leitura: a lista de modelos e o editor de um modelo já existente. Criar, clonar, ordenar, salvar e excluir não foram acionados.
+**Status: aprovada.** O código segue esta spec. Fonte: [inventario-referencia.md](../inventario-referencia.md) §4 e §1.3. Aplicar o modelo na criação do evento permanece na SPEC-008.
 
 ## 1. Identificador e nome
 
@@ -10,111 +8,112 @@ SPEC-012. Modelos de evento.
 
 ## 2. Objetivo
 
-A assessoria consulta a biblioteca de modelos e abre o editor de um modelo existente, no que a leitura mostrou: tipo na lista, abas do editor e checklist do serviço.
+O Organizer mantém a biblioteca de modelos de evento: listar, criar com Nome e Tipo, editar nas abas do editor, clonar e excluir. O modelo alimenta a criação do evento na SPEC-008.
 
 ## 3. Requisitos relacionados
 
-RF-053, status Observado.
+RF-053. Aplicação do modelo na criação do evento: SPEC-008 / RF-049.
 
-Permanece na SPEC-008, sem reescrita: modelo obrigatório na criação do evento, tipo definido por esse modelo, e o evento nascendo com os serviços e as tarefas do modelo. RF-049 continua dono desse formulário.
-
-Fora desta spec: bibliotecas de briefing, roteiro, cronograma, inspiração e mensagem (RF-054), tarefas do evento já aprovadas (SPEC-003, RF-061), permissões do portal do cliente (RF-056), loja de modelos (RF-079).
+Fora: RF-079 (VIP Store / loja de modelos). Bibliotecas de briefing, roteiro, cronograma, inspiração e mensagem (SPEC-013 a SPEC-017, RF-054). Assistente (RF-045). Portal do cliente além das flags de permissão do modelo (RF-056).
 
 ## 4. Atores e permissões
 
-O ator visto é a assessoria, na conta autenticada. A role `User` continua sem ser papel de negócio, RF-040. Assistente e a matriz de RF-045 não entram.
+| Ator | Pode |
+|---|---|
+| Organizer | CRUD completo dos modelos da própria conta: listar, criar, editar, clonar, excluir. |
+| Client | Não abre a biblioteca. As flags da aba Permissões do modelo definem o que o Client vê no evento depois da criação (RF-056); o Client não edita o modelo. |
+| Admin | Acessa e mantém modelos de qualquer conta. |
+| Visitante | Não acessa. |
 
-O cliente não abre esta biblioteca. O que as permissões do modelo mudam para ele está sem RF e fica não definido.
+Assistente e fornecedor com login ficam fora deste corte.
 
 ## 5. Pré-condições
 
-Conta autenticada, SPEC-001. Há um modelo existente para abrir o editor. Não está definido se os modelos dos cinco tipos nascem com a conta, vêm da plataforma ou são gravados pela assessoria.
+Conta autenticada, SPEC-001. A conta pode nascer sem modelo próprio; criar evento na SPEC-008 exige pelo menos um modelo disponível na conta.
 
 ## 6. Fluxo principal
 
-1. O usuário abre a biblioteca de modelos.
-2. A lista mostra modelos. O tipo de cada um é um dos vistos em RF-053: 15 anos, casamento, aniversário, corporativo, formatura.
-3. O usuário abre um modelo que já existe.
-4. O editor mostra as abas Checklist, Tarefas, Briefings, Roteiros, Inspirações, RSVP e Mensagens, e Permissões. RF-053.
-5. Na Checklist, o serviço aparece com tarefas, fornecedores, alinhamentos, comparativos e valor estimado. RF-053.
+1. O Organizer abre a biblioteca de modelos de evento.
+2. A lista mostra os modelos da conta, cada um com nome e tipo.
+3. Cria um modelo informando Nome e Tipo e salva.
+4. Abre o editor do modelo.
+5. Nas abas, configura Checklist (serviços com tarefas, fornecedores, alinhamentos, comparativos e valor estimado), Tarefas, Briefings, Roteiros, Inspirações, RSVP e Mensagens, e Permissões.
+6. Salva as alterações.
+7. Pode clonar um modelo existente, gerando cópia editável na mesma conta.
+8. Pode excluir um modelo da conta, com confirmação.
 
 ## 7. Fluxos alternativos
 
-- Biblioteca sem modelo: não foi vista. Não definido.
-- Modelo de outra conta: não foi visto. Não definido.
-- Criar, clonar, ordenar, salvar e excluir: Pendente. O controle não foi acionado. Não há passos, validação nem resultado.
+- Biblioteca sem modelo: lista vazia e ação de criar.
+- Nome ou Tipo ausentes na criação: não grava.
+- Modelo de outra conta: Organizer não vê; Admin sim.
+- Excluir modelo já usado em eventos existentes: o modelo some da biblioteca; eventos já criados mantêm os dados copiados na criação (não reaplicam o modelo).
+- Busca por nome na biblioteca: reduz a lista.
+- VIP Store / loja: fora (RF-079).
 
 ## 8. Regras de negócio
 
-- A lista exibe modelos dos cinco tipos de RF-053. Não está definido se a tela separa seções por tipo ou se o tipo é só o rótulo de cada modelo.
-- A checklist do modelo lista, por serviço, tarefas, fornecedores, alinhamentos, comparativos e valor estimado. RF-053. O valor zero visto num modelo é dado daquele modelo, não regra de valor inicial.
-- Aplicar o modelo na criação do evento permanece na SPEC-008.
-- Grupos de tarefas, prazo “N dias antes”, marca flexível, vínculos das outras abas e o efeito de cada permissão sobre o cliente foram vistos na tela e não têm RF. A regra não está definida. Não alteram a SPEC-003, em que o prazo da tarefa do evento é uma data.
+- Tipos de modelo: 15 anos, casamento, aniversário, corporativo, formatura. RF-053.
+- Criar pede Nome e Tipo. RF-053 / inventário §4.
+- O editor tem as abas Checklist, Tarefas, Briefings, Roteiros, Inspirações, RSVP e Mensagens, e Permissões. RF-053.
+- Na Checklist, cada serviço lista tarefas, fornecedores, alinhamentos, comparativos e valor estimado. RF-053.
+- Clonar gera novo modelo na conta, com o mesmo conteúdo editável, sem alterar o original.
+- Excluir remove o modelo da biblioteca da conta. Não apaga eventos já criados.
+- Aplicar o modelo na criação do evento (tipo, serviços, tarefas) permanece na SPEC-008.
+- Modelos pertencem à conta do Organizer. Isolamento entre contas.
+- A aba Permissões configura flags no estilo RF-056 (o que o Client vê/edita no evento): gerais, planejamento, tarefas, serviços e fornecedores, convites. Detalhe fino de cada flag fora do miolo desta spec fica na seção 17 se ainda não fechado.
+- Prazo de tarefa no modelo pode ser relativo ("N dias antes"); no evento, a SPEC-003 continua com data concreta após a aplicação.
 
 ## 9. Validações
 
-Nenhuma gravação foi feita. RF-053 registra que criar pede Nome e Tipo. Obrigatoriedade, lista fechada de Tipo, tamanho, duplicidade e o que o salvar rejeita continuam não definidos. A SPEC-008 já deixou a lista fechada de Tipo em aberto.
+Nome obrigatório, sem só espaços. Tipo obrigatório, um dos cinco tipos. Valor estimado, se informado, maior ou igual a zero. Modelo inexistente ou de outra conta: não grava e não revela dado.
 
 ## 10. Estados
 
-Não foi vista situação do modelo. Não definido.
+Modelo cadastrado na conta. Sem máquina de situação adicional (não há "publicado" / "rascunho" separado além de existir ou não na biblioteca).
 
 ## 11. Dados necessários
 
-Na lista, o que a leitura sustenta com RF-053: nome do modelo e tipo, entre os cinco tipos.
+Criar: Nome, Tipo.
 
-Na checklist: serviço, tarefas, fornecedores, alinhamentos, comparativos e valor estimado.
+Lista: nome, tipo.
 
-Grupo de tarefas, quantidade de dias antes do evento, marca flexível, vínculo de briefing, roteiro, inspiração, RSVP e mensagem, e o conteúdo de cada grupo de permissão: vistos na tela, sem RF. Não entram como dado decidido.
+Checklist por serviço: nome do serviço, tarefas, fornecedores, alinhamentos, comparativos, valor estimado.
+
+Demais abas: vínculos ou conteúdo de briefing, roteiro, inspiração, RSVP/mensagem, e grupos de permissão do Client.
+
+Clonar: origem do modelo. Excluir: identificador do modelo.
 
 ## 12. Interface
 
-Biblioteca com os modelos e o tipo de cada um. Editor com as sete abas de RF-053. Checklist com o serviço e os cinco itens da seção 11.
-
-Nesta leitura, a aba Tarefas mostrou grupos e prazo relativo no formato “N dias antes”, com marca flexível. As abas Briefings, Roteiros, Inspirações e RSVP e Mensagens mostraram vínculos. A aba Permissões mostrou grupos que tratam do que o cliente vê e edita: gerais, planejamento, tarefas, serviços e fornecedores, convites. Isso é registro da tela. Sem RF, não é regra.
-
-Criar, clonar, ordenar, salvar e excluir não têm tela de fluxo nesta spec.
+Biblioteca com busca, botão Criar modelo e cards com nome e tipo. Formulário de criação com Nome e Tipo. Editor com Clonar modelo e as sete abas. Confirmação ao excluir. Sem VIP Store neste produto.
 
 ## 13. Erros
 
-Nenhuma falha foi provocada. Mensagem de erro, modelo inexistente e modelo de outra conta: não definido.
+Campo inválido permanece no formulário. Modelo de outra conta não revela dado. Falha ao salvar mantém o conteúdo anterior. Exclusão sem confirmação não ocorre.
 
 ## 14. Critérios de aceite
 
-Enquanto o status for rascunho e RF-053 for Observado, o critério descreve a leitura. Não autoriza implementação.
-
-1. A biblioteca lista modelos cujo tipo é 15 anos, casamento, aniversário, corporativo ou formatura.
-2. O editor de um modelo existente mostra as abas Checklist, Tarefas, Briefings, Roteiros, Inspirações, RSVP e Mensagens, e Permissões.
-3. Na checklist, o serviço mostra tarefas, fornecedores, alinhamentos, comparativos e valor estimado.
-4. O formulário de criar evento continua o da SPEC-008.
-5. Criar, clonar, ordenar, salvar e excluir não têm critério de aceite. O fluxo está pendente.
+1. A biblioteca lista só modelos da conta do Organizer (Admin vê a conta escolhida).
+2. Criar com Nome e Tipo grava o modelo; sem um dos dois, não grava.
+3. O editor mostra as abas Checklist, Tarefas, Briefings, Roteiros, Inspirações, RSVP e Mensagens, e Permissões.
+4. Na checklist, o serviço mostra tarefas, fornecedores, alinhamentos, comparativos e valor estimado.
+5. Clonar gera cópia editável na mesma conta.
+6. Excluir remove o modelo da biblioteca e não apaga eventos já criados.
+7. A criação do evento continua a da SPEC-008, consumindo o modelo.
+8. Outra conta não vê o modelo.
 
 ## 15. Cenários de teste
 
-Abrir a biblioteca e ler o tipo de cada modelo. Abrir um modelo existente e ler a checklist de um serviço. Confirmar as sete abas. Não inclui criar, clonar, ordenar, salvar nem excluir.
+Criar modelo Casamento com nome. Abrir checklist e gravar um serviço com valor estimado. Clonar e conferir dois itens na lista. Excluir a cópia. Criar evento pela SPEC-008 com o modelo restante. Conta B não vê o modelo da conta A.
 
 ## 16. Dependências
 
-SPEC-001. SPEC-008 consome o modelo na criação do evento e não muda com esta spec. SPEC-003 permanece a regra aprovada da tarefa do evento.
-
-RF-054, RF-056, RF-061, RF-065, RF-069, RF-071 e RF-072 nomeiam peças que aparecem como aba ou vínculo. O miolo dessas peças não é desta spec.
+SPEC-001. SPEC-008 consome o modelo na criação. SPEC-003 para tarefas do evento após aplicar. SPEC-013 a SPEC-017 para o conteúdo das bibliotecas vinculadas nas abas. SPEC-018 para serviços/fornecedores usados na checklist.
 
 ## 17. Premissas e pontos não definidos
 
-Pendente. O fluxo não foi acionado; não há passos para especificar:
-
-- Criar modelo. O pedido de Nome e Tipo está em RF-053. As opções de Tipo não foram abertas e o salvar não foi acionado.
-- Clonar modelo.
-- Ordenar.
-- Salvar o editor.
-- Excluir modelo.
-
-Não definido. Visto nesta leitura, sem RF; a regra não foi decidida:
-
-- Tarefas do modelo em grupos, prazo “N dias antes” e marca flexível. O que “flexível” altera, e como o prazo vira data no evento, não foi decidido.
-- Vínculos de Briefings, Roteiros, Inspirações e RSVP e Mensagens. Não foi decidido o que o vínculo guarda nem se aponta para a biblioteca de RF-054.
-- Permissões do modelo nos grupos gerais, planejamento, tarefas, serviços e fornecedores, e convites. Não foi decidido o que o cliente vê e o que edita em cada grupo. Essa lista não é a matriz de RF-056.
-- Se a lista separa seções por tipo.
-- Se os modelos dos cinco tipos pertencem à conta ou à plataforma.
-- Efeito de alterar um modelo sobre eventos já criados.
-- Busca na biblioteca. Não está em RF-053 e não entra como regra.
+- Lista fechada exata de rótulos de Tipo na UI se a referência divergir na capitalização.
+- Efeito de alterar um modelo sobre eventos futuros apenas (já definido: não altera eventos passados); reaplicar em evento existente fica fora.
+- Semântica fina de cada flag da aba Permissões frente a RF-056.
+- Ordenação manual da lista de modelos.

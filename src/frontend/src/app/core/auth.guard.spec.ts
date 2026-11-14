@@ -19,11 +19,11 @@ describe('guardas de conta', () => {
     expect(router.serializeUrl(resultado as UrlTree)).toBe('/entrar');
   });
 
-  it('bloqueia User na rota de Admin', () => {
+  it('bloqueia Organizer na rota de Admin', () => {
     TestBed.inject(AuthService).guardar({
       token: 'token-de-teste',
       email: 'pessoa@gevents.test',
-      papeis: ['User'],
+      papeis: ['Organizer'],
     });
 
     const resultado = TestBed.runInInjectionContext(() => adminGuard({} as never, {} as never));

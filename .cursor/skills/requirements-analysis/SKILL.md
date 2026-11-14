@@ -11,7 +11,7 @@ description: Consolida requisitos do gevents a partir de docs/brief.md e docs/re
 2. Liste só funcionalidade que já está escrita. Marque a fonte.
 3. Grave RF novo com o próximo ID livre. Não renumere.
 4. Use Observado para a referência, Proposto para sugestão, Pendente quando faltar dado, Definido só para o que o usuário já aprovou.
-5. Aponte conflito com role `Admin`/`User`, e-mail, arquivo ou backup. Não resolva sozinho.
+5. Aponte conflito com roles `Admin`/`Organizer`/`Client`, e-mail, arquivo ou backup. Não resolva sozinho.
 
 ## Não faça
 

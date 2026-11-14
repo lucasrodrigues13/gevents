@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Project.Application.Cep;
+using Project.Infrastructure.Conta;
 
 namespace Project.IntegrationTests.Suporte;
 
@@ -69,8 +70,8 @@ public sealed class FabricaApi : WebApplicationFactory<Program>
         builder.ConfigureLogging(logging => logging.AddProvider(Logs));
         builder.ConfigureServices(services =>
         {
-            services.RemoveAll<IEmailSender<IdentityUser>>();
-            services.AddSingleton<IEmailSender<IdentityUser>>(Email);
+            services.RemoveAll<IEmailSender<ApplicationUser>>();
+            services.AddSingleton<IEmailSender<ApplicationUser>>(Email);
             services.RemoveAll<IConsultaCep>();
             services.AddSingleton<IConsultaCep, CepDeTeste>();
         });

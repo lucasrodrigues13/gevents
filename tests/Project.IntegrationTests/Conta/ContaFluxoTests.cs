@@ -41,12 +41,14 @@ public class ContaFluxoTests
         var entrada = await cliente.PostAsJsonAsync("/api/v1/conta/entrar", new { email, senha = Senha });
         Assert.Equal(HttpStatusCode.Unauthorized, entrada.StatusCode);
         await using var escopo = _banco.Fabrica.Services.CreateAsyncScope();
-        var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+        var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var usuario = await usuarios.FindByEmailAsync(email);
         Assert.NotNull(usuario);
         Assert.False(usuario.EmailConfirmed);
-        Assert.True(await usuarios.IsInRoleAsync(usuario, Papeis.User));
+        Assert.True(await usuarios.IsInRoleAsync(usuario, Papeis.Organizer));
         Assert.False(await usuarios.IsInRoleAsync(usuario, Papeis.Admin));
+        Assert.False(await usuarios.IsInRoleAsync(usuario, Papeis.Client));
+        Assert.Null(usuario.OrganizerId);
     }
 
     [Fact]
@@ -79,7 +81,7 @@ public class ContaFluxoTests
     }
 
     [Fact]
-    public async Task Link_valido_confirma_e_permite_login_de_usuario()
+    public async Task Link_valido_confirma_e_permite_login_de_organizer()
     {
         var email = Unico();
         var cliente = _banco.Fabrica.CreateClient();
@@ -91,7 +93,8 @@ public class ContaFluxoTests
 
         Assert.Equal(HttpStatusCode.OK, entrada.StatusCode);
         Assert.NotNull(sessao);
-        Assert.Contains(Papeis.User, sessao.Papeis);
+        Assert.Contains(Papeis.Organizer, sessao.Papeis);
+        Assert.DoesNotContain(Papeis.Client, sessao.Papeis);
         Assert.DoesNotContain(Senha, await entrada.Content.ReadAsStringAsync(), StringComparison.Ordinal);
 
         cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessao.Token);
@@ -168,7 +171,7 @@ public class ContaFluxoTests
         Assert.Equal(HttpStatusCode.Locked, bloqueio.StatusCode);
         Assert.Contains("não pode ser repetida agora", corpo, StringComparison.Ordinal);
         await using var escopo = _banco.Fabrica.Services.CreateAsyncScope();
-        var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+        var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var usuario = await usuarios.FindByEmailAsync(email);
         Assert.NotNull(usuario?.LockoutEnd);
         Assert.InRange((usuario.LockoutEnd.Value - DateTimeOffset.UtcNow).TotalMinutes, 14, 16);
@@ -230,7 +233,7 @@ public class ContaFluxoTests
         Assert.Equal(HttpStatusCode.Unauthorized, entrada.StatusCode);
 
         await using var escopo = _banco.Fabrica.Services.CreateAsyncScope();
-        var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+        var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var usuario = await usuarios.FindByEmailAsync(email);
         Assert.NotNull(usuario);
         Assert.False(usuario.EmailConfirmed);
@@ -316,7 +319,7 @@ public class ContaFluxoTests
         {
             using var _ = desligado.CreateClient();
             await using var escopo = desligado.Services.CreateAsyncScope();
-            var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+            var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             Assert.Null(await usuarios.FindByEmailAsync(email));
         }
 
@@ -338,7 +341,7 @@ public class ContaFluxoTests
     }
 
     [Fact]
-    public async Task Bootstrap_nao_promove_email_que_ja_e_usuario()
+    public async Task Bootstrap_nao_promove_email_que_ja_e_organizer()
     {
         var email = Unico();
         var cliente = _banco.Fabrica.CreateClient();
@@ -359,6 +362,61 @@ public class ContaFluxoTests
         Assert.NotNull(sessao);
         cliente.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessao.Token);
         Assert.Equal(HttpStatusCode.Forbidden, (await cliente.GetAsync("/api/v1/admin/area")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Bootstrap_garante_as_tres_roles_e_client_vinculado_acessa_tenant_sem_admin()
+    {
+        var adminEmail = Unico();
+        await using var fabrica = new FabricaApi(_banco.Conexao, bootstrap: true, adminEmail: adminEmail, adminSenha: Senha);
+        using var _ = fabrica.CreateClient();
+
+        await using var escopo = fabrica.Services.CreateAsyncScope();
+        var roles = escopo.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+        Assert.True(await roles.RoleExistsAsync(Papeis.Admin));
+        Assert.True(await roles.RoleExistsAsync(Papeis.Organizer));
+        Assert.True(await roles.RoleExistsAsync(Papeis.Client));
+
+        var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var organizer = new ApplicationUser { UserName = Unico(), Email = Unico(), EmailConfirmed = true };
+        Assert.True((await usuarios.CreateAsync(organizer, Senha)).Succeeded);
+        Assert.True((await usuarios.AddToRoleAsync(organizer, Papeis.Organizer)).Succeeded);
+
+        var client = new ApplicationUser { UserName = Unico(), Email = Unico(), EmailConfirmed = true };
+        client.VincularAoOrganizer(organizer.Id);
+        Assert.True((await usuarios.CreateAsync(client, Senha)).Succeeded);
+        Assert.True((await usuarios.AddToRoleAsync(client, Papeis.Client)).Succeeded);
+
+        var http = fabrica.CreateClient();
+        var entrada = await http.PostAsJsonAsync("/api/v1/conta/entrar", new { email = client.Email, senha = Senha });
+        var sessao = await entrada.Content.ReadFromJsonAsync<Sessao>();
+        Assert.Equal(HttpStatusCode.OK, entrada.StatusCode);
+        Assert.NotNull(sessao);
+        Assert.Contains(Papeis.Client, sessao.Papeis);
+        Assert.DoesNotContain(Papeis.Admin, sessao.Papeis);
+
+        http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", sessao.Token);
+        Assert.Equal(HttpStatusCode.Forbidden, (await http.GetAsync("/api/v1/admin/area")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await http.GetAsync("/api/v1/conta/area")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Client_sem_organizer_nao_completa_login()
+    {
+        await using var escopo = _banco.Fabrica.Services.CreateAsyncScope();
+        var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        var client = new ApplicationUser
+        {
+            UserName = Unico(),
+            Email = Unico(),
+            EmailConfirmed = true,
+        };
+        Assert.True((await usuarios.CreateAsync(client, Senha)).Succeeded);
+        Assert.True((await usuarios.AddToRoleAsync(client, Papeis.Client)).Succeeded);
+
+        var http = _banco.Fabrica.CreateClient();
+        var entrada = await http.PostAsJsonAsync("/api/v1/conta/entrar", new { email = client.Email, senha = Senha });
+        Assert.Equal(HttpStatusCode.Unauthorized, entrada.StatusCode);
     }
 
     [Fact]
@@ -417,7 +475,7 @@ public class ContaFluxoTests
     private async Task<string> TokenVencido(string usuarioId)
     {
         await using var escopo = _banco.Fabrica.Services.CreateAsyncScope();
-        var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+        var usuarios = escopo.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         var protecao = escopo.ServiceProvider.GetRequiredService<IDataProtectionProvider>();
         var usuario = await usuarios.FindByIdAsync(usuarioId);
         Assert.NotNull(usuario);

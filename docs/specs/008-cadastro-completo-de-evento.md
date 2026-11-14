@@ -16,15 +16,15 @@ RF-049, RF-053. RF-050 só no que a home já mostra a partir desses dados. Fora:
 
 ## 4. Atores e permissões
 
-O User da conta cria e edita os próprios eventos em andamento. Outro User não vê.
+O Organizer cria e edita os próprios eventos em andamento. Outro Organizer não vê. Admin fica fora do miolo desta spec. Client não opera este cadastro; acesso limitado a evento fica em RF-056.
 
 ## 5. Pré-condições
 
-Conta autenticada, SPEC-001. Existe pelo menos um modelo na conta, RF-053. A SPEC-002 continua valendo para lista, abas, concluir e cancelar.
+Organizer autenticado, SPEC-001. Existe pelo menos um modelo na conta, RF-053. A SPEC-002 continua valendo para lista, abas, concluir e cancelar.
 
 ## 6. Fluxo principal
 
-1. O usuário escolhe o modelo. O restante do formulário só aparece depois dessa escolha. O modelo define o tipo.
+1. O Organizer escolhe o modelo. O restante do formulário só aparece depois dessa escolha. O modelo define o tipo.
 2. Informa foto opcional, nomes das pessoas do evento, data, horário, budget, convidados estimados, local da cerimônia, local da recepção, tags, notificações e se grava na agenda.
 3. Salva. O sistema pede o valor do serviço da própria assessoria: valor total, quantidade de parcelas, data da primeira parcela e, se marcado, entrada.
 4. O evento nasce em andamento, com os serviços e tarefas do modelo, e com o serviço de assessoria contratado se o valor foi informado.
@@ -45,7 +45,7 @@ Conta autenticada, SPEC-001. Existe pelo menos um modelo na conta, RF-053. A SPE
 - Tags são da conta, com criação livre. Vistas: Assessoria completa, Assessoria parcial, Assessoria final.
 - Notificações por e-mail: assessor(a), assistentes, clientes. Vêm ligadas.
 - Horário do cadastro é o horário do convite. Detalhes guardam também tempo de festa, início da cerimônia e início da recepção.
-- CEP completo preenche endereço, estado, cidade e bairro.
+- CEP completo preenche país, endereço, estado, cidade e bairro. O CEP é o primeiro campo do endereço.
 - O valor da assessoria cria o serviço "Assessoria e Organização" com a própria conta como fornecedor contratado e gera parcelas, RF-068.
 
 ## 9. Validações
@@ -66,7 +66,7 @@ Editar, Informações gerais: foto, nomes, data, horário (convite), budget esti
 
 Editar, Detalhes: quantidade estimada de convidados, tempo de festa, horário de início da cerimônia, horário de início da recepção, quantidade de padrinhos, quantidade de damas e pajens.
 
-Editar, Cerimônia e Recepção, cada uma: local, país, CEP, endereço, número, estado, cidade, bairro.
+Editar, Cerimônia e Recepção, cada uma: local, CEP, país, endereço, número, estado, cidade, bairro.
 
 ## 12. Interface
 
@@ -83,7 +83,7 @@ Campo inválido permanece no formulário. Evento de outra conta não revela dado
 3. Dois nomes de casamento viram o nome do evento com `&`.
 4. O passo do valor da assessoria gera o serviço contratado e as parcelas informadas.
 5. A edição grava horário de convite, tempo de festa, horários de cerimônia e recepção e o endereço completo de cada local.
-6. CEP preenchido completa endereço, estado, cidade e bairro.
+6. CEP preenchido completa país, endereço, estado, cidade e bairro.
 7. Outra conta não vê o evento.
 
 ## 15. Cenários de teste
@@ -96,4 +96,4 @@ SPEC-001, SPEC-002 (lista e situações), RF-053 para existir modelo, RF-068 par
 
 ## 17. Premissas e pontos não definidos
 
-Lista fechada de Tipo ao criar modelo. O que acontece se o usuário fecha o modal de valor da assessoria. Campos obrigatórios de endereço. Tamanho máximo dos textos. Integração Google Agenda.
+Lista fechada de Tipo ao criar modelo. O que acontece se o Organizer fecha o modal de valor da assessoria. Campos obrigatórios de endereço. Tamanho máximo dos textos. Integração Google Agenda.

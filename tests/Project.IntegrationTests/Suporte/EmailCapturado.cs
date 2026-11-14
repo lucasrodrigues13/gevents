@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Identity;
+using Project.Infrastructure.Conta;
 
 namespace Project.IntegrationTests.Suporte;
 
 public sealed record MensagemDeEmail(string Email, string Tipo, string Corpo);
 
-public sealed class EmailCapturado : IEmailSender<IdentityUser>
+public sealed class EmailCapturado : IEmailSender<ApplicationUser>
 {
     private readonly List<MensagemDeEmail> _mensagens = [];
 
@@ -21,19 +22,19 @@ public sealed class EmailCapturado : IEmailSender<IdentityUser>
         }
     }
 
-    public Task SendConfirmationLinkAsync(IdentityUser user, string email, string confirmationLink)
+    public Task SendConfirmationLinkAsync(ApplicationUser user, string email, string confirmationLink)
     {
         Registrar(email, "confirmacao", confirmationLink);
         return Task.CompletedTask;
     }
 
-    public Task SendPasswordResetLinkAsync(IdentityUser user, string email, string resetLink)
+    public Task SendPasswordResetLinkAsync(ApplicationUser user, string email, string resetLink)
     {
         Registrar(email, "redefinicao", resetLink);
         return Task.CompletedTask;
     }
 
-    public Task SendPasswordResetCodeAsync(IdentityUser user, string email, string resetCode)
+    public Task SendPasswordResetCodeAsync(ApplicationUser user, string email, string resetCode)
     {
         Registrar(email, "codigo", resetCode);
         return Task.CompletedTask;

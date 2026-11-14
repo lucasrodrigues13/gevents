@@ -15,7 +15,7 @@ public sealed class GarantiaDePapeis
 
     public async Task GarantirAsync()
     {
-        foreach (var papel in new[] { Papeis.Admin, Papeis.User })
+        foreach (var papel in new[] { Papeis.Admin, Papeis.Organizer, Papeis.Client })
         {
             if (!await _roles.RoleExistsAsync(papel))
             {
@@ -31,10 +31,10 @@ public sealed class GarantiaDePapeis
 
 public sealed class BootstrapAdministrador
 {
-    private readonly UserManager<IdentityUser> _usuarios;
+    private readonly UserManager<ApplicationUser> _usuarios;
     private readonly BootstrapOpcoes _opcoes;
 
-    public BootstrapAdministrador(UserManager<IdentityUser> usuarios, IOptions<BootstrapOpcoes> opcoes)
+    public BootstrapAdministrador(UserManager<ApplicationUser> usuarios, IOptions<BootstrapOpcoes> opcoes)
     {
         _usuarios = usuarios;
         _opcoes = opcoes.Value;
@@ -63,7 +63,7 @@ public sealed class BootstrapAdministrador
             throw new InvalidOperationException("Bootstrap interrompido: o e-mail já pertence a um usuário comum.");
         }
 
-        var usuario = new IdentityUser
+        var usuario = new ApplicationUser
         {
             UserName = _opcoes.AdminEmail.Trim(),
             Email = _opcoes.AdminEmail.Trim(),

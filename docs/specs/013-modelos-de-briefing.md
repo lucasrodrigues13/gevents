@@ -1,6 +1,6 @@
 # 013. Modelos de briefing
 
-**Status: rascunho.** Fora do MVP aprovado. RF-054 e RF-071 continuam Observado. Esta spec não autoriza código.
+**Status: aprovada.** O código segue esta spec. Fonte: [inventario-referencia.md](../inventario-referencia.md) §6 (menu) e leitura VIP da biblioteca. Briefing aplicado ao evento permanece em RF-071.
 
 ## 1. Identificador e nome
 
@@ -8,93 +8,99 @@ SPEC-013. Modelos de briefing.
 
 ## 2. Objetivo
 
-A assessoria abre a biblioteca de modelos de briefing, a mesma lista no menu de Gestão e no menu do Funil, e lê um modelo com seções, descrição e perguntas.
+O Organizer mantém a biblioteca de modelos de briefing: listar, criar com nome, editar seções e perguntas, clonar e excluir. O mesmo acervo aparece no menu de Gestão de eventos.
 
 ## 3. Requisitos relacionados
 
-RF-095 e RF-096, Observado, ainda sem aprovação. RF-054 registra a biblioteca e que o editor não tinha sido aberto; o editor de briefing foi aberto depois, e esse trecho fica nestes dois RF. O briefing do evento, o status de resposta, o link público e a impressão permanecem em RF-071.
+RF-054 (biblioteca de briefing). RF-071 (briefing do evento: resposta, link público, impressão) fica fora do miolo desta biblioteca, como destino de aplicação.
 
-Roteiro, cronograma, inspiração e mensagem permanecem em RF-054.
+Fora: RF-079. Assistente. Fornecedor com login.
 
 ## 4. Atores e permissões
 
-A assessoria, na conta autenticada, consulta a biblioteca. Isolamento entre contas não foi medido.
+| Ator | Pode |
+|---|---|
+| Organizer | CRUD dos modelos de briefing da própria conta. |
+| Client | Não edita a biblioteca. Pode responder briefing do evento se a flag de permissão (RF-056) e o fluxo RF-071 permitirem. |
+| Admin | Acessa modelos de qualquer conta. |
+| Visitante | Não acessa a biblioteca. |
 
 ## 5. Pré-condições
 
-Conta autenticada, SPEC-001. O fluxo está fora do corte Must de [mvp-scope.md](../mvp-scope.md).
+Conta autenticada, SPEC-001.
 
 ## 6. Fluxo principal
 
-1. A assessoria abre Modelos de briefing pela Gestão ou pelo Funil.
-2. Os dois menus mostram a mesma lista.
-3. Cada item mostra a origem e uma data. A origem vista é Gestão de eventos ou Funil.
-4. Abrir um modelo mostra seções, descrição e perguntas.
-5. A pergunta vista é do tipo Texto de resposta curta.
-6. Um modelo padrão mostra um aviso para clonar antes de editar.
-7. Abrir o modelo Conhecendo o cliente mostra a seção Conhecendo você e perguntas de resposta curta.
+1. O Organizer abre Modelos de Briefing.
+2. A lista mostra os modelos da conta, com nome, origem (Gestão de eventos ou Funil, quando houver) e data de criação.
+3. Cria um novo modelo informando o nome e salva.
+4. Abre o modelo: editor com seções, descrição e perguntas.
+5. Edita seções e perguntas (tipo visto: Texto de resposta curta) e salva.
+6. Pode clonar um modelo (inclusive padrão, que avisa para clonar antes de editar).
+7. Pode excluir um modelo próprio, com confirmação.
 
 ## 7. Fluxos alternativos
 
-Clonar, criar, salvar e excluir não foram acionados. O resultado desses atos não está definido. Outro tipo de pergunta não foi visto.
+- Lista vazia: ação de criar.
+- Modelo padrão da plataforma: aviso para clonar antes de editar; edição direta do padrão não grava sobre o original.
+- Nome vazio: não grava.
+- Modelo de outra conta: Organizer não vê.
+- Aplicar o modelo a um briefing de evento: RF-071 / fluxo do evento, fora desta spec.
 
 ## 8. Regras de negócio
 
-- A lista da Gestão e a lista do Funil são a mesma biblioteca (RF-095).
-- Cada item mostra origem e data (RF-095). Origens vistas: Gestão de eventos e Funil.
-- O editor mostra seções, descrição e perguntas (RF-096).
-- O tipo de pergunta visto é Texto de resposta curta (RF-096).
-- Um modelo padrão avisa para clonar antes de editar (RF-096).
-- O modelo Conhecendo o cliente contém a seção Conhecendo você, com perguntas de resposta curta (RF-096).
+- A biblioteca de briefing é uma das bibliotecas de RF-054.
+- Cada item pode mostrar origem (Gestão de eventos ou Funil) e data.
+- O editor organiza conteúdo em seções com descrição e perguntas. RF-071 descreve o uso no evento; aqui o conteúdo é o modelo.
+- Tipo de pergunta mínimo suportado: Texto de resposta curta.
+- Modelo padrão exibe aviso para clonar antes de editar.
+- Clonar gera cópia editável na conta do Organizer.
+- Excluir remove o modelo da biblioteca; briefings de evento já criados a partir dele mantêm o conteúdo copiado.
+- Isolamento por conta do Organizer.
 
 ## 9. Validações
 
-Nenhuma validação foi exercida. Campo obrigatório, tamanho de texto e formato da data não estão definidos.
+Nome do modelo obrigatório, sem só espaços. Pergunta sem enunciado não grava. Modelo inexistente ou de outra conta: rejeitado sem vazar dado.
 
 ## 10. Estados
 
-A biblioteca, neste recorte, é só consulta. Estado da pergunta e status de resposta permanecem em RF-071.
+Modelo na biblioteca. Status de resposta do briefing no evento permanece em RF-071.
 
 ## 11. Dados necessários
 
-Modelo: nome, origem, data. Editor: seções, descrição e perguntas. Pergunta vista: tipo Texto de resposta curta. Seção vista em Conhecendo o cliente: Conhecendo você.
+Lista: nome, origem, data.
 
-O lugar da descrição, no modelo ou na seção, não está definido. O significado da data, criação ou alteração, não está definido.
+Criar / editar: nome; seções (título, descrição); perguntas (enunciado, tipo).
+
+Clonar / excluir: identificador do modelo.
 
 ## 12. Interface
 
-Dois menus, Gestão e Funil, abrem a mesma lista. A lista mostra origem e data. O editor mostra seções, descrição e perguntas. O modelo padrão mostra o aviso para clonar.
+Lista com busca, "Criar novo modelo" e painel de leitura ao selecionar. Editor de seções e perguntas. Aviso no modelo padrão. Confirmação ao excluir.
 
 ## 13. Erros
 
-Nenhum erro foi provocado. Mensagem de falha ao gravar não está definida.
+Campo inválido permanece no editor. Falha ao salvar mantém o anterior. Modelo de outra conta não revela dado.
 
 ## 14. Critérios de aceite
 
-1. Gestão e Funil mostram a mesma lista.
-2. Cada item mostra origem Gestão de eventos ou Funil, e uma data.
+1. O Organizer lista só os próprios modelos (Admin, a conta escolhida).
+2. Criar com nome grava; sem nome, não grava.
 3. Abrir um modelo mostra seções, descrição e perguntas.
-4. A pergunta exibida é Texto de resposta curta.
-5. O modelo padrão exibe aviso para clonar antes de editar.
-6. Conhecendo o cliente abre a seção Conhecendo você com perguntas de resposta curta.
+4. Clonar gera cópia editável; modelo padrão avisa para clonar antes de editar.
+5. Excluir remove da biblioteca sem apagar briefings já aplicados em eventos.
+6. Outra conta não vê o modelo.
 
 ## 15. Cenários de teste
 
-Abrir a lista pelos dois menus e comparar os itens. Abrir um modelo e ler seções, descrição e o tipo da pergunta. Abrir um modelo padrão e ler o aviso. Abrir Conhecendo o cliente e ler a seção Conhecendo você.
+Criar modelo com uma seção e uma pergunta de resposta curta. Clonar. Editar a cópia. Excluir a cópia. Conta B não vê o modelo da conta A. Abrir modelo padrão e ver o aviso de clonar.
 
 ## 16. Dependências
 
-SPEC-001. RF-054 nomeia a biblioteca entre os outros modelos. RF-095 e RF-096 detalham a lista e o editor. RF-071 fica para o briefing aplicado ao evento.
+SPEC-001. RF-054. RF-071 para aplicação no evento. SPEC-012 pode vincular briefing na aba Briefings do modelo de evento.
 
 ## 17. Premissas e pontos não definidos
 
-- Clonar, criar, salvar e excluir, inclusive o que o aviso do modelo padrão faz além de avisar.
-- Texto exato do aviso.
-- Outros tipos de pergunta.
-- Como a origem é gravada.
-- Se a data é de criação ou de alteração, e o formato.
-- Se a descrição é do modelo ou da seção.
-- Se o produto inclui o modelo Conhecendo o cliente como conteúdo inicial.
-- Ordenação, busca e modelo vazio.
-- Isolamento entre contas.
-- Aplicar o modelo num briefing, status de resposta, link público e impressão.
+- Demais tipos de pergunta além de texto curto.
+- Unificação obrigatória da lista Gestão × Funil neste produto (a referência mostra origem mista; o gevents trata como biblioteca da conta do Organizer).
+- Texto exato do aviso do modelo padrão.

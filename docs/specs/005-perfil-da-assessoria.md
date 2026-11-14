@@ -8,7 +8,7 @@ SPEC-005. Perfil da assessoria.
 
 ## 2. Objetivo
 
-A conta autenticada guarda os dados da empresa que foram vistos na tela de perfil.
+O Organizer guarda os dados da empresa que foram vistos na tela de perfil da assessoria. Este é o perfil do Organizer.
 
 ## 3. Requisitos relacionados
 
@@ -16,15 +16,15 @@ RF-044. A conta e o e-mail vêm da SPEC-001.
 
 ## 4. Atores e permissões
 
-O User vê e edita o próprio perfil. Não vê o perfil de outra conta. Admin não tem tela de perfil de assessoria nesta spec.
+O Organizer vê e edita o próprio perfil. Não vê o perfil de outra conta. Admin não tem tela de perfil de assessoria nesta spec. Client não edita este perfil.
 
 ## 5. Pré-condições
 
-Usuário autenticado com e-mail confirmado.
+Organizer autenticado com e-mail confirmado.
 
 ## 6. Fluxo principal
 
-1. O usuário abre o perfil.
+1. O Organizer abre o perfil.
 2. O e-mail da conta aparece e não pode ser editado.
 3. Ele informa nome da empresa, responsável, CPF ou CNPJ, celular, data de nascimento e endereço.
 4. Salva.
@@ -39,11 +39,11 @@ Usuário autenticado com e-mail confirmado.
 
 ## 8. Regras de negócio
 
-- Há um perfil por conta.
+- Há um perfil por conta de Organizer.
 - O e-mail é o da autenticação e permanece somente leitura, como na tela vista.
 - CPF ou CNPJ é um único campo de documento. Não foi vista validação de dígito.
 - Endereço é um único texto. A exploração não separou CEP, rua, cidade ou estado.
-- Estes dados não criam evento, cliente nem usuário.
+- Estes dados não criam evento, contato de cliente nem conta Identity.
 
 ## 9. Validações
 

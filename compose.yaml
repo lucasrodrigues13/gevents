@@ -51,7 +51,9 @@ services:
       Jwt__Audience: gevents
       Jwt__ExpiryHours: "8"
       DataProtection__KeysPath: /keys
+      Storage__Root: /storage
       PublicUrl: http://localhost:8080
+      Email__Password: ${EMAIL_PASSWORD:-}
       Bootstrap__Enabled: "false"
       ForwardedHeaders__KnownNetworks__0: 172.16.0.0/12
       ForwardedHeaders__KnownNetworks__1: 10.0.0.0/8

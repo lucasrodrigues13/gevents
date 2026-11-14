@@ -8,6 +8,7 @@ import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../../core/auth.service';
 import { ContaClient } from '../../core/conta.client';
 import { mensagemDeErro } from '../../core/mensagem-erro';
+import { ToastService } from '../../core/toast.service';
 
 @Component({
   selector: 'app-entrar',
@@ -28,9 +29,6 @@ import { mensagemDeErro } from '../../core/mensagem-erro';
               <mat-label>Senha</mat-label>
               <input matInput type="password" formControlName="senha" autocomplete="current-password" />
             </mat-form-field>
-            @if (aviso()) {
-              <p class="aviso" role="alert">{{ aviso() }}</p>
-            }
             <button mat-flat-button type="submit" [disabled]="formulario.invalid || enviando()">Entrar</button>
           </form>
           <p><a routerLink="/esqueci-senha">Esqueci a senha</a></p>
@@ -46,8 +44,8 @@ export class EntrarPage {
   private readonly conta = inject(ContaClient);
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly toast = inject(ToastService);
 
-  protected readonly aviso = signal('');
   protected readonly enviando = signal(false);
   protected readonly formulario = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
@@ -56,20 +54,22 @@ export class EntrarPage {
 
   protected enviar(): void {
     if (this.formulario.invalid) {
+      this.formulario.markAllAsTouched();
+      this.toast.erro('Informe e-mail e senha.');
       return;
     }
 
     this.enviando.set(true);
-    this.aviso.set('');
     const { email, senha } = this.formulario.getRawValue();
     this.conta.entrar(email, senha).subscribe({
       next: (sessao) => {
         this.auth.guardar(sessao);
-        const destino = sessao.papeis.includes('User') ? '/painel' : '/admin';
+        this.toast.sucesso('Login realizado.');
+        const destino = sessao.papeis.includes('Admin') ? '/admin' : '/painel';
         void this.router.navigateByUrl(destino);
       },
       error: (erro: unknown) => {
-        this.aviso.set(mensagemDeErro(erro));
+        this.toast.erro(mensagemDeErro(erro));
         this.enviando.set(false);
       },
     });

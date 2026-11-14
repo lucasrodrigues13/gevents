@@ -21,7 +21,7 @@ describe('ContaClient', () => {
 
     const pedido = http.expectOne('http://api.teste/api/v1/conta/entrar');
     expect(pedido.request.method).toBe('POST');
-    pedido.flush({ token: 't', email: 'pessoa@gevents.test', papeis: ['User'] });
+    pedido.flush({ token: 't', email: 'pessoa@gevents.test', papeis: ['Organizer'] });
     http.verify();
   });
 });

@@ -77,6 +77,7 @@ public class NegocioFluxoTests
             cerimonia = new { nome = "Igreja", cep = "01001-000" },
             recepcao = new { nome = "Espaço" },
         }));
+        Assert.Equal("Brasil", editado.GetProperty("cerimonia").GetProperty("pais").GetString());
         Assert.Equal("Praça da Sé", editado.GetProperty("cerimonia").GetProperty("endereco").GetString());
         Assert.Equal("SP", editado.GetProperty("cerimonia").GetProperty("estado").GetString());
         Assert.Equal("São Paulo", editado.GetProperty("cerimonia").GetProperty("cidade").GetString());
@@ -128,6 +129,7 @@ public class NegocioFluxoTests
             celular = "11988887777",
             cep = "01001000",
         }));
+        Assert.Equal("Brasil", cliente.GetProperty("pais").GetString());
         Assert.Equal("Praça da Sé", cliente.GetProperty("endereco").GetString());
         Assert.Equal(HttpStatusCode.OK, (await dono.PostAsJsonAsync($"/api/v1/eventos/{eventoId}/clientes", new { clienteId = cliente.GetProperty("id").GetGuid() })).StatusCode);
         Assert.Equal(HttpStatusCode.OK, (await dono.PostAsJsonAsync($"/api/v1/eventos/{eventoId}/clientes", new { clienteId = cliente.GetProperty("id").GetGuid() })).StatusCode);

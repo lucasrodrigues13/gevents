@@ -25,4 +25,5 @@ public static class Codigos
 {
     public const string Validacao = "validacao";
     public const string Indisponivel = "indisponivel";
+    public const string Proibido = "proibido";
 }

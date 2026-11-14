@@ -16,7 +16,7 @@ public sealed class EmissorJwt : IEmissorJwt
         _opcoes = opcoes.Value;
     }
 
-    public string Emitir(string usuarioId, string email, IReadOnlyList<string> papeis)
+    public string Emitir(string usuarioId, string email, IReadOnlyList<string> papeis, string? organizerId = null)
     {
         if (string.IsNullOrWhiteSpace(_opcoes.Secret) || _opcoes.Secret.Length < 32)
         {
@@ -33,6 +33,10 @@ public sealed class EmissorJwt : IEmissorJwt
             new(ClaimTypes.Email, email),
         };
         claims.AddRange(papeis.Select(papel => new Claim(ClaimTypes.Role, papel)));
+        if (!string.IsNullOrWhiteSpace(organizerId))
+        {
+            claims.Add(new Claim(ContaClaims.OrganizerId, organizerId));
+        }
 
         var token = new JwtSecurityToken(
             issuer: _opcoes.Issuer,

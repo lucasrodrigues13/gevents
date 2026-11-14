@@ -1,7 +1,17 @@
 using Project.Application.Comum;
+using Project.Application.Conta;
 using Project.Domain.Clientes;
 
 namespace Project.Application.Negocio;
+
+public sealed record PermissoesClientePedido(
+    bool? Convidados,
+    bool? Tarefas,
+    bool? Anexos,
+    bool? Parcelas,
+    bool? Rsvp,
+    bool? Mapa,
+    bool? Contrato);
 
 public sealed record NovoCliente(
     string? Nome,
@@ -27,7 +37,18 @@ public sealed record NovoCliente(
     string? Estado,
     string? Cidade,
     string? Bairro,
-    string? Complemento);
+    string? Complemento,
+    bool? AcessoPlataforma = null,
+    PermissoesClientePedido? Permissoes = null);
+
+public sealed record PermissoesClienteLeitura(
+    bool Convidados,
+    bool Tarefas,
+    bool Anexos,
+    bool Parcelas,
+    bool Rsvp,
+    bool Mapa,
+    bool Contrato);
 
 public sealed record ClienteLeitura(
     Guid Id,
@@ -57,11 +78,14 @@ public sealed record ClienteLeitura(
     string? Complemento,
     Guid? FotoId,
     string? UltimoAcesso,
+    bool AcessoPlataforma,
+    string? UsuarioId,
+    PermissoesClienteLeitura Permissoes,
     IReadOnlyList<EventoVinculado> Eventos);
 
 public sealed record EventoVinculado(Guid Id, string Nome);
 
-public sealed class ClienteServico(IDados dados, Cep.IConsultaCep cep)
+public sealed class ClienteServico(IDados dados, Cep.IConsultaCep cep, IContaCliente contaCliente)
 {
     public async Task<IReadOnlyList<ClienteLeitura>> ListarAsync(string contaId, string? nome, CancellationToken ct)
     {
@@ -98,6 +122,12 @@ public sealed class ClienteServico(IDados dados, Cep.IConsultaCep cep)
         if (!cepOk.Ok)
         {
             return Resultado<ClienteLeitura>.Erro(cepOk.Falha!.Codigo, cepOk.Falha.Mensagem);
+        }
+
+        var acesso = await AplicarAcessoAsync(contaId, montado.Valor!, pedido?.AcessoPlataforma == true, ct);
+        if (!acesso.Ok)
+        {
+            return Resultado<ClienteLeitura>.Erro(acesso.Falha!.Codigo, acesso.Falha.Mensagem);
         }
 
         await dados.InserirClienteAsync(montado.Valor!, ct);
@@ -154,6 +184,22 @@ public sealed class ClienteServico(IDados dados, Cep.IConsultaCep cep)
         cliente.Cidade = origem.Cidade;
         cliente.Bairro = origem.Bairro;
         cliente.Complemento = origem.Complemento;
+        cliente.AplicarPermissoes(
+            origem.PermiteConvidados,
+            origem.PermiteTarefas,
+            origem.PermiteAnexos,
+            origem.PermiteParcelas,
+            origem.PermiteRsvp,
+            origem.PermiteMapa,
+            origem.PermiteContrato);
+
+        var conceder = pedido?.AcessoPlataforma ?? cliente.AcessoPlataforma;
+        var acesso = await AplicarAcessoAsync(contaId, cliente, conceder, ct);
+        if (!acesso.Ok)
+        {
+            return Resultado<ClienteLeitura>.Erro(acesso.Falha!.Codigo, acesso.Falha.Mensagem);
+        }
+
         await dados.SalvarClienteAsync(ct);
         return Resultado<ClienteLeitura>.Sucesso(await LerAsync(contaId, cliente, ct));
     }
@@ -211,6 +257,31 @@ public sealed class ClienteServico(IDados dados, Cep.IConsultaCep cep)
         return Resultado<Guid?>.Sucesso(anterior);
     }
 
+    public async Task<Resultado<bool>> AplicarAcessoAsync(string contaId, Cliente cliente, bool conceder, CancellationToken ct)
+    {
+        if (conceder)
+        {
+            var criado = await contaCliente.ConcederAsync(contaId, cliente.Email, ct);
+            if (!criado.Ok)
+            {
+                return Resultado<bool>.Erro(criado.Falha!.Codigo, criado.Falha.Mensagem);
+            }
+
+            cliente.UsuarioId = criado.Valor;
+            cliente.AcessoPlataforma = true;
+            return Resultado<bool>.Sucesso(true);
+        }
+
+        if (!string.IsNullOrWhiteSpace(cliente.UsuarioId))
+        {
+            await contaCliente.RevogarAsync(cliente.UsuarioId, ct);
+        }
+
+        cliente.UsuarioId = null;
+        cliente.AcessoPlataforma = false;
+        return Resultado<bool>.Sucesso(true);
+    }
+
     public static Resultado<Cliente> Montar(string contaId, NovoCliente? pedido, DateOnly hoje)
     {
         if (pedido is null || Domain.Comum.Texto.Vazio(pedido.Nome))
@@ -257,7 +328,8 @@ public sealed class ClienteServico(IDados dados, Cep.IConsultaCep cep)
         }
 
         var ddi = Domain.Comum.Texto.Limpo(pedido.Ddi) ?? "+55";
-        return Resultado<Cliente>.Sucesso(new Cliente
+        var permissoes = pedido.Permissoes;
+        var cliente = new Cliente
         {
             Id = Guid.NewGuid(),
             ContaId = contaId,
@@ -285,7 +357,17 @@ public sealed class ClienteServico(IDados dados, Cep.IConsultaCep cep)
             Cidade = Domain.Comum.Texto.Limpo(pedido.Cidade),
             Bairro = Domain.Comum.Texto.Limpo(pedido.Bairro),
             Complemento = Domain.Comum.Texto.Limpo(pedido.Complemento),
-        });
+            AcessoPlataforma = pedido.AcessoPlataforma == true,
+        };
+        cliente.AplicarPermissoes(
+            permissoes?.Convidados == true,
+            permissoes?.Tarefas == true,
+            permissoes?.Anexos == true,
+            permissoes?.Parcelas == true,
+            permissoes?.Rsvp == true,
+            permissoes?.Mapa == true,
+            permissoes?.Contrato == true);
+        return Resultado<Cliente>.Sucesso(cliente);
     }
 
     private async Task<Resultado<bool>> CompletarCepAsync(Cliente cliente, CancellationToken ct)
@@ -301,6 +383,7 @@ public sealed class ClienteServico(IDados dados, Cep.IConsultaCep cep)
             return Resultado<bool>.Sucesso(true);
         }
 
+        cliente.Pais = encontrado.Pais;
         cliente.Endereco = encontrado.Endereco;
         cliente.Estado = encontrado.Estado;
         cliente.Cidade = encontrado.Cidade;
@@ -339,6 +422,16 @@ public sealed class ClienteServico(IDados dados, Cep.IConsultaCep cep)
             cliente.Complemento,
             cliente.FotoId,
             null,
+            cliente.AcessoPlataforma,
+            cliente.UsuarioId,
+            new PermissoesClienteLeitura(
+                cliente.PermiteConvidados,
+                cliente.PermiteTarefas,
+                cliente.PermiteAnexos,
+                cliente.PermiteParcelas,
+                cliente.PermiteRsvp,
+                cliente.PermiteMapa,
+                cliente.PermiteContrato),
             eventos.Select(evento => new EventoVinculado(evento.Id, evento.Nome)).ToArray());
     }
 }

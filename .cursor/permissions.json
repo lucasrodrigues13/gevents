@@ -1,0 +1,28 @@
+{
+  "terminalAllowlist": [
+    "dotnet",
+    "npm",
+    "npx",
+    "ng",
+    "node",
+    "docker",
+    "docker compose",
+    "git",
+    "pwsh",
+    "powershell",
+    "tsc",
+    "vitest"
+  ],
+  "autoRun": {
+    "allow_instructions": [
+      "Allow builds, unit tests, integration tests, typecheck, and local Docker Compose up/build/logs for this gevents repo.",
+      "Allow dotnet restore/build/test/ef migrations add, npm install/ci/build/test, and ng build/serve for local development.",
+      "Allow reading package.json, lockfiles, and running health checks against localhost.",
+      "Allow browser inspection of localhost and already-open Assessoria VIP / Apex tabs for implementation checks."
+    ],
+    "block_instructions": [
+      "Block git push --force, git reset --hard, and deleting production data or volumes without human review.",
+      "Block deploy to production, Database.Migrate on production, and changes to secrets or billing."
+    ]
+  }
+}
