@@ -16,7 +16,7 @@ deploy/                        script SQL da base local
 docs/                          requisitos e specs
 ```
 
-Abra `src/backend/gevents.slnx` no Visual Studio. Ela não inclui o Angular. Os testes ficam fora de `src/`, separados da produção.
+Abra `src/backend/gevents.slnx` no Visual Studio. Ela não inclui o Angular. Os testes ficam fora de `src/`, separados da produção. 
 
 ## Subir local
 
