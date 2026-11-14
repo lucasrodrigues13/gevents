@@ -53,8 +53,8 @@ services:
       Jwt__ExpiryHours: "8"
       DataProtection__KeysPath: /keys
       Storage__Root: /storage
-      PublicUrl: https://${DOMAIN:?defina DOMAIN no .env}
-      Cors__Origins__0: https://${DOMAIN:?defina DOMAIN no .env}
+      PublicUrl: http://${DOMAIN:?defina DOMAIN no .env}
+      Cors__Origins__0: http://${DOMAIN:?defina DOMAIN no .env}
       Email__Host: ${EMAIL_HOST:-smtp.gmail.com}
       Email__Port: ${EMAIL_PORT:-587}
       Email__Username: ${EMAIL_USERNAME:?defina EMAIL_USERNAME no .env}
@@ -87,7 +87,7 @@ services:
       context: .
       dockerfile: src/frontend/Dockerfile
     environment:
-      SITE_ADDRESS: ${DOMAIN:?defina DOMAIN no .env}
+      SITE_ADDRESS: :80
     ports:
       - "80:80"
       - "443:443"
